@@ -1,0 +1,54 @@
+.body {
+  background-image: url("src/assets/images/7a818354e678440e71ab80e6d6097587.jpg");
+  // background-size: cover; /* Ensure the image covers the entire background */
+  // background-position: center; /* Center the background image */
+  // background-repeat: no-repeat; /* Avoid repeating the image */
+}
+
+/* Container holding both left and right sections */
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+  width: 70%; /* Smaller width for the container */
+  height: auto; /* Automatic height based on content */ /* Padding for some space around the content */
+  border-radius: 20px; /* Rounded corners for the whole container */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Box shadow for a subtle 3D effect */
+  margin: 10rem auto; /* Centers the container horizontally */
+}
+
+.register-left {
+  background-color: rgba(253, 242, 233, 0.7); /* Slight transparency */
+  width: 40%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.register-right {
+  background-color: #fff;
+  width: 60%;
+  padding: 3rem;
+  border-radius: 0 20px 20px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05); /* Smaller shadow for inner content */
+}
+
+.name-row {
+  display: flex;
+  justify-content: space-between; /* Ensures inputs are placed in a row */
+}
+
+.register-input-s {
+  width: 100%; /* Now each input takes 100% of its container */
+  margin-bottom: 1.5rem;
+  height: 45px;
+  font-size: 16px;
+  border-radius: 5px;
+}

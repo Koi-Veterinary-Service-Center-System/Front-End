@@ -1,0 +1,102 @@
+.footer {
+  background-color: #f5f5f5;
+  padding: 2rem 0;
+  font-family: "Arial", sans-serif;
+  color: #333;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-around;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 200px;
+  margin: 0 1rem;
+}
+
+.footer-logo {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.footer-text {
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  color: #666;
+}
+
+.footer-section h5 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #000;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-links a {
+  text-decoration: none;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #007bff;
+}
+
+.social-icons {
+  display: flex;
+  gap: 10px;
+}
+
+.social-icons a {
+  font-size: 1.5rem;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.social-icons a:hover {
+  color: #007bff;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 1rem 0;
+  border-top: 1px solid #e5e5e5;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.footer-bottom p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.payment-icons {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Adds spacing between payment icons */
+}
+
+.payment-icons i {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Add hover effect for payment icons */
+.payment-icons i:hover {
+  color: #007bff;
+}
