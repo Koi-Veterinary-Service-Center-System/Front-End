@@ -3,7 +3,8 @@ import Register from "./pages/register/register";
 import Login from "./pages/login/login";
 import Home from "./pages/home/home";
 import Booking from "./pages/booking/Booking";
-import Profile from "./pages/profile/profile";
+import Profile from "./pages/updateProfile/updateProfile";
+import UpdateProfile from "./pages/updateProfile/updateProfile";
 function App() {
   const router = createBrowserRouter([
     {
@@ -15,8 +16,8 @@ function App() {
       element: <Booking />,
     },
     {
-      path: "/profile",
-      element: <Profile />,
+      path: "/updateProfile",
+      element: <UpdateProfile />,
     },
     {
       path: "/register",
