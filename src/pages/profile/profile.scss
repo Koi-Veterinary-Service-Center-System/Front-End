@@ -49,17 +49,17 @@
 
 .sidebar a.active {
   color: white;
-  background-color: #3f51b5;
+  background-color: #2f3f82;
   border-radius: 5px;
 }
 
 .sidebar a:hover {
-  background-color: #d1c4e9;
+  background-color: #c8eef9;
   border-radius: 5px;
 }
 
-.card-body media align-items-center {
-  display: flex;
+.card-body {
+  margin-bottom: 2px;
 }
 
 .card-body img {
@@ -117,7 +117,7 @@
 }
 
 .button-group button.update {
-  background-color: #3f51b5;
+  background-color: #2f3f82;
   color: white;
 }
 
@@ -131,8 +131,9 @@
   display: flex;
   justify-content: flex-end; /* Đẩy các nút sang phải */
   align-items: center;
-  margin-top: 50%; /* Tự động đẩy nội dung phía trên */
+  margin-top: 40%; /* Tự động đẩy nội dung phía trên */
   padding-bottom: 20px; /* Khoảng cách từ nút tới đáy */
+  margin-right: 10px;
 }
 
 .btn-primary {

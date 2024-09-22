@@ -48,10 +48,8 @@ function UpdateProfile() {
           <Link to="/account" className="active">
             Account
           </Link>
-          <Link to="#password">Password</Link>
-          <Link to="#security">Security</Link>
-          <Link to="#application">Application</Link>
-          <Link to="#notification">Notification</Link>
+          <Link to="/password">Password</Link>
+          <Link to="/serviceHistory">View Service History</Link>
         </div>
 
         <div className="content">
@@ -130,9 +128,13 @@ function UpdateProfile() {
           </div>
         </div>
         <div className="text-right">
-          <Button className="btn btn-primary">Save changes</Button>
+          <Button className="btn btn-primary">
+            <Link to="/profile">Save changes</Link>
+          </Button>
           &nbsp;
-          <Button className="btn btn-default">Cancel</Button>
+          <Button className="btn btn-default">
+            <Link to="/profile">Cancel</Link>
+          </Button>
         </div>
       </div>
     </div>
