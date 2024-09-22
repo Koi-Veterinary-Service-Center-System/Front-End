@@ -1,8 +1,8 @@
-import "./header.scss";
-import { Button, Form, Input } from "antd";
+import "./headerv2.scss";
+import { Form, Input } from "antd";
 import type { GetProps } from "antd";
 import { Link } from "react-router-dom";
-function Header() {
+function HeaderV2() {
   type SearchProps = GetProps<typeof Input.Search>;
 
   const { Search } = Input;
@@ -43,13 +43,6 @@ function Header() {
           </button>
         </Form>
 
-        <Button>
-          <Link to="/login#login-container">Login</Link>
-        </Button>
-        <Button>
-          <Link to="/register#register-container">Register</Link>
-        </Button>
-
         <div className="icons">
           <Link to="/favorites" className="heart-icon" data-count="0">
             <i className="bx bx-heart"></i>
@@ -66,4 +59,4 @@ function Header() {
   );
 }
 
-export default Header;
+export default HeaderV2;

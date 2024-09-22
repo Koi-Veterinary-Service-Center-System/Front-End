@@ -3,7 +3,7 @@ import Input from "antd/es/input/Input";
 import "./login.scss"; // Import the CSS file
 import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
-import { Link, useLocation } from "react-router-dom"; // Import useLocation
+import { Link, useLocation, useNavigate } from "react-router-dom"; // Import useLocation
 import { auth, googleProvider } from "../../configs/firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useEffect, useRef } from "react"; // Import useEffect, useRef
@@ -11,7 +11,7 @@ import { useEffect, useRef } from "react"; // Import useEffect, useRef
 function Login() {
   const location = useLocation(); // Hook để truy cập URL
   const loginRef = useRef(null); // Tạo ref để tham chiếu đến div login-container
-
+  const navigate = useNavigate();
   useEffect(() => {
     if (location.hash === "#login-container") {
       // Kiểm tra nếu URL có chứa hash #login-container
@@ -28,13 +28,14 @@ function Login() {
       .then((result) => {
         const credential = GoogleAuthProvider.credentialFromResult(result);
         console.log(credential);
+        navigate("/");
       })
       .catch((error) => {
         console.log(error);
       });
   };
 
-  const handleFinish = (values) => {
+  const handleFinish = (values = Object) => {
     console.log(values); // Handle form submission
   };
 

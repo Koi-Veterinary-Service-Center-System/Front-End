@@ -1,0 +1,111 @@
+// profile.scss
+
+.container {
+  margin-top: 20px;
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  border: none;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+h6 {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+img {
+  border-radius: 50%;
+}
+
+button {
+  border-radius: 30px;
+  padding: 6px 20px;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-outline-primary {
+  color: #007bff;
+  border-color: #007bff;
+}
+
+.list-group-item {
+  border: none;
+  font-size: 14px;
+}
+
+.text-secondary {
+  color: #6c757d !important;
+}
+
+.progress {
+  background-color: #e9ecef;
+  border-radius: 20px;
+  height: 8px;
+}
+
+.progress-bar {
+  border-radius: 20px;
+}
+
+.progress-bar.bg-primary {
+  background-color: #007bff;
+}
+
+.text-info {
+  color: #17a2b8 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.text-primary {
+  color: #007bff !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+// Specific profile details
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.profile-info img {
+  width: 150px;
+}
+
+.profile-info h4 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.profile-info p {
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.profile-info button {
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+
+.list-group-item svg {
+  margin-right: 10px;
+}

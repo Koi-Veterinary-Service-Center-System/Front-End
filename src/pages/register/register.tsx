@@ -5,6 +5,7 @@ import Header from "../../components/Header/header";
 import { Link, useLocation } from "react-router-dom";
 import Footer from "../../components/Footer/footer";
 import { useEffect, useRef } from "react";
+import { Object } from "../../types/info";
 
 function Register() {
   const location = useLocation(); // Hook để truy cập URL
@@ -21,7 +22,7 @@ function Register() {
     }
   }, [location.hash]);
 
-  const handleFinish = (values) => {
+  const handleFinish = (values: Object) => {
     console.log(values);
   };
   return (

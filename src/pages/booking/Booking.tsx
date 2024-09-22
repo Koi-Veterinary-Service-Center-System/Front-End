@@ -5,6 +5,7 @@ import { Input, Form, Button, Select, DatePicker } from "antd";
 import { useEffect, useRef, useState } from "react";
 import Banner from "../../components/banner/banner";
 import { useLocation } from "react-router-dom";
+import HeaderV2 from "../../components/HeaderNoLogin/headerv2";
 
 const { Option } = Select;
 
@@ -14,7 +15,7 @@ function Booking() {
   const [paymentMethod, setPaymentMethod] = useState("");
 
   // Handle payment method selection
-  const handlePaymentChange = (value) => {
+  const handlePaymentChange = (value: string) => {
     setPaymentMethod(value);
   };
 
@@ -25,7 +26,7 @@ function Booking() {
   };
 
   // Handle form submit and log the values
-  const handleSubmit = (values) => {
+  const handleSubmit = (values: string) => {
     console.log("Form Values:", values); // Check if values are logged correctly
   };
 
@@ -44,9 +45,9 @@ function Booking() {
 
   return (
     <div>
-      <Header />
+      <HeaderV2 />
       <Banner />
-      <div ref={bookingRef} id="booking" className="section">
+      <section ref={bookingRef} id="booking" className="booking">
         <div className="section-center">
           <div className="container">
             <div className="row">
@@ -64,10 +65,13 @@ function Booking() {
                   <div className="row">
                     <div className="col-sm-6">
                       <Form.Item
-                        label="FirstName & LastName"
+                        label="Name"
                         name="name"
                         rules={[
-                          { required: true, message: "Please enter your name" },
+                          {
+                            required: true,
+                            message: "Please enter your name",
+                          },
                           {
                             pattern: /^[^\s][a-zA-Z\s]+$/,
                             message:
@@ -77,7 +81,7 @@ function Booking() {
                       >
                         <Input
                           className="form-control"
-                          placeholder="Enter your FirstName & LastName"
+                          placeholder="Enter your Name"
                         />
                       </Form.Item>
                     </div>
@@ -271,7 +275,7 @@ function Booking() {
             </div>
           </div>
         </div>
-      </div>
+      </section>
       <Footer />
     </div>
   );

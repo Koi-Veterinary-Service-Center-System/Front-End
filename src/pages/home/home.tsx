@@ -1,12 +1,12 @@
 import Banner from "../../components/banner/banner";
 import Footer from "../../components/Footer/footer";
-import Header from "../../components/Header/header";
+import HeaderV2 from "../../components/HeaderNoLogin/headerv2";
 import "./home.scss";
 
 function Home() {
   return (
     <div>
-      <Header />
+      <HeaderV2 />
       <Banner />
       <Footer />
     </div>
