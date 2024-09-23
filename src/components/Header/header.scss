@@ -1,4 +1,4 @@
-header {
+.header_hd {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -8,7 +8,7 @@ header {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-header img {
+.header_hd img {
   height: 50px;
   cursor: pointer;
 }
@@ -39,47 +39,51 @@ nav {
   border-bottom: 2px solid #2e3a59;
 }
 
-.search-bar {
+.search-bar-hd {
   display: flex;
   align-items: center;
-  background-color: #fff;
+  background-color: #f7f8fb; /* Light background */
   padding: 5px 15px;
-  border-radius: 20px;
+  border-radius: 40px; /* More rounded for the search bar */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 250px;
-  max-height: 40px;
+  width: 300px; /* Wider search bar */
+  max-height: 50px; /* Slightly taller search bar */
   margin-left: 20px;
+  position: relative;
 }
 
-.search-bar input {
+.search-bar-hd input {
+  margin-top: 20px;
   border: none;
   outline: none;
-  margin-top: 20px;
   flex: 1;
   font-size: 16px;
   color: #303f82;
-  border-radius: 20px;
+  background-color: transparent; /* Transparent to match the background */
+  padding-left: 15px;
 }
 
-.search-bar button {
-  color: white; /* Set the icon color to white for better contrast */
+.search-bar-hd button {
+  position: absolute;
+  right: 10px; /* Moves the button to the edge of the bar */
+  background-color: #000; /* Black background for the button */
+  border: none;
+  border-radius: 50%; /* Circular button */
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
 }
 
-.search-bar button i {
-  border: none;
-  border-radius: 50%;
-  width: 40px; /* Adjust the size to be smaller */
-  height: 40px; /* Make height equal to width for a perfect circle */
-  background-color: #0071bc;
+.search-bar-hd button i {
+  color: #fff; /* White icon inside */
   font-size: 20px;
-  color: #fff;
-  transition: color 0.3s ease;
-  padding-top: 10px;
 }
 
-.search-bar button:hover i {
-  color: #0071bc;
+.search-bar-hd button:hover i {
+  color: #0071bc; /* Change color on hover */
 }
 
 .icons {

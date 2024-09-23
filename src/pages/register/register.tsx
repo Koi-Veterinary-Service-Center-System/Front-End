@@ -26,7 +26,7 @@ function Register() {
     console.log(values);
   };
   return (
-    <div className="body">
+    <div className="body-register">
       <Header />
       <div ref={registerRef} className="register-container">
         <div className="register-left">

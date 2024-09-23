@@ -40,7 +40,7 @@ function Login() {
   };
 
   return (
-    <div className="body">
+    <div className="body-login">
       <Header />
       <div ref={loginRef} className="login-container">
         {/* Đây là div sẽ được cuộn đến */}

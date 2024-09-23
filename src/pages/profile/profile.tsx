@@ -13,7 +13,7 @@ function Profile() {
   });
 
   return (
-    <div className="body-updateProfile">
+    <div className="body_updateProfile">
       <Button
         className="btn-back"
         type="primary"
@@ -22,7 +22,7 @@ function Profile() {
         Back
       </Button>
 
-      <div className="container updateProfile">
+      <div className="container_profile">
         <div className="sidebar">
           <img
             src="https://4kwallpapers.com/images/walls/thumbs_3t/12950.png"

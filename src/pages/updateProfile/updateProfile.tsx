@@ -38,7 +38,7 @@ function UpdateProfile() {
         Back
       </Button>
 
-      <div className="container updateProfile">
+      <div className="container_updateProfile">
         <div className="sidebar">
           <img
             src="https://4kwallpapers.com/images/walls/thumbs_3t/12950.png"

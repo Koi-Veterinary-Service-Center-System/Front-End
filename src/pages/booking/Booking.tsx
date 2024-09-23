@@ -3,9 +3,9 @@ import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
 import { Input, Form, Button, Select, DatePicker } from "antd";
 import { useEffect, useRef, useState } from "react";
-import Banner from "../../components/banner/banner";
+
 import { useLocation } from "react-router-dom";
-import HeaderV2 from "../../components/HeaderNoLogin/headerv2";
+import Banner from "../../components/banner";
 
 const { Option } = Select;
 
@@ -15,7 +15,7 @@ function Booking() {
   const [paymentMethod, setPaymentMethod] = useState("");
 
   // Handle payment method selection
-  const handlePaymentChange = (value: string) => {
+  const handlePaymentChange = (value) => {
     setPaymentMethod(value);
   };
 
@@ -26,7 +26,7 @@ function Booking() {
   };
 
   // Handle form submit and log the values
-  const handleSubmit = (values: string) => {
+  const handleSubmit = (values) => {
     console.log("Form Values:", values); // Check if values are logged correctly
   };
 
@@ -45,9 +45,9 @@ function Booking() {
 
   return (
     <div>
-      <HeaderV2 />
+      <Header />
       <Banner />
-      <section ref={bookingRef} id="booking" className="booking">
+      <div ref={bookingRef} id="booking" className="section">
         <div className="section-center">
           <div className="container">
             <div className="row">
@@ -65,13 +65,10 @@ function Booking() {
                   <div className="row">
                     <div className="col-sm-6">
                       <Form.Item
-                        label="Name"
+                        label="FirstName & LastName"
                         name="name"
                         rules={[
-                          {
-                            required: true,
-                            message: "Please enter your name",
-                          },
+                          { required: true, message: "Please enter your name" },
                           {
                             pattern: /^[^\s][a-zA-Z\s]+$/,
                             message:
@@ -81,7 +78,7 @@ function Booking() {
                       >
                         <Input
                           className="form-control"
-                          placeholder="Enter your Name"
+                          placeholder="Enter your FirstName & LastName"
                         />
                       </Form.Item>
                     </div>
@@ -275,7 +272,7 @@ function Booking() {
             </div>
           </div>
         </div>
-      </section>
+      </div>
       <Footer />
     </div>
   );

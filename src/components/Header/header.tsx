@@ -12,7 +12,7 @@ function Header() {
 
   return (
     <>
-      <header>
+      <header className="header_hd">
         <Link to="/">
           <img src="src/assets/images/logo.png" alt="Koine logo" />
         </Link>
@@ -34,7 +34,7 @@ function Header() {
           </ul>
         </nav>
 
-        <Form className="search-bar" onFinish={onSearch}>
+        <Form className="search-bar-hd" onFinish={onSearch}>
           <Form.Item>
             <input type="text" placeholder="Search products..." />
           </Form.Item>
