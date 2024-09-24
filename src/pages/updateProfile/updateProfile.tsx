@@ -1,16 +1,29 @@
 import { Link } from "react-router-dom";
 import { Input, Button, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./updateProfile.scss";
+import api from "../../configs/axios";
 
 function UpdateProfile() {
-  const [userData, setUserData] = useState({
-    username: "nmaxwell",
-    name: "Nelle Maxwell",
-    email: "nmaxwell@mail.com",
-    company: "Company Ltd.",
-  });
+  const [profile, setProfile] = useState([]);
+  const [error, setError] = useState(null);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await api.get("/profile", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Use token if available
+        },
+      });
+      setProfile(response.data); // Assuming the API response contains the profile data
+    } catch (error) {
+      setError(error.message || "Failed to fetch profile data");
+    }
+  };
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const handleFileUpload = (info) => {
     if (info.file.status === "done") {
@@ -20,13 +33,7 @@ function UpdateProfile() {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setUserData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  const handleChange = () => {};
 
   return (
     <div className="body-updateProfile">
@@ -68,7 +75,6 @@ function UpdateProfile() {
                 >
                   <Button icon={<UploadOutlined />}>Upload new photo</Button>
                 </Upload>
-                <Button className="ml-2">Reset</Button>
                 <div className="text-light small mt-1">
                   Allowed JPG, GIF or PNG. Max size of 800K.
                 </div>
@@ -83,7 +89,7 @@ function UpdateProfile() {
                 <Input
                   type="text"
                   name="username"
-                  value={userData.username}
+                  value={profile.userName}
                   onChange={handleChange}
                   className="mb-1"
                 />
@@ -94,7 +100,7 @@ function UpdateProfile() {
                 <Input
                   type="text"
                   name="name"
-                  value={userData.name}
+                  value={`${profile.firstName} ${profile.lastName}`}
                   onChange={handleChange}
                 />
               </div>
@@ -104,7 +110,7 @@ function UpdateProfile() {
                 <Input
                   type="text"
                   name="email"
-                  value={userData.email}
+                  value={profile.email}
                   onChange={handleChange}
                   className="mb-1"
                 />
@@ -116,11 +122,11 @@ function UpdateProfile() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Company</label>
+                <label className="form-label">Phone</label>
                 <Input
                   type="text"
-                  name="company"
-                  value={userData.company}
+                  name="phone"
+                  value={profile.phone}
                   onChange={handleChange}
                 />
               </div>

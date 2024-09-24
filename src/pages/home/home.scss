@@ -163,6 +163,10 @@ footer {
 .category-section {
   padding: 40px 20px;
   text-align: center;
+  background-image: url(src/assets/images/home-background-head.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 
   h3 {
     font-size: 24px;
@@ -172,9 +176,9 @@ footer {
 
   .category-container {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
+    gap: 100px;
     flex-wrap: wrap;
-    gap: 20px;
   }
 
   .category-card {
@@ -229,9 +233,13 @@ footer {
     }
   }
 
+  .category-narrow {
+    display: flex;
+  }
+
   .category-arrows {
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     margin-top: 30px;
 
     .arrow-button {
@@ -259,6 +267,10 @@ footer {
 .veterinarian-section {
   text-align: center;
   padding: 40px 20px;
+  background-image: url(src/assets/images/home-background.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 
   h2 {
     font-size: 28px;
@@ -269,14 +281,15 @@ footer {
   .veterinarian-cards {
     display: flex;
     justify-content: center;
-    gap: 30px;
+    gap: 50px;
 
     .vet-card {
       background-color: #fff;
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       overflow: hidden;
-      width: 250px;
+      width: 300px;
+      height: auto;
       text-align: center;
       transition: transform 0.3s ease;
 
@@ -286,7 +299,7 @@ footer {
 
       .vet-image {
         width: 100%;
-        height: 300px;
+        height: 600px;
         object-fit: cover;
       }
 
@@ -392,8 +405,8 @@ footer {
 
   .news-cards {
     display: flex;
-    justify-content: space-between;
-    gap: 10px;
+    justify-content: center;
+    gap: 60px;
     flex-wrap: wrap;
 
     .news-card {
@@ -450,6 +463,100 @@ footer {
   }
 }
 
+/* FAQ Chat Box Styles */
+.faq-chat-box {
+  position: fixed;
+  bottom: 100px;
+  right: 100px;
+  width: 300px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+/* Header of the Chat Box */
+.faq-header {
+  background-color: #007bff;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.faq-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.faq-header .close-button {
+  color: white;
+  font-size: 16px;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+/* FAQ Content Styling */
+.faq-content {
+  padding: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.faq-item {
+  margin-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 8px;
+}
+
+.faq-item h5 {
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #333;
+  font-weight: 600;
+}
+
+.faq-item p {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Scrollbar for FAQ content */
+.faq-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.faq-content::-webkit-scrollbar-thumb {
+  background-color: #007bff;
+  border-radius: 10px;
+}
+
+/* Transition for smooth opening */
+.faq-chat-box.hidden {
+  opacity: 0;
+  transform: translateY(50px);
+  pointer-events: none;
+}
+
+/* Float Button (adjusted for visual consistency) */
+.ant-float-btn {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.ant-float-btn:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
 /* For responsiveness */
 @media screen and (max-width: 768px) {
   .koi-service-section .koi-banner {
@@ -478,63 +585,6 @@ footer {
 
       p {
         max-width: 100%;
-      }
-    }
-  }
-}
-
-.news-blog-section {
-  text-align: center;
-  padding: 40px 20px;
-
-  h2 {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 30px;
-  }
-
-  .news-cards {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-
-    .news-card {
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      width: 300px;
-
-      img {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-      }
-
-      .news-info {
-        padding: 15px;
-
-        .news-tag {
-          display: inline-block;
-          background-color: #000;
-          color: #fff;
-          padding: 5px 10px;
-          border-radius: 5px;
-          font-size: 12px;
-          margin-bottom: 10px;
-        }
-
-        .news-date {
-          font-size: 14px;
-          color: #888;
-          margin-bottom: 5px;
-        }
-
-        h4 {
-          font-size: 18px;
-          color: #333;
-          margin-bottom: 10px;
-        }
       }
     }
   }

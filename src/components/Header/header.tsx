@@ -21,7 +21,7 @@ function Header() {
     localStorage.removeItem("token"); // Remove token from localStorage
     localStorage.removeItem("user"); // Optionally remove user info
     setIsLoggedIn(false); // Set logged-in state to false
-    navigate("/login"); // Redirect to login page
+    navigate("/login#login-container"); // Redirect to login page
   };
 
   const onSearch = (value: string) => {

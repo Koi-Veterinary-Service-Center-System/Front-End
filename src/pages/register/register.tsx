@@ -92,10 +92,7 @@ function Register() {
                     },
                   ]}
                 >
-                  <Input
-                    placeholder="First Name"
-                    className="register-input-s"
-                  />
+                  <Input placeholder="First Name" className="register-input" />
                 </Form.Item>
                 <Form.Item
                   name="lastName"
@@ -108,7 +105,7 @@ function Register() {
                     },
                   ]}
                 >
-                  <Input placeholder="Last Name" className="register-input-s" />
+                  <Input placeholder="Last Name" className="register-input" />
                 </Form.Item>
               </div>
 
@@ -141,7 +138,7 @@ function Register() {
                 <Input placeholder="Email" className="register-input" />
               </Form.Item>
 
-              <Form.Item
+              {/* <Form.Item
                 name="address"
                 rules={[
                   { required: true, message: "Please input your Address!" },
@@ -152,7 +149,7 @@ function Register() {
                 ]}
               >
                 <Input placeholder="Address" className="register-input" />
-              </Form.Item>
+              </Form.Item> */}
 
               <Form.Item
                 name="password"

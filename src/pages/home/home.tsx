@@ -1,11 +1,15 @@
 import Banner from "../../components/banner";
 import Footer from "../../components/Footer/footer";
 import Header from "../../components/Header/header";
-
+import { QuestionCircleOutlined, CloseOutlined } from "@ant-design/icons";
+import { FloatButton, Button } from "antd";
+import { useState } from "react";
 import "./home.scss";
 import { Link } from "react-router-dom";
 
 function Home() {
+  const [isChatBoxVisible, setIsChatBoxVisible] = useState(false);
+
   const categories = [
     {
       name: "Accessories",
@@ -29,9 +33,34 @@ function Home() {
       name: "Bags",
       products: 16,
       image:
-        "https://i.pinimg.com/564x/ea/e5/38/eae5381c66206ed0f3d883c8df9f2f47.jpg",
+        "https://i.pinimg.com/564x/e6/8a/22/e68a2226770084e96215024e0599a049.jpg",
     },
   ];
+
+  const faqs = [
+    {
+      question: "What services do you offer?",
+      answer: "We offer koi pond consultations, treatments, and home visits.",
+    },
+    {
+      question: "How do I book an appointment?",
+      answer:
+        "You can book an appointment through our website under the 'Services' section.",
+    },
+    {
+      question: "What are your operating hours?",
+      answer: "We operate from 9 AM to 6 PM, Monday to Saturday.",
+    },
+    {
+      question: "Do you provide emergency services?",
+      answer:
+        "Yes, we provide emergency services. Contact our hotline for urgent cases.",
+    },
+  ];
+
+  const toggleChatBox = () => {
+    setIsChatBoxVisible(!isChatBoxVisible);
+  };
 
   return (
     <div>
@@ -39,7 +68,17 @@ function Home() {
       <Banner />
 
       <div className="category-section">
-        <h3>Browse by category</h3>
+        <div className="category-arrows">
+          <h3>Browse by category</h3>
+          <div className="category-narrow">
+            <button className="arrow-button left">
+              <i className="bx bx-left-arrow-alt"></i>
+            </button>
+            <button className="arrow-button right">
+              <i className="bx bx-right-arrow-alt"></i>
+            </button>
+          </div>
+        </div>
         <div className="category-container">
           {categories.map((category, index) => (
             <div key={index} className="category-card">
@@ -58,15 +97,8 @@ function Home() {
             </div>
           ))}
         </div>
-        <div className="category-arrows">
-          <button className="arrow-button left">
-            <i className="bx bx-left-arrow-alt"></i>
-          </button>
-          <button className="arrow-button right">
-            <i className="bx bx-right-arrow-alt"></i>
-          </button>
-        </div>
       </div>
+
       <div className="veterinarian-section">
         <h2>Veterinarian</h2>
         <div className="veterinarian-cards">
@@ -109,10 +141,11 @@ function Home() {
         </div>
       </div>
 
+      {/* Koi Service Section */}
       <div className="koi-service-section">
         <div className="koi-service">
           <div className="koi-service-image">
-            <img src="src\assets\images\homeimage.png" alt="Koi Service" />
+            <img src="src/assets/images/homeimage.png" alt="Koi Service" />
           </div>
           <div className="koi-text">
             <h4>Koi Service</h4>
@@ -127,6 +160,7 @@ function Home() {
         </div>
       </div>
 
+      {/* News Blog Section */}
       <div className="news-blog-section">
         <h2>News & Blog</h2>
         <div className="news-cards">
@@ -138,7 +172,10 @@ function Home() {
             <div className="news-info">
               <span className="news-tag">News</span>
               <p className="news-date">24 May, 2024</p>
-              <h4>Urna Cras Et Mauris Congue Nunc Nisi Nec Tempus Cursus</h4>
+              <h4>
+                Aquatic Veterinary Services offers a wide-range of services for
+                your aquatic pets.
+              </h4>
             </div>
           </div>
           <div className="news-card">
@@ -149,7 +186,7 @@ function Home() {
             <div className="news-info">
               <span className="news-tag">News</span>
               <p className="news-date">24 May, 2024</p>
-              <h4>Id Tellus Dignissim Eu Nisl Aliquam. Massa Id Interdum</h4>
+              <h4>We Come To Your Tank or Pond</h4>
             </div>
           </div>
           <div className="news-card">
@@ -160,11 +197,42 @@ function Home() {
             <div className="news-info">
               <span className="news-tag">News</span>
               <p className="news-date">24 May, 2024</p>
-              <h4>Mus Cursus Pellentesque Blandit Tortor Suspendisse Ornare</h4>
+              <h4>Cleaning Koi Pond Filters the Right Way</h4>
             </div>
           </div>
         </div>
       </div>
+
+      {/* FAQ Chat Box */}
+      {isChatBoxVisible && (
+        <div className="faq-chat-box">
+          <div className="faq-header">
+            <h4>Frequently Asked Questions</h4>
+            <Button
+              type="text"
+              icon={<CloseOutlined />}
+              onClick={toggleChatBox}
+              className="close-button"
+            />
+          </div>
+          <div className="faq-content">
+            {faqs.map((faq, index) => (
+              <div key={index} className="faq-item">
+                <h5>{faq.question}</h5>
+                <p>{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Float Button */}
+      <FloatButton
+        icon={<QuestionCircleOutlined />}
+        type="primary"
+        style={{ insetInlineEnd: 94 }}
+        onClick={toggleChatBox}
+      />
 
       <Footer />
     </div>

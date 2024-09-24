@@ -1,16 +1,30 @@
 import { Link } from "react-router-dom";
 import { Input, Button, Upload } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./profile.scss";
+import api from "../../configs/axios"; // Assuming Axios is used for making requests
 
 function Profile() {
-  const [userData, setUserData] = useState({
-    username: "nmaxwell",
-    name: "Nelle Maxwell",
-    email: "nmaxwell@mail.com",
-    company: "Company Ltd.",
-  });
+  const [profile, setProfile] = useState({});
+  const [error, setError] = useState(null);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await api.get("/profile", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Use token if available
+        },
+      });
+      setProfile(response.data); // Assuming the API response contains the profile data
+    } catch (error) {
+      setError(error.message || "Failed to fetch profile data");
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   return (
     <div className="body_updateProfile">
@@ -25,10 +39,15 @@ function Profile() {
       <div className="container_profile">
         <div className="sidebar">
           <img
-            src="https://4kwallpapers.com/images/walls/thumbs_3t/12950.png"
+            src={
+              profile.imageURL ||
+              "https://4kwallpapers.com/images/walls/thumbs_3t/12950.png"
+            }
             alt="User Avatar"
           />
-          <h3>Doang Cong Thanh</h3>
+          <h3>
+            {profile.firstName} {profile.lastName}
+          </h3>
           <Link to="/account" className="active">
             Account
           </Link>
@@ -46,14 +65,20 @@ function Profile() {
                 <Input
                   type="text"
                   name="username"
-                  value={userData.username}
+                  value={profile.userName}
+                  readOnly
                   className="mb-1"
                 />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Name</label>
-                <Input type="text" name="name" value={userData.name} />
+                <Input
+                  type="text"
+                  name="name"
+                  value={`${profile.firstName} ${profile.lastName}`}
+                  readOnly
+                />
               </div>
 
               <div className="form-group">
@@ -61,14 +86,20 @@ function Profile() {
                 <Input
                   type="text"
                   name="email"
-                  value={userData.email}
+                  value={profile.email}
+                  readOnly
                   className="mb-1"
                 />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Company</label>
-                <Input type="text" name="company" value={userData.company} />
+                <label className="form-label">Phone</label>
+                <Input
+                  type="text"
+                  name="phone"
+                  value={profile.phone || "N/A"} // Default if company is not available
+                  readOnly
+                />
               </div>
             </div>
           </div>

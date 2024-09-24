@@ -3,16 +3,17 @@ import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
 import { Input, Form, Button, Select, DatePicker } from "antd";
 import { useEffect, useRef, useState } from "react";
-
 import { useLocation } from "react-router-dom";
 import Banner from "../../components/banner";
 
 const { Option } = Select;
+const { TextArea } = Input;
 
 function Booking() {
   const [total, setTotal] = useState(0);
-  const { TextArea } = Input;
   const [paymentMethod, setPaymentMethod] = useState("");
+  const location = useLocation();
+  const bookingRef = useRef(null);
 
   // Handle payment method selection
   const handlePaymentChange = (value) => {
@@ -27,14 +28,12 @@ function Booking() {
 
   // Handle form submit and log the values
   const handleSubmit = (values) => {
-    console.log("Form Values:", values); // Check if values are logged correctly
+    console.log("Form Values:", values);
   };
 
-  const location = useLocation();
-  const bookingRef = useRef(null);
-
+  // Scroll to section based on hash
   useEffect(() => {
-    if (location.hash == "#section") {
+    if (location.hash === "#section") {
       setTimeout(() => {
         if (bookingRef.current) {
           bookingRef.current.scrollIntoView({ behavior: "smooth" });
@@ -60,29 +59,85 @@ function Booking() {
                 <Form
                   name="bookingForm"
                   layout="vertical"
-                  onFinish={handleSubmit} // onFinish triggers handleSubmit
+                  onFinish={handleSubmit}
                 >
                   <div className="row">
-                    <div className="col-sm-6">
+                    <div className="col-sm-5">
                       <Form.Item
-                        label="FirstName & LastName"
-                        name="name"
+                        label="Pickup Date"
+                        name="pickupDate"
                         rules={[
-                          { required: true, message: "Please enter your name" },
-                          {
-                            pattern: /^[^\s][a-zA-Z\s]+$/,
-                            message:
-                              "Name cannot start with a space or contain special characters",
-                          },
+                          { required: true, message: "Please select a date" },
                         ]}
                       >
-                        <Input
+                        <DatePicker
                           className="form-control"
-                          placeholder="Enter your FirstName & LastName"
+                          style={{ width: "100%" }}
                         />
                       </Form.Item>
                     </div>
+                  </div>
 
+                  <div className="row">
+                    <div className="col-sm-4">
+                      <Form.Item
+                        label="Type of Service"
+                        name="serviceType"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select a service",
+                          },
+                        ]}
+                      >
+                        <Select className="form-control">
+                          <Option value="service1">Service 1</Option>
+                          <Option value="service2">Service 2</Option>
+                          <Option value="service3">Service 3</Option>
+                        </Select>
+                      </Form.Item>
+                    </div>
+
+                    <div className="col-sm-4">
+                      <Form.Item
+                        label="Slot"
+                        name="slot"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select a slot",
+                          },
+                        ]}
+                      >
+                        <Select className="form-control">
+                          <Option value="slot1">Slot 1</Option>
+                          <Option value="slot2">Slot 2</Option>
+                          <Option value="slot3">Slot 3</Option>
+                        </Select>
+                      </Form.Item>
+                    </div>
+
+                    <div className="col-sm-4">
+                      <Form.Item
+                        label="Vet"
+                        name="vet"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select a vet",
+                          },
+                        ]}
+                      >
+                        <Select className="form-control">
+                          <Option value="vet1">Vet 1</Option>
+                          <Option value="vet2">Vet 2</Option>
+                          <Option value="vet3">Vet 3</Option>
+                        </Select>
+                      </Form.Item>
+                    </div>
+                  </div>
+
+                  <div className="row">
                     <div className="col-sm-6">
                       <Form.Item
                         label="Address"
@@ -93,7 +148,7 @@ function Booking() {
                             message: "Please enter your address",
                           },
                           {
-                            pattern: /^[^\s][a-zA-Z\s]+$/,
+                            pattern: /^[^\s].+$/,
                             message:
                               "Address cannot start with a space or contain special characters",
                           },
@@ -128,110 +183,21 @@ function Booking() {
                   </Form.Item>
 
                   <Form.Item
-                    label="Name your Fish"
+                    label="Choose Fish or Pool"
                     name="fish"
                     rules={[
                       {
                         required: true,
-                        message: "Please enter your fish's name",
-                      },
-                      {
-                        pattern: /^[^\s][a-zA-Z\s]+$/,
-                        message:
-                          "Fish name cannot start with a space or contain special characters",
+                        message: "Please select a service",
                       },
                     ]}
                   >
-                    <Input
-                      className="form-control"
-                      placeholder="Enter your fish's name"
-                    />
+                    <Select className="form-control">
+                      <Option value="fish1">Fish 1</Option>
+                      <Option value="fish2">Fish 2</Option>
+                      <Option value="pool1">Pool 1</Option>
+                    </Select>
                   </Form.Item>
-
-                  <Form.Item name="detailOfFish">
-                    <TextArea
-                      placeholder="Detail your fish"
-                      autoSize={{ minRows: 3, maxRows: 5 }}
-                    />
-                  </Form.Item>
-
-                  <div className="row">
-                    <div className="col-sm-5">
-                      <Form.Item
-                        label="Pickup Date"
-                        name="pickupDate"
-                        rules={[
-                          { required: true, message: "Please select a date" },
-                        ]}
-                      >
-                        <DatePicker
-                          className="form-control"
-                          style={{ width: "100%" }}
-                        />
-                      </Form.Item>
-                    </div>
-
-                    <div className="col-sm-7">
-                      <div className="row">
-                        <div className="col-sm-4">
-                          <Form.Item
-                            label="Type of Service"
-                            name="serviceType"
-                            rules={[
-                              {
-                                required: true,
-                                message: "Please select a service",
-                              },
-                            ]}
-                          >
-                            <Select className="form-control">
-                              <Option value="service1">Service 1</Option>
-                              <Option value="service2">Service 2</Option>
-                              <Option value="service3">Service 3</Option>
-                            </Select>
-                          </Form.Item>
-                        </div>
-
-                        <div className="col-sm-4">
-                          <Form.Item
-                            label="Vet"
-                            name="vet"
-                            rules={[
-                              {
-                                required: true,
-                                message: "Please select a vet",
-                              },
-                            ]}
-                          >
-                            <Select className="form-control">
-                              <Option value="vet1">Vet 1</Option>
-                              <Option value="vet2">Vet 2</Option>
-                              <Option value="vet3">Vet 3</Option>
-                            </Select>
-                          </Form.Item>
-                        </div>
-
-                        <div className="col-sm-4">
-                          <Form.Item
-                            label="Slot"
-                            name="slot"
-                            rules={[
-                              {
-                                required: true,
-                                message: "Please select a slot",
-                              },
-                            ]}
-                          >
-                            <Select className="form-control">
-                              <Option value="slot1">Slot 1</Option>
-                              <Option value="slot2">Slot 2</Option>
-                              <Option value="slot3">Slot 3</Option>
-                            </Select>
-                          </Form.Item>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
 
                   {/* Payment Method Section */}
                   <Form.Item
@@ -249,8 +215,9 @@ function Booking() {
                       <Option value="cash">Cash on Delivery</Option>
                     </Select>
                   </Form.Item>
+
                   {/* Total Amount Section */}
-                  <h3>Total: {total} VND</h3>
+                  <h3>Total: {total} $</h3>
                   <Button
                     onClick={calculateTotal}
                     className="calculate-total-btn"
