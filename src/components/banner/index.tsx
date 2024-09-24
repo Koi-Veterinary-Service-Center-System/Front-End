@@ -14,9 +14,6 @@ function Banner() {
           rhoncus quisque eget sit
         </p>
         <Button className="fakeButton">
-          <Link to="/booking">Booking</Link>
-        </Button>
-        <Button>
           <Link to="/booking#section">Booking Service</Link>
         </Button>
       </div>

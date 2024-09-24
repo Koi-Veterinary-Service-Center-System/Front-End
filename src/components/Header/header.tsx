@@ -1,14 +1,32 @@
 import "./header.scss";
 import { Button, Form, Input } from "antd";
-import type { GetProps } from "antd";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react"; // Import useState and useEffect
+
 function Header() {
-  type SearchProps = GetProps<typeof Input.Search>;
-
   const { Search } = Input;
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
 
-  const onSearch: SearchProps["onSearch"] = (value, _e, info) =>
-    console.log(info?.source, value);
+  // Check if the user is logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token"); // Get the token from localStorage
+    if (token) {
+      setIsLoggedIn(true); // If token exists, user is logged in
+    }
+  }, []);
+
+  // Handle logout function
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Remove token from localStorage
+    localStorage.removeItem("user"); // Optionally remove user info
+    setIsLoggedIn(false); // Set logged-in state to false
+    navigate("/login"); // Redirect to login page
+  };
+
+  const onSearch = (value: string) => {
+    console.log("Searching for:", value);
+  };
 
   return (
     <>
@@ -43,13 +61,6 @@ function Header() {
           </button>
         </Form>
 
-        <Button>
-          <Link to="/login#login-container">Login</Link>
-        </Button>
-        <Button>
-          <Link to="/register#register-container">Register</Link>
-        </Button>
-
         <div className="icons">
           <Link to="/favorites" className="heart-icon" data-count="0">
             <i className="bx bx-heart"></i>
@@ -57,9 +68,45 @@ function Header() {
           <Link to="/cart" className="cart-icon" data-count="2">
             <i className="bx bx-cart"></i>
           </Link>
-          <Link to="/profile" className="user-icon">
-            <i className="bx bx-user"></i>
-          </Link>
+          <div>
+            {isLoggedIn ? (
+              <div className="user-profile-dropdown">
+                <div className="user-icon">
+                  <i className="bx bx-user"></i>
+                  <i className="ion-chevron-down"></i>
+                  <ul className="dropdown-menu">
+                    <li>
+                      <Link to="/profile">
+                        <Button>View Profile</Button>
+                      </Link>
+                    </li>
+                    <li>
+                      <Button onClick={handleLogout}>Logout</Button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <div className="user-profile-dropdown">
+                <div className="user-icon">
+                  <i className="bx bx-user"></i>
+                  <i className="ion-chevron-down"></i>
+                  <ul className="dropdown-menu">
+                    <li>
+                      <Link to="/login#login-container">
+                        <Button>Login</Button>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/register#register-container">
+                        <Button>Register</Button>
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
     </>
