@@ -1,31 +1,67 @@
-import { Button, Form } from "antd";
+import { Button, Form, message } from "antd";
 import Input from "antd/es/input/Input";
-import "./register.scss"; // Import the CSS file
+import "./register.scss";
 import Header from "../../components/Header/header";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer/footer";
 import { useEffect, useRef } from "react";
+import api from "../../configs/axios";
 
 function Register() {
-  const location = useLocation(); // Hook để truy cập URL
-  const registerRef = useRef(null); // Tạo ref để tham chiếu đến div login-container
+  const location = useLocation();
+  const registerRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (location.hash === "#register-container") {
-      // Kiểm tra nếu URL có chứa hash #login-container
       setTimeout(() => {
         if (registerRef.current) {
-          registerRef.current.scrollIntoView({ behavior: "smooth" }); // Cuộn đến phần tử
+          registerRef.current.scrollIntoView({ behavior: "smooth" });
         }
-      }, 100); // Delay nhỏ để đảm bảo DOM được render xong
+      }, 100);
     }
   }, [location.hash]);
 
-  const handleFinish = (values) => {
-    console.log(values);
+  const handleRegister = async (values) => {
+    try {
+      const response = await api.post("register", values);
+      const { token } = response.data;
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(response.data));
+
+      navigate("/");
+    } catch (error) {
+      //   if (error.response && error.response.status === 401) {
+      //     message.error("Registration failed. Please check your details.");
+      //     message.error(errorMessage); // Display error message from API response
+      //   } else {
+      //     message.error("An error occurred while registering. Please try again.");
+      //   }
+      // }
+      // Check if it's a response error from the API
+
+      // Log the error to inspect its structure
+      if (error.response && error.response.data) {
+        const apiErrors = error.response.data;
+
+        // Assuming the API returns an array of errors or just one error object
+        if (Array.isArray(apiErrors)) {
+          apiErrors.forEach((err) => message.error(err.description)); // Display each error's description
+        } else if (apiErrors.description) {
+          message.error(apiErrors.description); // Display the single error description
+        }
+      } else {
+        // Handle other cases, like network errors
+        message.error(
+          "A network error occurred. Please check your connection and try again."
+        );
+      }
+    }
   };
+
   return (
-    <div className="body">
+    <div className="body-register">
       <Header />
       <div ref={registerRef} className="register-container">
         <div className="register-left">
@@ -40,7 +76,7 @@ function Register() {
           <h3 className="register-right-title">Create Account</h3>
 
           <div className="in">
-            <Form onFinish={handleFinish}>
+            <Form onFinish={handleRegister}>
               <div className="name-row">
                 <Form.Item
                   name="firstName"
@@ -56,10 +92,7 @@ function Register() {
                     },
                   ]}
                 >
-                  <Input
-                    placeholder="First Name"
-                    className="register-input-s"
-                  />
+                  <Input placeholder="First Name" className="register-input" />
                 </Form.Item>
                 <Form.Item
                   name="lastName"
@@ -72,23 +105,27 @@ function Register() {
                     },
                   ]}
                 >
-                  <Input placeholder="Last Name" className="register-input-s" />
+                  <Input placeholder="Last Name" className="register-input" />
                 </Form.Item>
               </div>
+
               <Form.Item
-                name="phone"
+                name="username"
                 rules={[
+                  { required: true, message: "Please input your username!" },
                   {
-                    required: true,
-                    message: "Please input your Phone Number!",
+                    min: 4,
+                    message: "Username must be at least 4 characters long!",
                   },
+                  { max: 20, message: "Username cannot exceed 20 characters!" },
                   {
-                    pattern: /^[0-9]+$/,
-                    message: "Please input a valid phone number!",
+                    pattern: /^[a-zA-Z0-9_]+$/,
+                    message:
+                      "Username can only contain letters, numbers, and underscores!",
                   },
                 ]}
               >
-                <Input placeholder="Phone" className="register-input" />
+                <Input placeholder="Username" className="register-input" />
               </Form.Item>
 
               <Form.Item
@@ -101,19 +138,18 @@ function Register() {
                 <Input placeholder="Email" className="register-input" />
               </Form.Item>
 
-              <Form.Item
+              {/* <Form.Item
                 name="address"
                 rules={[
                   { required: true, message: "Please input your Address!" },
                   {
-                    pattern: /^[^\s][a-zA-Z\s]+$/,
-                    message:
-                      "Address cannot start with a space or contain special characters",
+                    pattern: /^[^\s].+$/,
+                    message: "Address cannot start with a space.",
                   },
                 ]}
               >
                 <Input placeholder="Address" className="register-input" />
-              </Form.Item>
+              </Form.Item> */}
 
               <Form.Item
                 name="password"
@@ -131,7 +167,11 @@ function Register() {
                   },
                 ]}
               >
-                <Input placeholder="Password" className="register-input" />
+                <Input.Password
+                  placeholder="Password"
+                  className="register-input"
+                  type="password"
+                />
               </Form.Item>
 
               <Form.Item
@@ -152,20 +192,24 @@ function Register() {
                   }),
                 ]}
               >
-                <Input
+                <Input.Password
                   placeholder="Confirm Password"
                   className="register-input"
+                  type="password"
                 />
               </Form.Item>
 
-              <Button className="login-button" htmlType="submit">
+              <Button className="register-button" htmlType="submit">
                 Register
               </Button>
             </Form>
+
             <div className="register-text">
               Already have an account? <Link to="/login">Login</Link>
             </div>
+
             <div className="divider">OR</div>
+
             <div className="social-login">
               <Button className="social-button google-button">
                 <img

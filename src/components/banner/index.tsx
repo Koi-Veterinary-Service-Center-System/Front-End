@@ -1,6 +1,8 @@
 import { Button } from "antd";
 import { Link } from "react-router-dom";
-import "./banner.scss";
+import "./index.scss";
+// Correctly import your SCSS file here
+
 function Banner() {
   return (
     <div className="banner-section">
@@ -12,14 +14,11 @@ function Banner() {
           rhoncus quisque eget sit
         </p>
         <Button className="fakeButton">
-          <Link to="/booking">Booking</Link>
-        </Button>
-        <Button>
           <Link to="/booking#section">Booking Service</Link>
         </Button>
       </div>
       <div className="koi-banner">
-        <img src="src/assets/images/koibanner.png" alt="Koi Banner" />
+        <img src="src/assets/images/bannerHome.png" alt="Koi Banner" />
       </div>
     </div>
   );

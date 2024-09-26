@@ -1,48 +1,74 @@
-import { Button, Form } from "antd";
+import { Button, Form, message } from "antd";
 import Input from "antd/es/input/Input";
 import "./login.scss"; // Import the CSS file
 import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
-import { Link, useLocation } from "react-router-dom"; // Import useLocation
+import { Link, useLocation, useNavigate } from "react-router-dom"; // Import useLocation
+import { useEffect, useRef, useState } from "react"; // Import useEffect, useRef
+import api from "../../configs/axios";
+import { signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider } from "firebase/auth/web-extension";
 import { auth, googleProvider } from "../../configs/firebase";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { useEffect, useRef } from "react"; // Import useEffect, useRef
 
 function Login() {
   const location = useLocation(); // Hook để truy cập URL
   const loginRef = useRef(null); // Tạo ref để tham chiếu đến div login-container
+  const navigate = useNavigate();
 
+  // Auto scroll to the login container
   useEffect(() => {
     if (location.hash === "#login-container") {
-      // Kiểm tra nếu URL có chứa hash #login-container
       setTimeout(() => {
         if (loginRef.current) {
-          loginRef.current.scrollIntoView({ behavior: "smooth" }); // Cuộn đến phần tử
+          loginRef.current.scrollIntoView({ behavior: "smooth" });
         }
-      }, 100); // Delay nhỏ để đảm bảo DOM được render xong
+      }, 100);
     }
   }, [location.hash]);
 
+  //Handle Login Google
   const handleLoginGoogle = () => {
     signInWithPopup(auth, googleProvider)
       .then((result) => {
         const credential = GoogleAuthProvider.credentialFromResult(result);
         console.log(credential);
+        navigate("/");
       })
       .catch((error) => {
         console.log(error);
       });
   };
 
-  const handleFinish = (values) => {
-    console.log(values); // Handle form submission
+  // Handle Login
+  const handleLogin = async (values: string) => {
+    try {
+      // Send request to the backend
+      const response = await api.post("login", values);
+
+      // Extract token and user information
+      const { token } = response.data;
+
+      // Save the token in localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(response.data));
+
+      // Navigate to the homepage after successful login
+      navigate("/");
+    } catch (error) {
+      // Check if the error is due to invalid credentials
+      if (error.response && error.response.status === 401) {
+        message.error("Invalid username or password. Please try again.");
+      } else {
+        // Handle other types of errors (e.g., network errors)
+        message.error("An error occurred while logging in. Please try again.");
+      }
+    }
   };
 
   return (
-    <div className="body">
+    <div className="body-login">
       <Header />
       <div ref={loginRef} className="login-container">
-        {/* Đây là div sẽ được cuộn đến */}
         <div className="login-left">
           <h3 className="login-left-title">Sign in</h3>
           <img
@@ -54,9 +80,9 @@ function Login() {
         <div className="login-right">
           <h3 className="login-right-title">Sign in Account</h3>
           <div className="in">
-            <Form onFinish={handleFinish}>
+            <Form onFinish={handleLogin}>
               <Form.Item
-                name={"username"}
+                name="username"
                 rules={[
                   { required: true, message: "Please input your username!" },
                   {
@@ -74,10 +100,12 @@ function Login() {
                 <Input placeholder="Username" className="login-input" />
               </Form.Item>
               <Form.Item
-                name={"password"}
-                rules={[{ required: true, message: "Not correct Password!" }]}
+                name="password"
+                rules={[
+                  { required: true, message: "Please input your password!" },
+                ]}
               >
-                <Input
+                <Input.Password
                   placeholder="Password"
                   type="password"
                   className="login-input"
