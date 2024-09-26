@@ -1,10 +1,12 @@
 import "./booking.scss";
 import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
-import { Input, Form, Button, Select, DatePicker } from "antd";
+import { Input, Form, Button, Select, DatePicker, message } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Banner from "../../components/banner";
+import api from "../../configs/axios";
+import moment from "moment";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -20,15 +22,49 @@ function Booking() {
     setPaymentMethod(value);
   };
 
-  // Example function for calculating the total
+  // Calculate total example logic
   const calculateTotal = () => {
-    const servicePrice = 100; // Adjust as necessary
+    const servicePrice = 100; // Mock service price
     setTotal(servicePrice);
   };
 
-  // Handle form submit and log the values
-  const handleSubmit = (values) => {
-    console.log("Form Values:", values);
+  // Handle form submission
+  const handleBooking = async (values) => {
+    try {
+      // Format the booking date using moment (or dayjs if you've switched)
+      const bookingDate = {
+        year: moment(values.pickupDate).year(),
+        month: moment(values.pickupDate).month() + 1, // Months are 0-indexed
+        day: moment(values.pickupDate).date(),
+        dayOfWeek: moment(values.pickupDate).day(),
+      };
+
+      // Create the object matching API requirements
+      const bookingData = {
+        createBookingDto: {
+          customerUserName: "string", // Add the actual username or dynamic data
+          note: values.note || "", // Optional note field
+          koiOrPoolId: values.fish || 0,
+          vetName: values.vet || "string", // Add the actual vet name
+          totalAmount: total, // Total calculated amount
+          location: values.location,
+          slotId: values.slot || 0, // Add slot id
+          serviceId: values.serviceType || 0, // Add service id
+          paymentId: values.paymentMethod || 0, // Add payment id
+          bookingDate: bookingDate,
+        },
+      };
+
+      // Make the API call with the correctly structured data
+      const response = await api.post("/booking/create-booking", bookingData);
+
+      // Handle response
+      const { token } = response.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(response.data));
+    } catch (error) {
+      console.error("Booking error:", error.response?.data || error.message);
+    }
   };
 
   // Scroll to section based on hash
@@ -59,7 +95,7 @@ function Booking() {
                 <Form
                   name="bookingForm"
                   layout="vertical"
-                  onFinish={handleSubmit}
+                  onFinish={handleBooking}
                 >
                   <div className="row">
                     <div className="col-sm-5">
@@ -91,9 +127,9 @@ function Booking() {
                         ]}
                       >
                         <Select className="form-control">
-                          <Option value="service1">Service 1</Option>
-                          <Option value="service2">Service 2</Option>
-                          <Option value="service3">Service 3</Option>
+                          <Option value={1}>Service 1</Option>
+                          <Option value={2}>Service 2</Option>
+                          <Option value={3}>Service 3</Option>
                         </Select>
                       </Form.Item>
                     </div>
@@ -103,16 +139,13 @@ function Booking() {
                         label="Slot"
                         name="slot"
                         rules={[
-                          {
-                            required: true,
-                            message: "Please select a slot",
-                          },
+                          { required: true, message: "Please select a slot" },
                         ]}
                       >
                         <Select className="form-control">
-                          <Option value="slot1">Slot 1</Option>
-                          <Option value="slot2">Slot 2</Option>
-                          <Option value="slot3">Slot 3</Option>
+                          <Option value={1}>Slot 1</Option>
+                          <Option value={2}>Slot 2</Option>
+                          <Option value={3}>Slot 3</Option>
                         </Select>
                       </Form.Item>
                     </div>
@@ -122,16 +155,13 @@ function Booking() {
                         label="Vet"
                         name="vet"
                         rules={[
-                          {
-                            required: true,
-                            message: "Please select a vet",
-                          },
+                          { required: true, message: "Please select a vet" },
                         ]}
                       >
                         <Select className="form-control">
-                          <Option value="vet1">Vet 1</Option>
-                          <Option value="vet2">Vet 2</Option>
-                          <Option value="vet3">Vet 3</Option>
+                          <Option value="Vet A">Vet A</Option>
+                          <Option value="Vet B">Vet B</Option>
+                          <Option value="Vet C">Vet C</Option>
                         </Select>
                       </Form.Item>
                     </div>
@@ -140,23 +170,23 @@ function Booking() {
                   <div className="row">
                     <div className="col-sm-6">
                       <Form.Item
-                        label="Address"
-                        name="address"
+                        label="Location"
+                        name="location"
                         rules={[
                           {
                             required: true,
-                            message: "Please enter your address",
+                            message: "Please enter your location",
                           },
                           {
                             pattern: /^[^\s].+$/,
                             message:
-                              "Address cannot start with a space or contain special characters",
+                              "Location cannot start with a space or contain special characters",
                           },
                         ]}
                       >
                         <Input
                           className="form-control"
-                          placeholder="Enter your address"
+                          placeholder="Enter your location"
                         />
                       </Form.Item>
                     </div>
@@ -186,16 +216,13 @@ function Booking() {
                     label="Choose Fish or Pool"
                     name="fish"
                     rules={[
-                      {
-                        required: true,
-                        message: "Please select a service",
-                      },
+                      { required: true, message: "Please select an option" },
                     ]}
                   >
                     <Select className="form-control">
-                      <Option value="fish1">Fish 1</Option>
-                      <Option value="fish2">Fish 2</Option>
-                      <Option value="pool1">Pool 1</Option>
+                      <Option value={1}>Fish 1</Option>
+                      <Option value={2}>Fish 2</Option>
+                      <Option value={3}>Pool 1</Option>
                     </Select>
                   </Form.Item>
 
@@ -211,8 +238,8 @@ function Booking() {
                     ]}
                   >
                     <Select onChange={handlePaymentChange}>
-                      <Option value="vnpay">VNPay</Option>
-                      <Option value="cash">Cash on Delivery</Option>
+                      <Option value={1}>VNPay</Option>
+                      <Option value={2}>Cash on Delivery</Option>
                     </Select>
                   </Form.Item>
 

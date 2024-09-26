@@ -3,9 +3,12 @@ import Register from "./pages/register/register";
 import Login from "./pages/login/login";
 import Home from "./pages/home/home";
 import Booking from "./pages/booking/Booking";
+import "./index.css";
 
-import UpdateProfile from "./pages/updateProfile/updateProfile";
+import Process from "./pages/process/process";
 import Profile from "./pages/profile/profile";
+import UpdateProfile from "./pages/updateProfile/updateProfile";
+
 function App() {
   const router = createBrowserRouter([
     {
@@ -16,13 +19,18 @@ function App() {
       path: "/booking",
       element: <Booking />,
     },
+
+    {
+      path: "/profile",
+      element: <Profile />,
+    },
     {
       path: "/updateProfile",
       element: <UpdateProfile />,
     },
     {
-      path: "/profile",
-      element: <Profile />,
+      path: "/process",
+      element: <Process />,
     },
     {
       path: "/register",

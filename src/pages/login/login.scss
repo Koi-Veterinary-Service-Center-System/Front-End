@@ -14,7 +14,10 @@
   height: auto; /* Automatic height based on content */ /* Padding for some space around the content */
   border-radius: 20px; /* Rounded corners for the whole container */
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Box shadow for a subtle 3D effect */
-  margin: 10rem auto; /* Centers the container horizontally */
+  margin-left: 17rem;
+  margin-right: auto;
+  margin-bottom: 10rem;
+  margin-top: 5rem;
 }
 
 .login-left {
