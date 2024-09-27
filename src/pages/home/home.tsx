@@ -104,13 +104,13 @@ function Home() {
         <div className="veterinarian-cards">
           <div className="vet-card">
             <img
-              src="https://i.pinimg.com/564x/d0/d8/aa/d0d8aaf4c5a076a6adcc5a2c3ec17637.jpg"
-              alt="John Wick"
+              src="https://th.bing.com/th/id/R.00fbc210500b3738bf7c5860480113eb?rik=Pt18rX8ZnHdXNQ&riu=http%3a%2f%2f2.bp.blogspot.com%2f-uYTYcoORWoA%2fUokUjNBpt1I%2fAAAAAAAABs0%2fmW6Q3qgiXfI%2fs1600%2f1391477_577843652264588_1820292808_n.jpg&ehk=eW5Y6MhUcG2lC7%2fHzKqjtYCQmYR1I5EV%2fpx0Dd7c4N8%3d&risl=&pid=ImgRaw&r=0"
+              alt="Richmond Loh"
               className="vet-image"
             />
             <div className="vet-info">
-              <h4>John Wick</h4>
-              <p>4 years experience</p>
+              <h4>Richmond Loh</h4>
+              <p>6 years experience</p>
               <i className="heart-icon">❤</i>
             </div>
           </div>
@@ -128,7 +128,7 @@ function Home() {
           </div>
           <div className="vet-card">
             <img
-              src="https://i.pinimg.com/564x/08/99/c7/0899c70a16e0be0c6f2f7dbdf4ab994d.jpg"
+              src="https://img.freepik.com/premium-photo/portrait-female-cute-asia-doctor-medical-coat-standing-isolated-white-background_1000819-2116.jpg?w=826"
               alt="Isabella Turner"
               className="vet-image"
             />
@@ -227,12 +227,16 @@ function Home() {
       )}
 
       {/* Float Button */}
-      <FloatButton
-        icon={<QuestionCircleOutlined />}
-        type="primary"
-        style={{ insetInlineEnd: 94 }}
-        onClick={toggleChatBox}
-      />
+
+      <FloatButton.Group shape="circle" style={{ insetInlineEnd: 24 }}>
+        <FloatButton
+          icon={<QuestionCircleOutlined />}
+          type="primary"
+          style={{ insetInlineEnd: 94 }}
+          onClick={toggleChatBox}
+        />
+        <FloatButton.BackTop visibilityHeight={0} />
+      </FloatButton.Group>
 
       <Footer />
     </div>

@@ -1,4 +1,5 @@
-import { Button, Form, message } from "antd";
+import { Button, Form, message, Tooltip } from "antd";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import Input from "antd/es/input/Input";
 import "./login.scss"; // Import the CSS file
 import Header from "../../components/Header/header";
@@ -43,7 +44,7 @@ function Login() {
   const handleLogin = async (values: string) => {
     try {
       // Send request to the backend
-      const response = await api.post("login", values);
+      const response = await api.post("User/login", values);
 
       // Extract token and user information
       const { token } = response.data;
@@ -97,7 +98,11 @@ function Login() {
                   },
                 ]}
               >
-                <Input placeholder="Username" className="login-input" />
+                <Input
+                  placeholder="Username"
+                  className="login-input"
+                  prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+                />
               </Form.Item>
               <Form.Item
                 name="password"
@@ -109,6 +114,7 @@ function Login() {
                   placeholder="Password"
                   type="password"
                   className="login-input"
+                  prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
                 />
               </Form.Item>
 

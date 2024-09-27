@@ -1,4 +1,10 @@
 import { Button, Form, message } from "antd";
+import {
+  LockOutlined,
+  MailOutlined,
+  SolutionOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import Input from "antd/es/input/Input";
 import "./register.scss";
 import Header from "../../components/Header/header";
@@ -24,7 +30,7 @@ function Register() {
 
   const handleRegister = async (values) => {
     try {
-      const response = await api.post("register", values);
+      const response = await api.post("User/register", values);
       const { token } = response.data;
 
       localStorage.setItem("token", token);
@@ -32,15 +38,6 @@ function Register() {
 
       navigate("/");
     } catch (error) {
-      //   if (error.response && error.response.status === 401) {
-      //     message.error("Registration failed. Please check your details.");
-      //     message.error(errorMessage); // Display error message from API response
-      //   } else {
-      //     message.error("An error occurred while registering. Please try again.");
-      //   }
-      // }
-      // Check if it's a response error from the API
-
       // Log the error to inspect its structure
       if (error.response && error.response.data) {
         const apiErrors = error.response.data;
@@ -92,7 +89,13 @@ function Register() {
                     },
                   ]}
                 >
-                  <Input placeholder="First Name" className="register-input" />
+                  <Input
+                    placeholder="First Name"
+                    className="register-input"
+                    prefix={
+                      <SolutionOutlined style={{ color: "rgba(0,0,0,.25)" }} />
+                    }
+                  />
                 </Form.Item>
                 <Form.Item
                   name="lastName"
@@ -105,7 +108,13 @@ function Register() {
                     },
                   ]}
                 >
-                  <Input placeholder="Last Name" className="register-input" />
+                  <Input
+                    placeholder="Last Name"
+                    className="register-input"
+                    prefix={
+                      <SolutionOutlined style={{ color: "rgba(0,0,0,.25)" }} />
+                    }
+                  />
                 </Form.Item>
               </div>
 
@@ -125,7 +134,11 @@ function Register() {
                   },
                 ]}
               >
-                <Input placeholder="Username" className="register-input" />
+                <Input
+                  placeholder="Username"
+                  className="register-input"
+                  prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+                />
               </Form.Item>
 
               <Form.Item
@@ -135,21 +148,12 @@ function Register() {
                   { type: "email", message: "Please enter a valid Email!" },
                 ]}
               >
-                <Input placeholder="Email" className="register-input" />
+                <Input
+                  placeholder="Email"
+                  className="register-input"
+                  prefix={<MailOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+                />
               </Form.Item>
-
-              {/* <Form.Item
-                name="address"
-                rules={[
-                  { required: true, message: "Please input your Address!" },
-                  {
-                    pattern: /^[^\s].+$/,
-                    message: "Address cannot start with a space.",
-                  },
-                ]}
-              >
-                <Input placeholder="Address" className="register-input" />
-              </Form.Item> */}
 
               <Form.Item
                 name="password"
@@ -171,6 +175,7 @@ function Register() {
                   placeholder="Password"
                   className="register-input"
                   type="password"
+                  prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
                 />
               </Form.Item>
 
