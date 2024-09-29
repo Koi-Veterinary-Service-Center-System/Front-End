@@ -1,3 +1,24 @@
 export type Object = {
   values: string;
 };
+
+export type Slot = {
+  slotID: number;
+  startTime: string;
+  endTime: string;
+  weekDate: string;
+};
+
+export type profile = {
+  userId: number;
+  userName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role?: string; // Optional
+  gender?: string; // Optional
+  address?: string; // Optional
+  imageURL?: string;
+  phoneNumber: string;
+  // Add any other fields your profile may have
+};

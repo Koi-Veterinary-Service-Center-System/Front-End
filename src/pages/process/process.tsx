@@ -4,9 +4,10 @@ import "./process.scss";
 import api from "../../configs/axios"; // Assuming Axios is used for making requests
 import { Button, Input } from "antd";
 import { RollbackOutlined } from "@ant-design/icons";
+import { profile } from "../../types/info";
 
 function Process() {
-  const [profile, setProfile] = useState({});
+  const [profile, setProfile] = useState<profile | null>(null);
   const [error, setError] = useState(null);
 
   const [activeMenuItem, setActiveMenuItem] = useState("dashboard");
@@ -14,7 +15,7 @@ function Process() {
 
   const fetchProfile = async () => {
     try {
-      const response = await api.get("/profile", {
+      const response = await api.get("User/profile", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`, // Use token if available
         },
@@ -43,7 +44,7 @@ function Process() {
   return (
     <div className="`process-page ${isSidebarHidden ? 'hide-sidebar' : ''}`">
       <section id="sidebar">
-        <Link to="#" className="brand">
+        <Link to="/" className="brand">
           <i className="bx bxs-smile"></i>
           <span className="text">Profile</span>
         </Link>
@@ -93,10 +94,7 @@ function Process() {
           <label htmlFor="switch-mode" className="switch-mode"></label>
 
           <Link to="#" className="process">
-            <img
-              src="https://sm.ign.com/ign_ap/cover/a/avatar-gen/avatar-generations_hugw.jpg"
-              alt="process"
-            />
+            <img src={profile?.imageURL} alt="process" />
           </Link>
         </nav>
 
@@ -153,10 +151,7 @@ function Process() {
                 <tbody>
                   <tr>
                     <td>
-                      <img
-                        src="https://sm.ign.com/ign_ap/cover/a/avatar-gen/avatar-generations_hugw.jpg"
-                        alt="user"
-                      />
+                      <img src={profile?.imageURL} alt="user" />
                       <p>John Doe</p>
                     </td>
                     <td>01-10-2021</td>
@@ -166,10 +161,7 @@ function Process() {
                   </tr>
                   <tr>
                     <td>
-                      <img
-                        src="https://sm.ign.com/ign_ap/cover/a/avatar-gen/avatar-generations_hugw.jpg"
-                        alt="user"
-                      />
+                      <img src={profile?.imageURL} alt="user" />
                       <p>John Doe</p>
                     </td>
                     <td>01-10-2021</td>
@@ -179,10 +171,7 @@ function Process() {
                   </tr>
                   <tr>
                     <td>
-                      <img
-                        src="https://sm.ign.com/ign_ap/cover/a/avatar-gen/avatar-generations_hugw.jpg"
-                        alt="user"
-                      />
+                      <img src={profile?.imageURL} alt="user" />
                       <p>John Doe</p>
                     </td>
                     <td>01-10-2021</td>
@@ -192,10 +181,7 @@ function Process() {
                   </tr>
                   <tr>
                     <td>
-                      <img
-                        src="https://sm.ign.com/ign_ap/cover/a/avatar-gen/avatar-generations_hugw.jpg"
-                        alt="user"
-                      />
+                      <img src={profile?.imageURL} alt="user" />
                       <p>John Doe</p>
                     </td>
                     <td>01-10-2021</td>
@@ -205,10 +191,7 @@ function Process() {
                   </tr>
                   <tr>
                     <td>
-                      <img
-                        src="https://sm.ign.com/ign_ap/cover/a/avatar-gen/avatar-generations_hugw.jpg"
-                        alt="user"
-                      />
+                      <img src={profile?.imageURL} alt="user" />
                       <p>John Doe</p>
                     </td>
                     <td>01-10-2021</td>

@@ -1,4 +1,5 @@
 import axios from "axios";
+
 const baseUrl = "http://localhost:5155/api/";
 
 const config = {
@@ -10,7 +11,7 @@ const api = axios.create(config);
 api.defaults.baseURL = baseUrl; // This line is redundant since you already set `baseURL` in the `config` object.
 
 // Handle before API call
-const handleBefore = (config) => {
+const handleBefore = (config: any) => {
   // Retrieve the token and attach it to the request
   const token = localStorage.getItem("token");
   if (token) {

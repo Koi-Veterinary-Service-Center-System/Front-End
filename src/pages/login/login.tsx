@@ -1,15 +1,17 @@
-import { Button, Form, message, Tooltip } from "antd";
+import { Button, Form } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import Input from "antd/es/input/Input";
 import "./login.scss"; // Import the CSS file
 import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
 import { Link, useLocation, useNavigate } from "react-router-dom"; // Import useLocation
-import { useEffect, useRef, useState } from "react"; // Import useEffect, useRef
+import { useEffect, useRef } from "react"; // Import useEffect, useRef
 import api from "../../configs/axios";
 import { signInWithPopup } from "firebase/auth";
 import { GoogleAuthProvider } from "firebase/auth/web-extension";
 import { auth, googleProvider } from "../../configs/firebase";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Login() {
   const location = useLocation(); // Hook để truy cập URL
@@ -27,16 +29,17 @@ function Login() {
     }
   }, [location.hash]);
 
-  //Handle Login Google
+  // Handle Login with Google
   const handleLoginGoogle = () => {
     signInWithPopup(auth, googleProvider)
       .then((result) => {
         const credential = GoogleAuthProvider.credentialFromResult(result);
         console.log(credential);
-        navigate("/");
+        toast.success("Logged in with Google successfully!");
+        navigate("/", { state: { loginSuccess: true } });
       })
       .catch((error) => {
-        console.log(error);
+        toast.error("Google login failed: " + error.message);
       });
   };
 
@@ -53,15 +56,16 @@ function Login() {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(response.data));
 
-      // Navigate to the homepage after successful login
-      navigate("/");
+      // Show success message and navigate to homepage
+
+      navigate("/", { state: { loginSuccess: true } });
     } catch (error) {
       // Check if the error is due to invalid credentials
       if (error.response && error.response.status === 401) {
-        message.error("Invalid username or password. Please try again.");
+        toast.error("Invalid username or password. Please try again.");
       } else {
         // Handle other types of errors (e.g., network errors)
-        message.error("An error occurred while logging in. Please try again.");
+        toast.error("An error occurred while logging in. Please try again.");
       }
     }
   };
@@ -151,6 +155,8 @@ function Login() {
         </div>
       </div>
       <Footer />
+      {/* Toast Container for React Toastify */}
+      <ToastContainer position="top-right" autoClose={5000} />
     </div>
   );
 }

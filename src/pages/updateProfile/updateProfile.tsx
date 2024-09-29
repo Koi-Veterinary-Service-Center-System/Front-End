@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./updateProfile.scss";
 import api from "../../configs/axios"; // Assuming Axios is used for making requests
@@ -20,13 +20,20 @@ import {
   PlusOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import { profile as ProfileType } from "../../types/info";
+import uploadFile from "../../utils/upload";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { storage } from "../../configs/firebase";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function UpdateProfile() {
-  const [profile, setProfile] = useState<any>({});
+  const [profile, setProfile] = useState<ProfileType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeMenuItem, setActiveMenuItem] = useState("dashboard");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [loading, setLoading] = useState(false); // Added loading state
+  const navigate = useNavigate();
 
   const getBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -51,7 +58,7 @@ function UpdateProfile() {
       };
 
       setProfile(updatedProfile); // Set the transformed profile data
-    } catch (error) {
+    } catch (error: any) {
       setError(error.message || "Failed to fetch profile data");
     }
   };
@@ -94,29 +101,62 @@ function UpdateProfile() {
     </button>
   );
 
-  const handleUpdateProfile = async (values: any) => {
+  const uploadFileToFirebase = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const storageRef = ref(storage, `profile_pictures/${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          // Theo dõi tiến trình upload nếu cần
+        },
+        (error) => {
+          reject(error); // Xử lý lỗi nếu upload thất bại
+        },
+        () => {
+          // Upload thành công, lấy URL của file
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            resolve(downloadURL); // Trả về URL của ảnh
+          });
+        }
+      );
+    });
+  };
+
+  const handleUpdateProfile = async (values: string) => {
     setLoading(true);
 
-    // Convert "Male" to true, "Female" to false for API compatibility
-    const updatedProfile = {
-      ...values,
-      gender: values.gender === "Male" ? true : false,
-    };
-
     try {
+      let imageURL = profile?.imageURL || ""; // Use current image if no new image
+
+      if (fileList.length > 0 && fileList[0].originFileObj) {
+        // If a new image is uploaded, upload to Firebase
+        const file = fileList[0].originFileObj;
+        imageURL = await uploadFileToFirebase(file); // Upload the image and get the URL
+      }
+
+      // Convert "Male" to true, "Female" to false for API compatibility
+      const updatedProfile = {
+        ...values,
+        gender: values.gender === "Male" ? true : false,
+        imageURL, // Update the image URL
+      };
+
       await api.put(
         "User/update-profile",
-        updatedProfile, // Send the updated profile data with correct gender format
+        updatedProfile, // Send the updated profile data
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Send token for auth
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Send token for authentication
           },
         }
       );
-      message.success("Profile updated successfully!");
-      fetchProfile(); // Refresh the profile data
+
+      fetchProfile(); // Refresh profile after update
+      navigate("/profile", { state: { updateProfileSuccess: true } }); // Navigate to the profile page
     } catch (error) {
-      message.error("Failed to update profile.");
+      toast.error("Failed to update profile.");
     } finally {
       setLoading(false);
     }
@@ -125,7 +165,7 @@ function UpdateProfile() {
   return (
     <div className={`updateProfile-page ${isDarkMode ? "dark-mode" : ""}`}>
       <section id="sidebar">
-        <Link to="#" className="brand">
+        <Link to="/" className="brand">
           <i className="bx bxs-smile"></i>
           <span className="text">Profile</span>
         </Link>
@@ -176,7 +216,7 @@ function UpdateProfile() {
 
           <Link to="#" className="updateProfile">
             <img
-              src={profile.imageURL || "https://via.placeholder.com/150"}
+              src={profile?.imageURL || "https://via.placeholder.com/150"}
               alt="profile"
             />
           </Link>
@@ -194,17 +234,16 @@ function UpdateProfile() {
                   <div className="updateProfile-image">
                     <Form.Item label="Avatar" name="imageURL">
                       <Upload
-                        action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
-                        listType="picture-card"
+                        listType="picture-circle"
                         fileList={fileList}
                         onPreview={handlePreview}
                         onChange={handleChange}
+                        beforeUpload={() => false} // Không upload trực tiếp lên server
                       >
-                        {fileList.length >= 8 ? null : uploadButton}
+                        {fileList.length >= 1 ? null : uploadButton}
                       </Upload>
                       {previewImage && (
                         <Image
-                          wrapperStyle={{ display: "none" }}
                           preview={{
                             visible: previewOpen,
                             onVisibleChange: (visible) =>
@@ -216,176 +255,78 @@ function UpdateProfile() {
                     </Form.Item>
                   </div>
                   <div className="updateProfile-details">
-                    <div className="form-group">
-                      <Form.Item
-                        label="Username"
-                        name="userName"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please input your username!",
-                          },
-                          {
-                            min: 4,
-                            message:
-                              "Username must be at least 4 characters long!",
-                          },
-                          {
-                            max: 20,
-                            message: "Username cannot exceed 20 characters!",
-                          },
-                          {
-                            pattern: /^[a-zA-Z0-9_]+$/,
-                            message:
-                              "Username can only contain letters, numbers, and underscores!",
-                          },
-                        ]}
-                      >
-                        <Input
-                          placeholder={profile.userName}
-                          prefix={
-                            <UserOutlined
-                              style={{ color: "rgba(0,0,0,.25)" }}
-                            />
-                          }
-                        />
-                      </Form.Item>
-                    </div>
+                    <Form.Item label="Username" name="userName">
+                      <Input
+                        placeholder={profile?.userName || "Enter username"}
+                        prefix={
+                          <UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />
+                        }
+                      />
+                    </Form.Item>
 
-                    <div className="form-group">
-                      <Form.Item
-                        label="First Name"
-                        name="firstName"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please input your Last Name!",
-                          },
-                          {
-                            pattern: /^[^\s][a-zA-Z\s]+$/,
-                            message:
-                              "Last name cannot start with a space or contain special characters",
-                          },
-                        ]}
-                      >
-                        <Input
-                          placeholder={profile.firstName}
-                          prefix={
-                            <AuditOutlined
-                              style={{ color: "rgba(0,0,0,.25)" }}
-                            />
-                          }
-                        />
-                      </Form.Item>
-                      <Form.Item
-                        label="Last Name"
-                        name="lastName"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please input your Last Name!",
-                          },
-                          {
-                            pattern: /^[^\s][a-zA-Z\s]+$/,
-                            message:
-                              "Last name cannot start with a space or contain special characters",
-                          },
-                        ]}
-                      >
-                        <Input
-                          placeholder={profile.lastName}
-                          prefix={
-                            <AuditOutlined
-                              style={{ color: "rgba(0,0,0,.25)" }}
-                            />
-                          }
-                        />
-                      </Form.Item>
-                    </div>
+                    <Form.Item label="First Name" name="firstName">
+                      <Input
+                        placeholder={profile?.firstName || "Enter first name"}
+                        prefix={
+                          <AuditOutlined style={{ color: "rgba(0,0,0,.25)" }} />
+                        }
+                      />
+                    </Form.Item>
 
-                    <div className="form-group">
-                      <Form.Item label="Gender" name="gender">
-                        <Input placeholder={profile.gender || "N/A"} />
-                      </Form.Item>
-                    </div>
+                    <Form.Item label="Last Name" name="lastName">
+                      <Input
+                        placeholder={profile?.lastName || "Enter last name"}
+                        prefix={
+                          <AuditOutlined style={{ color: "rgba(0,0,0,.25)" }} />
+                        }
+                      />
+                    </Form.Item>
 
-                    <div className="form-group">
-                      <Form.Item label="ImageURL" name="imageURl">
-                        <Input placeholder={profile.imageURL || "N/A"} />
-                      </Form.Item>
-                    </div>
+                    <Form.Item label="Phone Number" name="phoneNumber">
+                      <Input
+                        placeholder={
+                          profile?.phoneNumber || "Enter phone number"
+                        }
+                        prefix={
+                          <PhoneOutlined style={{ color: "rgba(0,0,0,.25)" }} />
+                        }
+                      />
+                    </Form.Item>
 
-                    <div className="form-group">
-                      <Form.Item
-                        label="Address"
-                        name="address"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please input your address!",
-                          },
-                        ]}
-                      >
-                        <Input
-                          placeholder={profile.address || "N/A"}
-                          prefix={
-                            <AimOutlined style={{ color: "rgba(0,0,0,.25)" }} />
-                          }
-                        />
-                      </Form.Item>
-                    </div>
+                    <Form.Item label="Email" name="email">
+                      <Input
+                        placeholder={profile?.email || "Enter email"}
+                        prefix={
+                          <MailOutlined style={{ color: "rgba(0,0,0,.25)" }} />
+                        }
+                      />
+                    </Form.Item>
 
-                    <div className="form-group">
-                      <Form.Item
-                        label="Email"
-                        name="email"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please input your Email!",
-                          },
-                          {
-                            type: "email",
-                            message: "Please enter a valid Email!",
-                          },
-                        ]}
-                      >
-                        <Input
-                          placeholder={profile.email}
-                          prefix={
-                            <MailOutlined
-                              style={{ color: "rgba(0,0,0,.25)" }}
-                            />
-                          }
-                        />
-                      </Form.Item>
-                    </div>
+                    <Form.Item label="Address" name="address">
+                      <Input
+                        placeholder={profile?.address || "Enter address"}
+                        prefix={
+                          <AimOutlined style={{ color: "rgba(0,0,0,.25)" }} />
+                        }
+                      />
+                    </Form.Item>
 
-                    <div className="form-group">
-                      <Form.Item label="Phone" name="phoneNumber">
-                        <Input
-                          placeholder={profile.phoneNumber || "N/A"}
-                          prefix={
-                            <PhoneOutlined
-                              style={{ color: "rgba(0,0,0,.25)" }}
-                            />
-                          }
-                        />
-                      </Form.Item>
-                    </div>
+                    <Form.Item label="Gender" name="gender">
+                      <Input placeholder={profile?.gender || "Enter gender"} />
+                    </Form.Item>
 
-                    <div className="text-right">
+                    <Form.Item>
                       <Button
                         type="primary"
                         htmlType="submit"
                         loading={loading}
                       >
-                        Save Changes
+                        Update Profile
                       </Button>
                       <Button className="btn btn-default">
                         <Link to="/profile">Cancel</Link>
                       </Button>
-                    </div>
+                    </Form.Item>
                   </div>
                 </div>
               </Form>
@@ -393,6 +334,7 @@ function UpdateProfile() {
           </div>
         </div>
       </section>
+      <ToastContainer />
     </div>
   );
 }
