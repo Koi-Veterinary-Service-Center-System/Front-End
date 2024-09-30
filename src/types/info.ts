@@ -22,3 +22,11 @@ export type profile = {
   phoneNumber: string;
   // Add any other fields your profile may have
 };
+
+export type koiOrPool = {
+  koiOrPoolID: string;
+  name: string;
+  isPool: boolean;
+  description: string;
+  customerId: string;
+};

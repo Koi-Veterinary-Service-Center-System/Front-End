@@ -4,15 +4,29 @@ import "./process.scss";
 import api from "../../configs/axios"; // Assuming Axios is used for making requests
 import { Button, Input } from "antd";
 import { RollbackOutlined } from "@ant-design/icons";
-import { profile } from "../../types/info";
+import { koiOrPool, profile } from "../../types/info";
+import { Trophy } from "lucide-react";
 
 function Process() {
   const [profile, setProfile] = useState<profile | null>(null);
+  const [koiOrPool, setKoiOrPool] = useState<koiOrPool | null>(null);
   const [error, setError] = useState(null);
 
   const [activeMenuItem, setActiveMenuItem] = useState("dashboard");
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  //fetch the fish or pool
+
+  const fetchKoiOrPool = async (values) => {
+    try {
+      const response = await api.get(
+        "/koi-or-pool/all-customer-koi-poll",
+        values
+      );
+    } catch (error) {}
+  };
+
+  //fetch the profile
   const fetchProfile = async () => {
     try {
       const response = await api.get("User/profile", {
@@ -152,7 +166,9 @@ function Process() {
                   <tr>
                     <td>
                       <img src={profile?.imageURL} alt="user" />
-                      <p>John Doe</p>
+                      <p>
+                        {profile?.firstName} {profile?.lastName}
+                      </p>
                     </td>
                     <td>01-10-2021</td>
                     <td>
@@ -162,7 +178,9 @@ function Process() {
                   <tr>
                     <td>
                       <img src={profile?.imageURL} alt="user" />
-                      <p>John Doe</p>
+                      <p>
+                        {profile?.firstName} {profile?.lastName}
+                      </p>
                     </td>
                     <td>01-10-2021</td>
                     <td>
@@ -172,7 +190,9 @@ function Process() {
                   <tr>
                     <td>
                       <img src={profile?.imageURL} alt="user" />
-                      <p>John Doe</p>
+                      <p>
+                        {profile?.firstName} {profile?.lastName}
+                      </p>
                     </td>
                     <td>01-10-2021</td>
                     <td>
@@ -182,7 +202,9 @@ function Process() {
                   <tr>
                     <td>
                       <img src={profile?.imageURL} alt="user" />
-                      <p>John Doe</p>
+                      <p>
+                        {profile?.firstName} {profile?.lastName}
+                      </p>
                     </td>
                     <td>01-10-2021</td>
                     <td>
@@ -192,7 +214,9 @@ function Process() {
                   <tr>
                     <td>
                       <img src={profile?.imageURL} alt="user" />
-                      <p>John Doe</p>
+                      <p>
+                        {profile?.firstName} {profile?.lastName}
+                      </p>
                     </td>
                     <td>01-10-2021</td>
                     <td>

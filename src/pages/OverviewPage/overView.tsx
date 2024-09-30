@@ -3,6 +3,8 @@ import StatCard from "@/components/common/StatCard";
 import Sidebar from "@/components/Sidebar/sidebar";
 import { motion } from "framer-motion";
 import { BarChart2, ShoppingBag, Users, Zap } from "lucide-react";
+import SalesOverviewChart from "./SalesOverviewChart";
+import CategoryDistributionChart from "./CategoryDistributionChart";
 
 const OverviewPage = () => {
   return (
@@ -48,6 +50,12 @@ const OverviewPage = () => {
               color="#10B981"
             />
           </motion.div>
+
+          {/* CHARTS */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <SalesOverviewChart />
+            <CategoryDistributionChart />
+          </div>
         </main>
       </div>
     </div>

@@ -108,9 +108,14 @@ function Booking() {
   const handleSlotChange = (slotId: number) => {
     setSelectedSlot(slotId);
 
-    // Reset vet selection and fetch new vets for the selected slot
-    form.setFieldsValue({ vet: undefined });
-    fetchVetsBySlot(slotId);
+    // Fetch new vets for the selected slot
+    fetchVetsBySlot(slotId).then(() => {
+      // If the previously selected vet is still available in the new slot, retain it
+      const currentVetId = form.getFieldValue("vet");
+      if (!vets.find((vet) => vet.id === currentVetId)) {
+        form.setFieldsValue({ vet: undefined }); // Reset if the vet is not available for the new slot
+      }
+    });
   };
 
   // Fetch available slots for a selected vet
@@ -131,8 +136,13 @@ function Booking() {
   const handleVetChange = (vetId: number) => {
     setSelectedVet(vetId);
 
-    form.setFieldsValue({ slot: undefined });
-    fetchSlotsByVet(vetId);
+    // Find the selected vet's name
+    const selectedVetName = vets.find((vet) => vet.id === vetId)?.vetName;
+
+    // Set both vetId and vetName in the form fields
+    form.setFieldsValue({ vet: vetId, vetName: selectedVetName });
+
+    console.log("Selected Vet Name:", selectedVetName); // Debugging
   };
 
   // Handle payment method selection
@@ -146,46 +156,41 @@ function Booking() {
     setTotal(servicePrice);
   };
 
-  const handleBooking = async (values) => {
+  const handleBooking = async (values: any) => {
     try {
-      const bookingDate = {
-        year: moment(values.pickupDate).year(),
-        month: moment(values.pickupDate).month() + 1,
-        day: moment(values.pickupDate).date(),
-        dayOfWeek: moment(values.pickupDate).day(),
-      };
+      // Format bookingDate as a string
+      const bookingDate = moment(values.pickupDate).format("YYYY-MM-DD");
 
+      // Construct the booking data
       const bookingData = {
-        createBookingDto: {
-          customerUserName: "string", // Dynamic data needed
-          note: values.note || "",
-          koiOrPoolId: values.fish || 0,
-          vetName: values.vet || "string",
-          totalAmount: total,
-          location: values.location,
-          slotId: values.slot || 0,
-          serviceId: values.serviceType || 0,
-          paymentId: values.paymentMethod || 0,
-          bookingDate: bookingDate,
-        },
+        note: values.note || "",
+        koiOrPoolId: values.fish || 0,
+        vetName: form.getFieldValue("vetName") || "", // Ensure vetName is retrieved correctly
+        totalAmount: total,
+        location: values.location,
+        slotId: values.slot || 0,
+        serviceId: values.serviceType || 0,
+        paymentId: values.paymentMethod || 0,
+        bookingDate: bookingDate,
       };
 
-      const response = await api.post("/booking/create-booking", bookingData);
+      console.log("Booking Data:", bookingData); // Debug the data
 
-      const { token } = response.data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("booking", JSON.stringify(response.data));
+      const requestPayload = {
+        createBookingDto: bookingData,
+      };
+
+      // Send booking data to backend API
+      const response = await api.post(
+        "/booking/create-booking",
+        requestPayload
+      );
+
+      // Handle success response
       toast.success("Booking successful!");
     } catch (error) {
-      console.error("Booking error:", error); // Log the full error object
-      if (error.response && error.response.data) {
-        console.error("API Error Data:", error.response.data); // Log error response data
-        toast.error(
-          `Booking failed: ${error.response.data.message || "Unknown error"}`
-        );
-      } else {
-        toast.error(`Booking failed: ${error.message}`);
-      }
+      // Handle errors
+      toast.error("Booking failed: " + error.message);
     }
   };
 
@@ -273,9 +278,9 @@ function Booking() {
                       <Form.Item
                         label="Slot"
                         name="slot"
-                        rules={[
-                          { required: true, message: "Please select a slot" },
-                        ]}
+                        // rules={[
+                        //   { required: true, message: "Please select a slot" },
+                        // ]}
                       >
                         <Select
                           className="form-control"
