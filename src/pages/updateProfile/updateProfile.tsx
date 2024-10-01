@@ -10,7 +10,6 @@ import {
   Upload,
   UploadFile,
   UploadProps,
-  message,
 } from "antd";
 import {
   AimOutlined,

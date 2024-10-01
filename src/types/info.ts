@@ -10,7 +10,7 @@ export type Slot = {
 };
 
 export type profile = {
-  userId: number;
+  userId: string;
   userName: string;
   firstName: string;
   lastName: string;

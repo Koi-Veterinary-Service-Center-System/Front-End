@@ -8,7 +8,7 @@ import Banner from "../../components/banner";
 import api from "../../configs/axios";
 import moment from "moment";
 import { Slot, Service, Vet } from "../../types/info";
-import { toast, ToastContainer } from "react-toastify"; // Import react-toastify
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const { Option } = Select;

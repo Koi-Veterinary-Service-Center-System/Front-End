@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Checkbox, Form, Input, Modal, message } from "antd";
+import { Button, Checkbox, Form, Input, Modal } from "antd";
 import { Link } from "react-router-dom";
 import TextArea from "antd/es/input/TextArea";
 import "./index.scss"; // Correctly import your SCSS file here
@@ -69,6 +69,7 @@ function Banner() {
           Create Koi Or Pool
         </Button>
       </div>
+      <ToastContainer />
       <div className="koi-banner">
         <img src="src/assets/images/bannerHome.png" alt="Koi Banner" />
       </div>
@@ -93,8 +94,7 @@ function Banner() {
               { max: 50, message: "Name cannot exceed 50 characters!" },
               {
                 pattern: /^[^\s][a-zA-Z\s]+$/,
-                message:
-                  "Name cannot start with a space or contain special characters",
+                message: "Name cannot contain special characters",
               },
             ]}
           >
@@ -106,7 +106,6 @@ function Banner() {
             label="Is this a Pool?"
             name="isPool"
             valuePropName="checked"
-            rules={[{ required: true, message: "Please insure that!!!" }]}
           >
             <Checkbox>Pool</Checkbox>
           </Form.Item>
@@ -116,11 +115,7 @@ function Banner() {
             name="description"
             rules={[
               { required: true, message: "Please provide a description!" },
-              {
-                pattern: /^[^\s][a-zA-Z\s]+$/,
-                message:
-                  "Description cannot start with a space or contain special characters",
-              },
+
               {
                 min: 10,
                 message: "Description must be at least 10 characters!",
@@ -147,7 +142,6 @@ function Banner() {
           </Form.Item>
         </Form>
       </Modal>
-      <ToastContainer />
     </div>
   );
 }
