@@ -27,7 +27,7 @@ const Service = () => {
             transition={{ duration: 1 }}
           >
             <StatCard
-              name="Total Products"
+              name="Total Services"
               icon={Package}
               value={1234}
               color="#6366F1"
@@ -39,7 +39,7 @@ const Service = () => {
               color="#10B981"
             />
             <StatCard
-              name="Low Stock"
+              name="Low Service"
               icon={AlertTriangle}
               value={23}
               color="#F59E0B"
