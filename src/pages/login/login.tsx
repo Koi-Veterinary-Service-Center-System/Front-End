@@ -73,7 +73,7 @@ function Login() {
   return (
     <div className="body-login">
       {/* Toast Container for React Toastify */}
-      <ToastContainer position="top-right" autoClose={5000} />
+      <ToastContainer position="top-right" autoClose={3000} />
       <Header />
       <div ref={loginRef} className="login-container">
         <div className="login-left">

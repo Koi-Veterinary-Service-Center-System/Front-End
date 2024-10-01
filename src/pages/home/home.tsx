@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import "./home.scss";
 import { Link, useLocation } from "react-router-dom";
 
-import { toast, ToastContainer } from "react-toastify"; // Import react-toastify
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function Home() {
@@ -84,7 +84,7 @@ function Home() {
     <div>
       <Header />
       <Banner />
-      <ToastContainer />
+      <ToastContainer position="top-right" autoClose={3000} />
 
       <div className="category-section">
         <div className="category-arrows">

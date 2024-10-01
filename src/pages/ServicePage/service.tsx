@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 import { AlertTriangle, DollarSign, Package, TrendingUp } from "lucide-react";
 import CategoryDistributionChart from "../OverviewPage/CategoryDistributionChart";
 import HeaderAd from "@/components/common/header";
-import ProductsTable from "@/components/products/ProductsTable";
+import ServicesTable from "@/components/services/ServicesTable";
+import SalesTrendChart from "@/components/services/SalesTrendChart";
 const Service = () => {
   return (
     <div className="flex h-screen bg-gray-900 text-gray-100 overflow-hidden">
@@ -15,7 +16,7 @@ const Service = () => {
       </div>
       <Sidebar />;
       <div className="flex-1 overflow-auto relative z-10">
-        <HeaderAd title="Products" />
+        <HeaderAd title="Services" />
 
         <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8">
           {/* STATS */}
@@ -51,11 +52,12 @@ const Service = () => {
             />
           </motion.div>
 
-          <ProductsTable />
+          <ServicesTable />
 
           {/* CHARTS */}
           <div className="grid grid-col-1 lg:grid-cols-2 gap-8">
             {/* <SalesTrendChart /> */}
+            <SalesTrendChart />
             <CategoryDistributionChart />
           </div>
         </main>

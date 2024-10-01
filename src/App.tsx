@@ -11,6 +11,7 @@ import UpdateProfile from "./pages/updateProfile/updateProfile";
 import AdminDashbroad from "./pages/adminDashbroad/adminDashbroad";
 import OverviewPage from "./pages/OverviewPage/overView";
 import Service from "./pages/ServicePage/service";
+import UsersPage from "./pages/UsersManagePage/Users";
 
 function App() {
   const router = createBrowserRouter([
@@ -46,6 +47,10 @@ function App() {
     {
       path: "/service",
       element: <Service />,
+    },
+    {
+      path: "/users",
+      element: <UsersPage />,
     },
     {
       path: "/register",

@@ -11,8 +11,8 @@ function AdminDashbroad({ name }) {
       </div>
 
       <Sidebar />
-      <Link to="/overview">Overview</Link>
-      <Link to="/service">Service</Link>
+      {/* <Link to="/overview">Overview</Link>
+      <Link to="/service">Service</Link> */}
     </div>
   );
 }

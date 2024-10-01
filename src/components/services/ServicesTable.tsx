@@ -45,7 +45,7 @@ const PRODUCT_DATA = [
   },
 ];
 
-const ProductsTable = () => {
+const ServicesTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState(PRODUCT_DATA);
 
@@ -153,4 +153,4 @@ const ProductsTable = () => {
     </motion.div>
   );
 };
-export default ProductsTable;
+export default ServicesTable;
