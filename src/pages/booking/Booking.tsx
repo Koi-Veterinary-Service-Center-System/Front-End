@@ -7,15 +7,142 @@ import { useLocation } from "react-router-dom";
 import Banner from "../../components/banner";
 import api from "../../configs/axios";
 import moment from "moment";
+import { Slot, Service, Vet } from "../../types/info";
+import { Toaster, toast } from "sonner";
 
 const { Option } = Select;
-const { TextArea } = Input;
 
 function Booking() {
   const [total, setTotal] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("");
   const location = useLocation();
   const bookingRef = useRef(null);
+
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [allSlots, setAllSlots] = useState<Slot[]>([]); // To keep all slots
+  const [services, setServices] = useState<Service[]>([]);
+  const [vets, setVets] = useState<Vet[]>([]);
+  const [allVets, setAllVets] = useState<Vet[]>([]); // To keep all vets
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [selectedVet, setSelectedVet] = useState<number | null>(null);
+
+  const [isLoadingSlots, setLoadingSlots] = useState(false);
+  const [isLoadingServices, setLoadingServices] = useState(false);
+  const [isLoadingVets, setLoadingVets] = useState(false);
+
+  // Ant Design form hook
+  const [form] = Form.useForm();
+
+  // Fetch Slots
+  useEffect(() => {
+    const fetchSlots = async () => {
+      try {
+        setLoadingSlots(true);
+        const response = await api.get("/slot/all-slot");
+        setSlots(response.data); // Assuming response data is the array of slots
+        setAllSlots(response.data); // Save all slots for filtering later
+      } catch (error) {
+        console.error("Error fetching slots:", error);
+        toast.error("Failed to load slot data.");
+      } finally {
+        setLoadingSlots(false);
+      }
+    };
+
+    fetchSlots();
+  }, []);
+
+  // Fetch Services
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoadingServices(true);
+        const response = await api.get("/service/all-service");
+        setServices(response.data); // Assuming response data is the array of services
+      } catch (error) {
+        console.error("Error fetching services:", error);
+        toast.error("Failed to load service data.");
+      } finally {
+        setLoadingServices(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
+  // Fetch all Vets
+  useEffect(() => {
+    const fetchAllVets = async () => {
+      try {
+        setLoadingVets(true);
+        const response = await api.get("/vet/all-vet");
+        setVets(response.data); // Set all vets initially
+        setAllVets(response.data); // Save all vets for filtering later
+      } catch (error) {
+        console.error("Error fetching all vets:", error);
+        toast.error("Failed to load vet data.");
+      } finally {
+        setLoadingVets(false);
+      }
+    };
+
+    fetchAllVets();
+  }, []);
+
+  // Fetch available Vets for a selected slot
+  const fetchVetsBySlot = async (slotId: number) => {
+    try {
+      setLoadingVets(true);
+      const response = await api.get(`/vet/available-vet/${slotId}`);
+      setVets(response.data); // Update the vets list based on the slot
+    } catch (error) {
+      console.error("Error fetching available vets:", error);
+      toast.error("Failed to load vet data.");
+    } finally {
+      setLoadingVets(false);
+    }
+  };
+
+  // Handle slot change to fetch vets
+  const handleSlotChange = (slotId: number) => {
+    setSelectedSlot(slotId);
+
+    // Fetch new vets for the selected slot
+    fetchVetsBySlot(slotId).then(() => {
+      // If the previously selected vet is still available in the new slot, retain it
+      const currentVetId = form.getFieldValue("vet");
+      if (!vets.find((vet) => vet.id === currentVetId)) {
+        form.setFieldsValue({ vet: undefined }); // Reset if the vet is not available for the new slot
+      }
+    });
+  };
+
+  // Fetch available slots for a selected vet
+  const fetchSlotsByVet = async (vetId: number) => {
+    try {
+      setLoadingSlots(true);
+      const response = await api.get(`/vet/available-slot/${vetId}`);
+      setSlots(response.data); // Update the slot list based on the vet
+    } catch (error) {
+      console.error("Error fetching available slots:", error);
+      toast.error("Failed to load slot data.");
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
+
+  // Handle vet change to fetch slot
+  const handleVetChange = (vetId: number) => {
+    setSelectedVet(vetId);
+
+    // Find the selected vet's name
+    const selectedVetName = vets.find((vet) => vet.id === vetId)?.vetName;
+
+    // Set both vetId and vetName in the form fields
+    form.setFieldsValue({ vet: vetId, vetName: selectedVetName });
+
+    console.log("Selected Vet Name:", selectedVetName); // Debugging
+  };
 
   // Handle payment method selection
   const handlePaymentChange = (value) => {
@@ -28,42 +155,41 @@ function Booking() {
     setTotal(servicePrice);
   };
 
-  // Handle form submission
-  const handleBooking = async (values) => {
+  const handleBooking = async (values: any) => {
     try {
-      // Format the booking date using moment (or dayjs if you've switched)
-      const bookingDate = {
-        year: moment(values.pickupDate).year(),
-        month: moment(values.pickupDate).month() + 1, // Months are 0-indexed
-        day: moment(values.pickupDate).date(),
-        dayOfWeek: moment(values.pickupDate).day(),
-      };
+      // Format bookingDate as a string
+      const bookingDate = moment(values.pickupDate).format("YYYY-MM-DD");
 
-      // Create the object matching API requirements
+      // Construct the booking data
       const bookingData = {
-        createBookingDto: {
-          customerUserName: "string", // Add the actual username or dynamic data
-          note: values.note || "", // Optional note field
-          koiOrPoolId: values.fish || 0,
-          vetName: values.vet || "string", // Add the actual vet name
-          totalAmount: total, // Total calculated amount
-          location: values.location,
-          slotId: values.slot || 0, // Add slot id
-          serviceId: values.serviceType || 0, // Add service id
-          paymentId: values.paymentMethod || 0, // Add payment id
-          bookingDate: bookingDate,
-        },
+        note: values.note || "",
+        koiOrPoolId: values.fish || 0,
+        vetName: form.getFieldValue("vetName") || "", // Ensure vetName is retrieved correctly
+        totalAmount: total,
+        location: values.location,
+        slotId: values.slot || 0,
+        serviceId: values.serviceType || 0,
+        paymentId: values.paymentMethod || 0,
+        bookingDate: bookingDate,
       };
 
-      // Make the API call with the correctly structured data
-      const response = await api.post("/booking/create-booking", bookingData);
+      console.log("Booking Data:", bookingData); // Debug the data
 
-      // Handle response
-      const { token } = response.data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(response.data));
+      const requestPayload = {
+        createBookingDto: bookingData,
+      };
+
+      // Send booking data to backend API
+      const response = await api.post(
+        "/booking/create-booking",
+        requestPayload
+      );
+
+      // Handle success response
+      toast.success("Booking successful!");
     } catch (error) {
-      console.error("Booking error:", error.response?.data || error.message);
+      // Handle errors
+      toast.error("Booking failed: " + error.message);
     }
   };
 
@@ -82,6 +208,7 @@ function Booking() {
     <div>
       <Header />
       <Banner />
+      <Toaster richColors position="top-right" />
       <div ref={bookingRef} id="booking" className="section">
         <div className="section-center">
           <div className="container">
@@ -93,10 +220,12 @@ function Booking() {
 
                 {/* Ant Design Form */}
                 <Form
+                  form={form}
                   name="bookingForm"
                   layout="vertical"
                   onFinish={handleBooking}
                 >
+                  {/* Pickup Date */}
                   <div className="row">
                     <div className="col-sm-5">
                       <Form.Item
@@ -114,6 +243,7 @@ function Booking() {
                     </div>
                   </div>
 
+                  {/* Service, Slot, and Vet */}
                   <div className="row">
                     <div className="col-sm-4">
                       <Form.Item
@@ -126,10 +256,19 @@ function Booking() {
                           },
                         ]}
                       >
-                        <Select className="form-control">
-                          <Option value={1}>Service 1</Option>
-                          <Option value={2}>Service 2</Option>
-                          <Option value={3}>Service 3</Option>
+                        <Select
+                          className="form-control"
+                          loading={isLoadingServices}
+                        >
+                          {services.map((service) => (
+                            <Option
+                              key={service.serviceID}
+                              value={service.serviceID}
+                            >
+                              {service.serviceName} - ${service.price}{" "}
+                              (Duration: {service.estimatedDuration} hours)
+                            </Option>
+                          ))}
                         </Select>
                       </Form.Item>
                     </div>
@@ -138,30 +277,44 @@ function Booking() {
                       <Form.Item
                         label="Slot"
                         name="slot"
-                        rules={[
-                          { required: true, message: "Please select a slot" },
-                        ]}
+                        // rules={[
+                        //   { required: true, message: "Please select a slot" },
+                        // ]}
                       >
-                        <Select className="form-control">
-                          <Option value={1}>Slot 1</Option>
-                          <Option value={2}>Slot 2</Option>
-                          <Option value={3}>Slot 3</Option>
+                        <Select
+                          className="form-control"
+                          loading={isLoadingSlots}
+                          onChange={handleSlotChange} // Handle slot change
+                          value={selectedSlot}
+                        >
+                          {slots.map((slot) => (
+                            <Option key={slot.slotID} value={slot.slotID}>
+                              {slot.weekDate} ({slot.startTime} -{slot.endTime})
+                            </Option>
+                          ))}
                         </Select>
                       </Form.Item>
                     </div>
 
                     <div className="col-sm-4">
                       <Form.Item
-                        label="Vet"
+                        label="Veterinarian"
                         name="vet"
                         rules={[
                           { required: true, message: "Please select a vet" },
                         ]}
                       >
-                        <Select className="form-control">
-                          <Option value="Vet A">Vet A</Option>
-                          <Option value="Vet B">Vet B</Option>
-                          <Option value="Vet C">Vet C</Option>
+                        <Select
+                          className="form-control"
+                          loading={isLoadingVets}
+                          onChange={handleVetChange} // Handle vet change
+                          value={selectedVet}
+                        >
+                          {vets.map((vet) => (
+                            <Option key={vet.id} value={vet.id}>
+                              {vet.vetName}
+                            </Option>
+                          ))}
                         </Select>
                       </Form.Item>
                     </div>

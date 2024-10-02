@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./profile.scss";
 import api from "../../configs/axios"; // Assuming Axios is used for making requests
@@ -10,28 +10,39 @@ import {
   PhoneOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import { profile } from "../../types/info";
+import { Toaster, toast } from "sonner";
 
 function Profile() {
-  const [profile, setProfile] = useState<any>({});
+  const [profile, setProfile] = useState<profile | null>(null); // Use the Profile type
   const [error, setError] = useState<string | null>(null);
   const [activeMenuItem, setActiveMenuItem] = useState("dashboard");
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state && location.state.updateProfileSuccess) {
+      toast.success("Profile updated successfully!");
+
+      // Reset location state to prevent duplicate toasts
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const fetchProfile = async () => {
     try {
-      const response = await api.get("User/profile", {
+      const response = await api.get("/User/profile", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`, // Use token if available
         },
       });
 
       // Convert gender from boolean to "Male" or "Female"
-      const updatedProfile = {
+      const genderProfile = {
         ...response.data,
         gender: response.data.gender ? "Male" : "Female", // Gender conversion
       };
 
-      setProfile(updatedProfile); // Set the transformed profile data
+      setProfile(genderProfile); // Set the transformed profile data
     } catch (error) {
       setError(error.message || "Failed to fetch profile data");
     }
@@ -55,7 +66,7 @@ function Profile() {
   return (
     <div className={`profile-page ${isDarkMode ? "dark-mode" : ""}`}>
       <section id="sidebar">
-        <Link to="#" className="brand">
+        <Link to="/" className="brand">
           <i className="bx bxs-smile"></i>
           <span className="text">Profile</span>
         </Link>
@@ -105,23 +116,11 @@ function Profile() {
           <label htmlFor="switch-mode" className="switch-mode"></label>
 
           <Link to="#" className="profile">
-            <img
-              src="https://sm.ign.com/ign_ap/cover/a/avatar-gen/avatar-generations_hugw.jpg"
-              alt="profile"
-            />
+            <img src={profile?.imageURL} alt="profile" />
           </Link>
         </nav>
 
         <div className="body_profile">
-          <iframe
-            className="profile_video"
-            src="src\assets\images\Koi Fish Pond Live Wallpaper.mp4"
-            width="640"
-            height="360"
-            frameBorder="0"
-            allow="autoplay: fullscreen; picture-in-picture"
-            allowFullScreen
-          ></iframe>
           <div className="container_profile">
             <div className="content">
               <div className="tab-pane fade active show" id="account-general">
@@ -129,19 +128,26 @@ function Profile() {
 
                 <div className="profile-wrapper">
                   <div className="profile-image">
-                    <Image width={200} src={profile.imageURL} />
-                    {/* Update with the image source */}
+                    <Image
+                      width={200}
+                      height={200}
+                      src={
+                        profile?.imageURL || "https://via.placeholder.com/150"
+                      }
+                      alt="profile"
+                    />
+
+                    {/* Use optional chaining to prevent error if imageURL is null */}
                   </div>
                   <div className="profile-details">
                     <div className="card-body">
-                      {/* Your profile details go here (unchanged) */}
-
+                      {/* Profile details with optional chaining for safety */}
                       <div className="form-group">
                         <label className="form-label">Username</label>
                         <Input
                           type="text"
                           name="username"
-                          value={profile.userName}
+                          value={profile?.userName || "N/A"}
                           readOnly
                           prefix={
                             <UserOutlined
@@ -156,7 +162,11 @@ function Profile() {
                         <Input
                           type="text"
                           name="name"
-                          value={`${profile.firstName} ${profile.lastName}`}
+                          value={
+                            profile
+                              ? `${profile.firstName} ${profile.lastName}`
+                              : "N/A"
+                          }
                           prefix={
                             <AuditOutlined
                               style={{ color: "rgba(0,0,0,.25)" }}
@@ -171,7 +181,7 @@ function Profile() {
                         <Input
                           type="text"
                           name="role"
-                          value={profile.role || "N/A"} // Default if role is not available
+                          value={profile?.role || "N/A"}
                           readOnly
                         />
                       </div>
@@ -181,16 +191,17 @@ function Profile() {
                         <Input
                           type="text"
                           name="gender"
-                          value={profile.gender || "N/A"} // Gender converted to "Male" or "Female"
+                          value={profile?.gender || "N/A"} // Gender converted to "Male" or "Female"
                           readOnly
                         />
                       </div>
+
                       <div className="form-group">
                         <label className="form-label">Address</label>
                         <Input
                           type="text"
                           name="address"
-                          value={profile.address || "N/A"} // Default if address is not available
+                          value={profile?.address || "N/A"} // Default if address is not available
                           prefix={
                             <AimOutlined style={{ color: "rgba(0,0,0,.25)" }} />
                           }
@@ -203,7 +214,7 @@ function Profile() {
                         <Input
                           type="text"
                           name="email"
-                          value={profile.email}
+                          value={profile?.email || "N/A"}
                           readOnly
                           prefix={
                             <MailOutlined
@@ -218,13 +229,13 @@ function Profile() {
                         <label className="form-label">Phone</label>
                         <Input
                           type="text"
-                          name="phone"
+                          name="phoneNumber"
                           prefix={
                             <PhoneOutlined
                               style={{ color: "rgba(0,0,0,.25)" }}
                             />
                           }
-                          value={profile.phoneNumber} // Default if phone is not available
+                          value={profile?.phoneNumber || "N/A"} // Default if phone is not available
                           readOnly
                         />
                       </div>
@@ -241,6 +252,7 @@ function Profile() {
           </div>
         </div>
       </section>
+      <Toaster richColors position="top-right" />
     </div>
   );
 }

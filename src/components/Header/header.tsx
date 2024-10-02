@@ -1,19 +1,43 @@
 import "./header.scss";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react"; // Import useState and useEffect
+import { profile } from "../../types/info";
+import api from "../../configs/axios";
 
 function Header() {
   const { Search } = Input;
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
-
+  const [profile, setProfile] = useState<profile | null>(null);
+  const [isLoading, setLoading] = useState(false);
   // Check if the user is logged in
   useEffect(() => {
     const token = localStorage.getItem("token"); // Get the token from localStorage
     if (token) {
       setIsLoggedIn(true); // If token exists, user is logged in
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchSlots = async () => {
+      const token = localStorage.getItem("token"); // Get token from localStorage
+
+      try {
+        setLoading(true);
+        const response = await api.get("/User/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to request headers
+          },
+        });
+        setProfile(response.data);
+      } catch (error) {
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSlots();
   }, []);
 
   // Handle logout function
@@ -72,16 +96,20 @@ function Header() {
             {isLoggedIn ? (
               <div className="user-profile-dropdown">
                 <div className="user-icon">
-                  <i className="bx bx-user"></i>
+                  <img src={profile?.imageURL} alt="" />
                   <i className="ion-chevron-down"></i>
                   <ul className="dropdown-menu">
                     <li>
                       <Link to="/profile">
-                        <Button>View Profile</Button>
+                        <Button className="btn-view">
+                          <i className="bx bx-user-circle"></i>View Profile
+                        </Button>
                       </Link>
                     </li>
                     <li>
-                      <Button onClick={handleLogout}>Logout</Button>
+                      <Button className="btn-logout" onClick={handleLogout}>
+                        <i className="bx bxs-log-out-circle"></i>Logout
+                      </Button>
                     </li>
                   </ul>
                 </div>

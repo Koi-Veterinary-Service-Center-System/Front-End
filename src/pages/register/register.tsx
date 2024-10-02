@@ -12,6 +12,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer/footer";
 import { useEffect, useRef } from "react";
 import api from "../../configs/axios";
+import { Toaster, toast } from "sonner";
 
 function Register() {
   const location = useLocation();
@@ -36,7 +37,7 @@ function Register() {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(response.data));
 
-      navigate("/");
+      navigate("/", { state: { registerSuccess: true } });
     } catch (error) {
       // Log the error to inspect its structure
       if (error.response && error.response.data) {
@@ -44,13 +45,13 @@ function Register() {
 
         // Assuming the API returns an array of errors or just one error object
         if (Array.isArray(apiErrors)) {
-          apiErrors.forEach((err) => message.error(err.description)); // Display each error's description
+          apiErrors.forEach((err) => toast.error(err.description)); // Display each error's description
         } else if (apiErrors.description) {
-          message.error(apiErrors.description); // Display the single error description
+          toast.error(apiErrors.description); // Display the single error description
         }
       } else {
         // Handle other cases, like network errors
-        message.error(
+        toast.error(
           "A network error occurred. Please check your connection and try again."
         );
       }
@@ -60,6 +61,7 @@ function Register() {
   return (
     <div className="body-register">
       <Header />
+      <Toaster richColors position="top-right" />
       <div ref={registerRef} className="register-container">
         <div className="register-left">
           <h3 className="register-left-title">Register</h3>

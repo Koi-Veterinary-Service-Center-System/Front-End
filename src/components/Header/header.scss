@@ -89,7 +89,7 @@ nav {
 }
 
 .search-bar-hd button:hover i {
-  color: #0071bc; /* Change color on hover */
+  color: #007abc; /* Change color on hover */
 }
 
 .icons {
@@ -132,6 +132,18 @@ nav {
 
 .heart-icon {
   font-size: 24px;
+}
+
+.btn-logout {
+  color: red;
+}
+
+.user-icon img {
+  width: 40px; // Make the image small
+  height: 40px; // Maintain square aspect ratio
+  border-radius: 50%; // Make the image circular
+  object-fit: cover; // Ensure the image fits well inside the container
+  border: 2px solid #ccc; // Add a border, optional
 }
 
 .user-profile-dropdown {

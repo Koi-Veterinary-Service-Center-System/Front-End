@@ -493,6 +493,10 @@ body {
 .body_updateProfile {
   background-color: #f5f5f5; /* Light background for better readability */
   padding: 20px; /* Add some padding for visual balance */
+  background-image: url("src/assets/images/background-profile.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .container_updateProfile {

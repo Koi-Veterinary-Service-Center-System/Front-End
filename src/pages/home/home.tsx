@@ -3,12 +3,28 @@ import Footer from "../../components/Footer/footer";
 import Header from "../../components/Header/header";
 import { QuestionCircleOutlined, CloseOutlined } from "@ant-design/icons";
 import { FloatButton, Button } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./home.scss";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { Toaster, toast } from "sonner";
 
 function Home() {
   const [isChatBoxVisible, setIsChatBoxVisible] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state) {
+      if (location.state.loginSuccess) {
+        toast.success("Login successful!");
+        // Reset location state to prevent duplicate toasts
+        window.history.replaceState({}, document.title);
+      } else if (location.state.registerSuccess) {
+        toast.success("Register successful!");
+        // Reset location state to prevent duplicate toasts
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state]);
 
   const categories = [
     {
@@ -66,7 +82,7 @@ function Home() {
     <div>
       <Header />
       <Banner />
-
+      <Toaster richColors position="top-right" />
       <div className="category-section">
         <div className="category-arrows">
           <h3>Browse by category</h3>
