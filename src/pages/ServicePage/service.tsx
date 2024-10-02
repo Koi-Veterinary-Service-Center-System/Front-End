@@ -6,7 +6,18 @@ import CategoryDistributionChart from "../OverviewPage/CategoryDistributionChart
 import HeaderAd from "@/components/common/header";
 import ServicesTable from "@/components/services/ServicesTable";
 import SalesTrendChart from "@/components/services/SalesTrendChart";
+import { Toaster, toast } from "sonner"; // Use sonner for toast notifications
+
 const Service = () => {
+  // Function to show delete success toast
+  const handleDeleteSuccess = () => {
+    toast.success("Service deleted successfully");
+  };
+
+  const handleAddSuccess = () => {
+    toast.success("Service added sucessfully");
+  };
+
   return (
     <div className="flex h-screen bg-gray-900 text-gray-100 overflow-hidden">
       {/* BG */}
@@ -52,15 +63,21 @@ const Service = () => {
             />
           </motion.div>
 
-          <ServicesTable />
+          {/* Pass handleDeleteSuccess as a prop to ServicesTable */}
+          <ServicesTable
+            onDeleteSuccess={handleDeleteSuccess}
+            onAddSuccess={handleAddSuccess}
+          />
 
           {/* CHARTS */}
           <div className="grid grid-col-1 lg:grid-cols-2 gap-8">
-            {/* <SalesTrendChart /> */}
             <SalesTrendChart />
             <CategoryDistributionChart />
           </div>
         </main>
+
+        {/* Toaster component to show toast notifications */}
+        <Toaster richColors position="top-right" />
       </div>
     </div>
   );
