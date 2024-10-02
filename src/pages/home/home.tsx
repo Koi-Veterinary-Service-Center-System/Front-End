@@ -6,25 +6,23 @@ import { FloatButton, Button } from "antd";
 import { useEffect, useState } from "react";
 import "./home.scss";
 import { Link, useLocation } from "react-router-dom";
-
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Toaster, toast } from "sonner";
 
 function Home() {
   const [isChatBoxVisible, setIsChatBoxVisible] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    //Check if login was successfull and display in the toast
-    if (location.state && location.state.loginSuccess) {
-      toast.success("Login successfull!");
-    }
-  }, [location.state]);
-
-  useEffect(() => {
-    //Check if login was successfull and display in the toast
-    if (location.state && location.state.registerSuccess) {
-      toast.success("Register successfull!");
+    if (location.state) {
+      if (location.state.loginSuccess) {
+        toast.success("Login successful!");
+        // Reset location state to prevent duplicate toasts
+        window.history.replaceState({}, document.title);
+      } else if (location.state.registerSuccess) {
+        toast.success("Register successful!");
+        // Reset location state to prevent duplicate toasts
+        window.history.replaceState({}, document.title);
+      }
     }
   }, [location.state]);
 
@@ -84,8 +82,7 @@ function Home() {
     <div>
       <Header />
       <Banner />
-      <ToastContainer position="top-right" autoClose={3000} />
-
+      <Toaster richColors position="top-right" />
       <div className="category-section">
         <div className="category-arrows">
           <h3>Browse by category</h3>

@@ -68,7 +68,7 @@ function Process() {
     loadData();
   }, [profile?.userId]);
 
-  //Handle update profile
+  //Handle
 
   const handleUpdateFishOrPool = (item: koiOrPool) => {
     setCurrentKoiOrPool(item); // Set the current item to be edited
@@ -80,7 +80,6 @@ function Process() {
   const handleFormSubmit = async (values: koiOrPool) => {
     setLoading(true);
     try {
-      // Update the koiOrPool with the correct ID and form values
       await api.put(
         `/koi-or-pool/update-koiorpool/${currentKoiOrPool?.koiOrPoolID}`,
         values,
@@ -91,7 +90,8 @@ function Process() {
       fetchKoiOrPool(profile?.userId || ""); // Refresh the data after update
       form.resetFields(); // Reset form after successful submission
       setIsModalOpen(false); // Close modal after success
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Update failed: ", error.response || error);
       setError(error.message || "Failed to update Fish or Pool");
     } finally {
       setLoading(false);
@@ -109,11 +109,14 @@ function Process() {
     setIsDeleteModalOpen(true); // Open the delete modal
   };
 
-  const handleDeleteSuccess = () => {
+  const handleDeleteSuccess = async () => {
     // Close the delete modal
     setIsDeleteModalOpen(false);
-    // Refresh the list after successful deletion
-    fetchKoiOrPool(customerId);
+
+    // Fetch the updated list of Koi or Pool items
+    if (profile?.userId) {
+      await fetchKoiOrPool(profile.userId); // Refresh the list after deletion
+    }
   };
 
   const handleCloseModalDL = () => {
@@ -204,7 +207,7 @@ function Process() {
               <i className="bx bxs-calendar-check"></i>
               <span className="text">
                 <h3>1020</h3>
-                <p>Appointment</p>
+                <p>Total Fish & Koi</p>
               </span>
             </li>
             <li>
@@ -333,11 +336,6 @@ function Process() {
                                   max: 50,
                                   message: "Name cannot exceed 50 characters!",
                                 },
-                                {
-                                  pattern: /^[^\s][a-zA-Z\s]+$/,
-                                  message:
-                                    "Name cannot start with a space or contain special characters",
-                                },
                               ]}
                             >
                               <Input />
@@ -365,11 +363,6 @@ function Process() {
                                 {
                                   required: true,
                                   message: "Please provide a description!",
-                                },
-                                {
-                                  pattern: /^[^\s][a-zA-Z\s]+$/,
-                                  message:
-                                    "Description cannot start with a space or contain special characters",
                                 },
                                 {
                                   min: 10,
@@ -411,7 +404,7 @@ function Process() {
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && currentKoiOrPool && (
         <ModalDelete
-          koiOrPoolID={currentKoiOrPool?.koiOrPoolID} // Ensure this is correctly defined
+          koiOrPoolID={currentKoiOrPool?.koiOrPoolID}
           onDeleteSuccess={handleDeleteSuccess}
           onClose={handleCloseModalDL}
         />

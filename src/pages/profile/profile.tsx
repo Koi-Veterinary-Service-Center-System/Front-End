@@ -11,8 +11,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { profile } from "../../types/info";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Toaster, toast } from "sonner";
 
 function Profile() {
   const [profile, setProfile] = useState<profile | null>(null); // Use the Profile type
@@ -23,8 +22,11 @@ function Profile() {
   useEffect(() => {
     if (location.state && location.state.updateProfileSuccess) {
       toast.success("Profile updated successfully!");
+
+      // Reset location state to prevent duplicate toasts
+      window.history.replaceState({}, document.title);
     }
-  });
+  }, [location.state]);
 
   const fetchProfile = async () => {
     try {
@@ -250,7 +252,7 @@ function Profile() {
           </div>
         </div>
       </section>
-      <ToastContainer />
+      <Toaster richColors position="top-right" />
     </div>
   );
 }

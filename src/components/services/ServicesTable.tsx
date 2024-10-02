@@ -66,9 +66,6 @@ const ServicesTable = () => {
                 Name
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Category
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Price
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -99,10 +96,6 @@ const ServicesTable = () => {
                       className="size-10 rounded-full"
                     />
                     {service.serviceName}
-                  </td>
-
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {service.category}
                   </td>
 
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">

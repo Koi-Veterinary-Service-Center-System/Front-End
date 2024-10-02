@@ -8,8 +8,7 @@ import Banner from "../../components/banner";
 import api from "../../configs/axios";
 import moment from "moment";
 import { Slot, Service, Vet } from "../../types/info";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Toaster, toast } from "sonner";
 
 const { Option } = Select;
 
@@ -209,7 +208,7 @@ function Booking() {
     <div>
       <Header />
       <Banner />
-      <ToastContainer />
+      <Toaster richColors position="top-right" />
       <div ref={bookingRef} id="booking" className="section">
         <div className="section-center">
           <div className="container">

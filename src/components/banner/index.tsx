@@ -2,53 +2,49 @@ import { useState } from "react";
 import { Button, Checkbox, Form, Input, Modal } from "antd";
 import { Link } from "react-router-dom";
 import TextArea from "antd/es/input/TextArea";
-import "./index.scss"; // Correctly import your SCSS file here
-import api from "@/configs/axios"; // Ensure your axios instance is properly configured
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import "./index.scss";
+import api from "@/configs/axios";
 import { koiOrPool } from "@/types/info";
+import { Toaster, toast } from "sonner";
 
 function Banner() {
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
-  const [loading, setLoading] = useState(false); // To handle the loading state for form submission
-  const [form] = Form.useForm(); // Ant Design form instance
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
 
-  // Function to open the modal
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
 
-  // Function to close the modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    form.resetFields(); // Clear the form fields after closing the modal
+    form.resetFields();
   };
 
-  // Handle form submission and post the data to API
+  // Handle form submission
   const handleCreateFishOrPool = async (values: koiOrPool) => {
-    // Ensure `isPool` is a boolean value
+    if (loading) return;
+
     const payload = {
       ...values,
-      isPool: values.isPool ? true : false, // Make sure it's a boolean
+      isPool: values.isPool ? true : false,
     };
 
-    setLoading(true);
     try {
       const response = await api.post("/koi-or-pool/create-koiorpool", payload);
 
       if (response.status === 200) {
-        toast.success("Successfully added!");
-        handleCloseModal(); // Close modal if API call succeeds
+        toast.success("Successfully added!"); // Display success toast
+        handleCloseModal();
       } else {
-        toast.error("Failed to add the item.");
+        toast.error("Failed to add the item."); // Display error toast if the response isn't 200
       }
     } catch (error) {
+      // Catch errors and display appropriate error toast
       toast.error(
         error.response?.data?.errors?.IsPool[0] ||
           "An error occurred. Please try again."
       );
-    } finally {
-      setLoading(false); // Stop loading spinner
     }
   };
 
@@ -64,12 +60,12 @@ function Banner() {
         <Button className="fakeButton">
           <Link to="/booking#section">Booking Service</Link>
         </Button>
-        {/* Button to open modal */}
         <Button className="fakeButton" onClick={handleOpenModal}>
           Create Koi Or Pool
         </Button>
       </div>
-      <ToastContainer position="top-right" autoClose={3000} />
+      <Toaster richColors position="top-right" />
+
       <div className="koi-banner">
         <img src="src/assets/images/bannerHome.png" alt="Koi Banner" />
       </div>
@@ -78,12 +74,12 @@ function Banner() {
         open={isModalOpen}
         title="Create Koi Or Pool"
         onCancel={handleCloseModal}
-        footer={null} // Custom footer will be handled by form buttons
+        footer={null}
       >
         <Form
           form={form}
           labelCol={{ span: 24 }}
-          onFinish={handleCreateFishOrPool} // Handle form submission
+          onFinish={handleCreateFishOrPool}
         >
           <Form.Item
             label="Name Your Fish Or Pool"
@@ -101,7 +97,6 @@ function Banner() {
             <Input />
           </Form.Item>
 
-          {/* Handling Checkbox */}
           <Form.Item
             label="Is this a Pool?"
             name="isPool"
@@ -115,7 +110,6 @@ function Banner() {
             name="description"
             rules={[
               { required: true, message: "Please provide a description!" },
-
               {
                 min: 10,
                 message: "Description must be at least 10 characters!",
@@ -129,14 +123,8 @@ function Banner() {
             <TextArea rows={4} />
           </Form.Item>
 
-          {/* Form submit button */}
           <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading} // Add loading spinner during submission
-              style={{ width: "100%" }}
-            >
+            <Button type="primary" htmlType="submit" style={{ width: "100%" }}>
               Submit
             </Button>
           </Form.Item>

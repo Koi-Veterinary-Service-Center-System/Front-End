@@ -10,8 +10,7 @@ import api from "../../configs/axios";
 import { signInWithPopup } from "firebase/auth";
 import { GoogleAuthProvider } from "firebase/auth/web-extension";
 import { auth, googleProvider } from "../../configs/firebase";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Toaster, toast } from "sonner";
 
 function Login() {
   const location = useLocation(); // Hook để truy cập URL
@@ -73,7 +72,8 @@ function Login() {
   return (
     <div className="body-login">
       {/* Toast Container for React Toastify */}
-      <ToastContainer position="top-right" autoClose={3000} />
+      <Toaster richColors position="top-right" />
+
       <Header />
       <div ref={loginRef} className="login-container">
         <div className="login-left">

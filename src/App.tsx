@@ -12,12 +12,14 @@ import AdminDashbroad from "./pages/adminDashbroad/adminDashbroad";
 import OverviewPage from "./pages/OverviewPage/overView";
 import Service from "./pages/ServicePage/service";
 import UsersPage from "./pages/UsersManagePage/Users";
+import ErrorBoundary from "./errorBoudary";
 
 function App() {
   const router = createBrowserRouter([
     {
       path: "/",
       element: <Home />,
+      errorElement: <ErrorBoundary />,
     },
     {
       path: "/booking",

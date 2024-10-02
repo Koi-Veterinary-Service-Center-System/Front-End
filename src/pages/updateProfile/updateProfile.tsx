@@ -20,11 +20,9 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { profile as ProfileType } from "../../types/info";
-import uploadFile from "../../utils/upload";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "../../configs/firebase";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Toaster, toast } from "sonner";
 
 function UpdateProfile() {
   const [profile, setProfile] = useState<ProfileType | null>(null);
@@ -333,7 +331,7 @@ function UpdateProfile() {
           </div>
         </div>
       </section>
-      <ToastContainer />
+      <Toaster richColors position="top-right" />
     </div>
   );
 }
