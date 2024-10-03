@@ -252,7 +252,17 @@ function UpdateProfile() {
                     </Form.Item>
                   </div>
                   <div className="updateProfile-details">
-                    <Form.Item label="Username" name="userName">
+                    <Form.Item
+                      label="Username"
+                      name="userName"
+                      rules={[
+                        {
+                          pattern: /^[^\s][a-zA-Z\s]+$/,
+                          message:
+                            "Username cannot start with a space or contain special characters",
+                        },
+                      ]}
+                    >
                       <Input
                         placeholder={profile?.userName || "Enter username"}
                         prefix={
@@ -261,7 +271,17 @@ function UpdateProfile() {
                       />
                     </Form.Item>
 
-                    <Form.Item label="First Name" name="firstName">
+                    <Form.Item
+                      label="First Name"
+                      name="firstName"
+                      rules={[
+                        {
+                          pattern: /^[^\s][a-zA-Z\s]+$/,
+                          message:
+                            "First name cannot start with a space or contain special characters",
+                        },
+                      ]}
+                    >
                       <Input
                         placeholder={profile?.firstName || "Enter first name"}
                         prefix={
@@ -270,7 +290,17 @@ function UpdateProfile() {
                       />
                     </Form.Item>
 
-                    <Form.Item label="Last Name" name="lastName">
+                    <Form.Item
+                      label="Last Name"
+                      name="lastName"
+                      rules={[
+                        {
+                          pattern: /^[^\s][a-zA-Z\s]+$/,
+                          message:
+                            "Last name cannot start with a space or contain special characters",
+                        },
+                      ]}
+                    >
                       <Input
                         placeholder={profile?.lastName || "Enter last name"}
                         prefix={
@@ -290,7 +320,16 @@ function UpdateProfile() {
                       />
                     </Form.Item>
 
-                    <Form.Item label="Email" name="email">
+                    <Form.Item
+                      label="Email"
+                      name="email"
+                      rules={[
+                        {
+                          type: "email",
+                          message: "Please enter a valid Email!",
+                        },
+                      ]}
+                    >
                       <Input
                         placeholder={profile?.email || "Enter email"}
                         prefix={
@@ -299,7 +338,17 @@ function UpdateProfile() {
                       />
                     </Form.Item>
 
-                    <Form.Item label="Address" name="address">
+                    <Form.Item
+                      label="Address"
+                      name="address"
+                      rules={[
+                        {
+                          pattern: /^[^\s][a-zA-Z\s]+$/,
+                          message:
+                            "Address cannot start with a space or contain special characters",
+                        },
+                      ]}
+                    >
                       <Input
                         placeholder={profile?.address || "Enter address"}
                         prefix={
@@ -308,7 +357,17 @@ function UpdateProfile() {
                       />
                     </Form.Item>
 
-                    <Form.Item label="Gender" name="gender">
+                    <Form.Item
+                      label="Gender"
+                      name="gender"
+                      rules={[
+                        {
+                          pattern: /^[^\s][a-zA-Z\s]+$/,
+                          message:
+                            "Gender cannot start with a space or contain special characters",
+                        },
+                      ]}
+                    >
                       <Input placeholder={profile?.gender || "Enter gender"} />
                     </Form.Item>
 

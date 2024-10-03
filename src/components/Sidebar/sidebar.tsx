@@ -1,6 +1,6 @@
 import {
   BarChart2,
-  DollarSign,
+  Calendar,
   Menu,
   Settings,
   ShoppingBag,
@@ -16,7 +16,7 @@ const SIDEBAR_ITEMS = [
   { name: "Overview", icon: BarChart2, color: "#6366f1", path: "/overview" },
   { name: "Service", icon: ShoppingBag, color: "#8B5CF6", path: "/service" },
   { name: "Users", icon: Users, color: "#EC4899", path: "/users" },
-  { name: "Sales", icon: DollarSign, color: "#10B981", path: "/sales" },
+  { name: "Schedules", icon: Calendar, color: "#10B981", path: "/schedules" },
   { name: "Orders", icon: ShoppingCart, color: "#F59E0B", path: "/orders" },
   { name: "Analytics", icon: TrendingUp, color: "#3B82F6", path: "/analytics" },
   { name: "Settings", icon: Settings, color: "#6EE7B7", path: "/settings" },
