@@ -247,7 +247,7 @@ function Booking() {
                   <div className="row">
                     <div className="col-sm-4">
                       <Form.Item
-                        label="Type of Service"
+                        label="Type of Services"
                         name="serviceType"
                         rules={[
                           {

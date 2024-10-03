@@ -38,9 +38,9 @@ const OverviewPage = () => {
               color="#885CF6"
             />
             <StatCard
-              name="Total Products"
+              name="Total Services"
               icon={ShoppingBag}
-              value="567"
+              value="8"
               color="#EC4899"
             />
             <StatCard
@@ -53,8 +53,8 @@ const OverviewPage = () => {
 
           {/* CHARTS */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <SalesOverviewChart />
-            <CategoryDistributionChart />
+            {/* <SalesOverviewChart /> */}
+            {/* <CategoryDistributionChart /> */}
           </div>
         </main>
       </div>
