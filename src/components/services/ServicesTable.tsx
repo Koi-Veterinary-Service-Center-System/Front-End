@@ -270,7 +270,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({
 
           <Form.Item
             name="estimatedDuration"
-            label="Estimated Duration (in minutes)"
+            label="Estimated Duration (in hour)"
             rules={[
               {
                 required: true,
