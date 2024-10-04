@@ -117,20 +117,6 @@ function Booking() {
     });
   };
 
-  // Fetch available slots for a selected vet
-  const fetchSlotsByVet = async (vetId: number) => {
-    try {
-      setLoadingSlots(true);
-      const response = await api.get(`/vet/available-slot/${vetId}`);
-      setSlots(response.data); // Update the slot list based on the vet
-    } catch (error) {
-      console.error("Error fetching available slots:", error);
-      toast.error("Failed to load slot data.");
-    } finally {
-      setLoadingSlots(false);
-    }
-  };
-
   // Handle vet change to fetch slot
   const handleVetChange = (vetId: number) => {
     setSelectedVet(vetId);
@@ -163,7 +149,7 @@ function Booking() {
       // Construct the booking data
       const bookingData = {
         note: values.note || "",
-        koiOrPoolId: values.fish || 0,
+        koiOrPoolId: values.fish || null,
         vetName: form.getFieldValue("vetName") || "", // Ensure vetName is retrieved correctly
         totalAmount: total,
         location: values.location,
@@ -175,21 +161,20 @@ function Booking() {
 
       console.log("Booking Data:", bookingData); // Debug the data
 
-      const requestPayload = {
-        createBookingDto: bookingData,
-      };
-
       // Send booking data to backend API
-      const response = await api.post(
-        "/booking/create-booking",
-        requestPayload
-      );
+      const response = await api.post("/booking/create-booking", bookingData);
 
       // Handle success response
-      toast.success("Booking successful!");
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Booking successful!");
+      } else {
+        throw new Error("Unexpected response from server.");
+      }
     } catch (error) {
       // Handle errors
-      toast.error("Booking failed: " + error.message);
+      toast.error(
+        "Booking failed: " + (error.response?.data?.message || error.message)
+      );
     }
   };
 
@@ -274,13 +259,7 @@ function Booking() {
                     </div>
 
                     <div className="col-sm-4">
-                      <Form.Item
-                        label="Slot"
-                        name="slot"
-                        // rules={[
-                        //   { required: true, message: "Please select a slot" },
-                        // ]}
-                      >
+                      <Form.Item label="Slot" name="slot">
                         <Select
                           className="form-control"
                           loading={isLoadingSlots}
@@ -365,13 +344,7 @@ function Booking() {
                     />
                   </Form.Item>
 
-                  <Form.Item
-                    label="Choose Fish or Pool"
-                    name="fish"
-                    rules={[
-                      { required: true, message: "Please select an option" },
-                    ]}
-                  >
+                  <Form.Item label="Choose Fish or Pool" name="fish">
                     <Select className="form-control">
                       <Option value={1}>Fish 1</Option>
                       <Option value={2}>Fish 2</Option>
