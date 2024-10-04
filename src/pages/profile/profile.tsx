@@ -1,29 +1,46 @@
+"use client";
+
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import "./profile.scss";
-import api from "../../configs/axios"; // Assuming Axios is used for making requests
-import { Button, Image, Input } from "antd";
-import {
-  AimOutlined,
-  AuditOutlined,
-  MailOutlined,
-  PhoneOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { profile } from "../../types/info";
+import { motion } from "framer-motion";
+import api from "../../configs/axios";
+import { Button, Input } from "antd";
 import { Toaster, toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+  ChevronLeft,
+  MessageSquare,
+  Moon,
+  Store,
+  Sun,
+  User,
+} from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+interface Profile {
+  imageURL: string;
+  userName: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  gender: string;
+  address: string;
+  email: string;
+  phoneNumber: string;
+}
 
 function Profile() {
-  const [profile, setProfile] = useState<profile | null>(null); // Use the Profile type
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeMenuItem, setActiveMenuItem] = useState("dashboard");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const location = useLocation();
+
   useEffect(() => {
     if (location.state && location.state.updateProfileSuccess) {
       toast.success("Profile updated successfully!");
-
-      // Reset location state to prevent duplicate toasts
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -32,19 +49,18 @@ function Profile() {
     try {
       const response = await api.get("/User/profile", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Use token if available
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-      // Convert gender from boolean to "Male" or "Female"
       const genderProfile = {
         ...response.data,
-        gender: response.data.gender ? "Male" : "Female", // Gender conversion
+        gender: response.data.gender ? "Male" : "Female",
       };
 
-      setProfile(genderProfile); // Set the transformed profile data
+      setProfile(genderProfile);
     } catch (error) {
-      setError(error.message || "Failed to fetch profile data");
+      setError(error.response?.data?.message || "Failed to fetch profile data");
     }
   };
 
@@ -52,207 +68,188 @@ function Profile() {
     fetchProfile();
   }, []);
 
-  // Handle menu item click
   const handleMenuItemClick = (menuItem: string) => {
     setActiveMenuItem(menuItem);
   };
 
-  // Handle dark mode toggle
   const handleDarkModeSwitch = () => {
     setIsDarkMode(!isDarkMode);
     document.body.classList.toggle("dark", !isDarkMode);
   };
 
+  if (error) {
+    return <div className="text-red-500">Error: {error}</div>;
+  }
+
+  if (!profile) {
+    return <div>Loading...</div>;
+  }
+
+  const sidebarVariants = {
+    hidden: { x: -300 },
+    visible: { x: 0, transition: { type: "spring", stiffness: 100 } },
+  };
+
+  const mainContentVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.5 } },
+  };
+
   return (
-    <div className={`profile-page ${isDarkMode ? "dark-mode" : ""}`}>
-      <section id="sidebar">
-        <Link to="/" className="brand">
-          <i className="bx bxs-smile"></i>
-          <span className="text">Profile</span>
-        </Link>
-        <ul className="side-menu top">
-          <li className={activeMenuItem === "dashboard" ? "active" : ""}>
-            <Link
-              to="/profile"
-              onClick={() => handleMenuItemClick("dashboard")}
+    <div className={`min-h-screen ${isDarkMode ? "dark" : ""}`}>
+      <div className="flex">
+        <motion.aside
+          className="w-64 bg-gray-100 dark:bg-gray-800 h-screen sticky top-0"
+          initial="hidden"
+          animate="visible"
+          variants={sidebarVariants}
+        >
+          <div className="p-4">
+            <Link to="/" className="flex items-center space-x-2 text-primary">
+              <User className="h-6 w-6" />
+              <span className="text-xl font-bold">Profile</span>
+            </Link>
+          </div>
+          <nav className="mt-8">
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  to="/profile"
+                  className={`flex items-center space-x-2 p-2 ${
+                    activeMenuItem === "dashboard"
+                      ? "bg-blue-400 text-primary-foreground"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
+                  }`}
+                  onClick={() => handleMenuItemClick("dashboard")}
+                >
+                  <User className="h-5 w-5" />
+                  <span>Your Profile</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/process"
+                  className={`flex items-center space-x-2 p-2 ${
+                    activeMenuItem === "my-store"
+                      ? "bg-blue-400 text-primary-foreground"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
+                  }`}
+                  onClick={() => handleMenuItemClick("my-store")}
+                >
+                  <Store className="h-5 w-5" />
+                  <span>Service History</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/message"
+                  className={`flex items-center space-x-2 p-2 ${
+                    activeMenuItem === "message"
+                      ? "bg-blue-400 text-primary-foreground"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
+                  }`}
+                  onClick={() => handleMenuItemClick("message")}
+                >
+                  <MessageSquare className="h-5 w-5" />
+                  <span>Message</span>
+                </Link>
+              </li>
+            </ul>
+          </nav>
+          <div className="absolute bottom-4 left-4">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => window.history.back()}
             >
-              <i className="bx bxs-dashboard"></i>
-              <span className="text">Your Profile</span>
-            </Link>
-          </li>
-          <li className={activeMenuItem === "my-store" ? "active" : ""}>
-            <Link to="/process" onClick={() => handleMenuItemClick("my-store")}>
-              <i className="bx bxs-shopping-bag-alt"></i>
-              <span className="text">Service History</span>
-            </Link>
-          </li>
-          <li className={activeMenuItem === "message" ? "active" : ""}>
-            <Link to="/message" onClick={() => handleMenuItemClick("message")}>
-              <i className="bx bxs-message-dots"></i>
-              <span className="text">Message</span>
-            </Link>
-          </li>
-        </ul>
-        <ul className="side-menu">
-          <li>
-            <Button className="text" onClick={() => window.history.back()}>
-              Back
+              <ChevronLeft className="mr-2 h-4 w-4" /> Back
             </Button>
-          </li>
-        </ul>
-      </section>
+          </div>
+        </motion.aside>
 
-      <section id="content">
-        <nav>
-          <i className="bx bx-menu"></i>
+        <motion.main
+          className="flex-1 bg-white dark:bg-gray-900"
+          initial="hidden"
+          animate="visible"
+          variants={mainContentVariants}
+        >
+          <header className="bg-white dark:bg-gray-800 shadow">
+            <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Your Profile
+              </h1>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Sun className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <Switch
+                    checked={isDarkMode}
+                    onCheckedChange={handleDarkModeSwitch}
+                  />
+                  <Moon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                </div>
+                <Avatar>
+                  <AvatarImage src={profile.imageURL} alt="Profile" />
+                  <AvatarFallback>JD</AvatarFallback>
+                </Avatar>
+              </div>
+            </div>
+          </header>
 
-          <input
-            type="checkbox"
-            id="switch-mode"
-            hidden
-            checked={isDarkMode}
-            onChange={handleDarkModeSwitch}
-          />
-          <label htmlFor="switch-mode" className="switch-mode"></label>
-
-          <Link to="#" className="profile">
-            <img src={profile?.imageURL} alt="profile" />
-          </Link>
-        </nav>
-
-        <div className="body_profile">
-          <div className="container_profile">
-            <div className="content">
-              <div className="tab-pane fade active show" id="account-general">
-                <hr className="border-light m-0" />
-
-                <div className="profile-wrapper">
-                  <div className="profile-image">
-                    <Image
-                      width={200}
-                      height={200}
-                      src={
-                        profile?.imageURL || "https://via.placeholder.com/150"
-                      }
-                      alt="profile"
-                    />
-
-                    {/* Use optional chaining to prevent error if imageURL is null */}
+          <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="username">Username</Label>
+                      <Input id="username" value={profile.userName} readOnly />
+                    </div>
+                    <div>
+                      <Label htmlFor="name">Name</Label>
+                      <Input
+                        id="name"
+                        value={`${profile.firstName} ${profile.lastName}`}
+                        readOnly
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="role">Role</Label>
+                      <Input id="role" value={profile.role} readOnly />
+                    </div>
+                    <div>
+                      <Label htmlFor="gender">Gender</Label>
+                      <Input id="gender" value={profile.gender} readOnly />
+                    </div>
                   </div>
-                  <div className="profile-details">
-                    <div className="card-body">
-                      {/* Profile details with optional chaining for safety */}
-                      <div className="form-group">
-                        <label className="form-label">Username</label>
-                        <Input
-                          type="text"
-                          name="username"
-                          value={profile?.userName || "N/A"}
-                          readOnly
-                          prefix={
-                            <UserOutlined
-                              style={{ color: "rgba(0,0,0,.25)" }}
-                            />
-                          }
-                          className="mb-1"
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Name</label>
-                        <Input
-                          type="text"
-                          name="name"
-                          value={
-                            profile
-                              ? `${profile.firstName} ${profile.lastName}`
-                              : "N/A"
-                          }
-                          prefix={
-                            <AuditOutlined
-                              style={{ color: "rgba(0,0,0,.25)" }}
-                            />
-                          }
-                          readOnly
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label className="form-label">Role</label>
-                        <Input
-                          type="text"
-                          name="role"
-                          value={profile?.role || "N/A"}
-                          readOnly
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label className="form-label">Gender</label>
-                        <Input
-                          type="text"
-                          name="gender"
-                          value={profile?.gender || "N/A"} // Gender converted to "Male" or "Female"
-                          readOnly
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label className="form-label">Address</label>
-                        <Input
-                          type="text"
-                          name="address"
-                          value={profile?.address || "N/A"} // Default if address is not available
-                          prefix={
-                            <AimOutlined style={{ color: "rgba(0,0,0,.25)" }} />
-                          }
-                          readOnly
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label className="form-label">E-mail</label>
-                        <Input
-                          type="text"
-                          name="email"
-                          value={profile?.email || "N/A"}
-                          readOnly
-                          prefix={
-                            <MailOutlined
-                              style={{ color: "rgba(0,0,0,.25)" }}
-                            />
-                          }
-                          className="mb-1"
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label className="form-label">Phone</label>
-                        <Input
-                          type="text"
-                          name="phoneNumber"
-                          prefix={
-                            <PhoneOutlined
-                              style={{ color: "rgba(0,0,0,.25)" }}
-                            />
-                          }
-                          value={profile?.phoneNumber || "N/A"} // Default if phone is not available
-                          readOnly
-                        />
-                      </div>
-                      <div className="text-right">
-                        <Button className="btn btn-primary">
-                          <Link to="/updateProfile">Edit Profile</Link>
-                        </Button>
-                      </div>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="address">Address</Label>
+                      <Input id="address" value={profile.address} readOnly />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">E-mail</Label>
+                      <Input id="email" value={profile.email} readOnly />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">Phone</Label>
+                      <Input id="phone" value={profile.phoneNumber} readOnly />
+                    </div>
+                    <div className="flex justify-end">
+                      <Button asChild>
+                        <Link to="/updateProfile">Edit Profile</Link>
+                      </Button>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
-      </section>
-      <Toaster richColors position="top-right" />
+        </motion.main>
+      </div>
+      <Toaster />
     </div>
   );
 }

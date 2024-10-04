@@ -38,3 +38,15 @@ export type services = {
   price: number;
   estimatedDuration: number;
 };
+
+export type vetSlots = {
+  isBook: boolean;
+  slotID: number;
+  slotStartTime: string; // Set as string for any valid time format
+  slotEndTime: string; // Similarly set as string
+  weekDate: string; // Set as string to allow various days
+  vetId: string; // Set as string for dynamic vet IDs
+  vetName: string; // Set as string for dynamic vet names
+  vetFirstName: string; // Set as string for dynamic first names
+  vetLastName: string; // Set as string for dynamic last names
+};

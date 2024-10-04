@@ -13,6 +13,14 @@ import OverviewPage from "./pages/OverviewPage/overView";
 import Service from "./pages/ServicePage/service";
 import UsersPage from "./pages/UsersManagePage/Users";
 import ErrorBoundary from "./errorBoudary";
+import SchedulesMPage from "./pages/SchedulesMPage/SchedulesMPage";
+import { registerLicense } from "@syncfusion/ej2-base";
+import SchedulesV from "./pages/SchedulerVet";
+
+// Add your license key here
+registerLicense(
+  "Ngo9BigBOggjHTQxAR8/V1NDaF5cWWtCf1JpR3xbf1x0ZFRHalhYTnRWUiweQnxTdEFiWX9dcXVRT2NcVUxyXA=="
+);
 
 function App() {
   const router = createBrowserRouter([
@@ -45,6 +53,14 @@ function App() {
     {
       path: "/overview",
       element: <OverviewPage />,
+    },
+    {
+      path: "/schedules",
+      element: <SchedulesMPage />,
+    },
+    {
+      path: "/schedulesV",
+      element: <SchedulesV />,
     },
     {
       path: "/service",
