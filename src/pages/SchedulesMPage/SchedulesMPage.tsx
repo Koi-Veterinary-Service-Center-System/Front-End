@@ -1,239 +1,312 @@
-import { useState, useEffect, useRef } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  ScheduleComponent,
-  ViewsDirective,
-  ViewDirective,
-  Day,
-  Week,
-  WorkWeek,
-  Month,
-  Agenda,
-  Inject,
-  Resize,
-  DragAndDrop,
-} from "@syncfusion/ej2-react-schedule";
-import { DatePickerComponent } from "@syncfusion/ej2-react-calendars";
+  Calendar,
+  Edit,
+  Plus,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { format, addDays, startOfWeek, subWeeks, addWeeks } from "date-fns";
 import api from "@/configs/axios";
 import Sidebar from "@/components/Sidebar/sidebar";
 import HeaderAd from "@/components/common/header";
-import { Toaster, toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const PropertyPane = (props) => <div className="mt-5">{props.children}</div>;
-// Create a simple Modal component using Tailwind CSS
-const Modal = ({ isOpen, closeModal, handleSubmit }) => {
-  const [vetID, setVetID] = useState("");
-  const [slotID, setSlotID] = useState("");
+interface Slot {
+  id: string;
+  day: string;
+  task: string;
+  vetId: string; // Added vetId to store vet ID separately
+}
 
-  if (!isOpen) return null; // Don't render the modal if not open
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div
-        className="absolute inset-0 bg-black opacity-50"
-        onClick={closeModal}
-      ></div>
-      <div className="bg-white p-6 rounded shadow-lg z-10">
-        <h2 className="text-lg font-bold mb-4">Add Vet Slot</h2>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit(vetID, slotID);
-            closeModal(); // Close the modal after submission
-          }}
-        >
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="vetID"
-            >
-              Vet ID
-            </label>
-            <input
-              type="text"
-              id="vetID"
-              value={vetID}
-              onChange={(e) => setVetID(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
-              placeholder="Enter Vet ID"
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="slotID"
-            >
-              Slot ID
-            </label>
-            <input
-              type="number"
-              id="slotID"
-              value={slotID}
-              onChange={(e) => setSlotID(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
-              placeholder="Enter Slot ID"
-              required
-            />
-          </div>
-
-          <div className="flex justify-between">
-            <button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Add Slot
-            </button>
-            <button
-              type="button"
-              onClick={closeModal}
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+export default function SchedulePage() {
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentSlot, setCurrentSlot] = useState<Slot | null>(null);
+  const [currentWeekStart, setCurrentWeekStart] = useState(
+    startOfWeek(new Date())
   );
-};
 
-const Scheduler = () => {
-  const scheduleObj = useRef(null);
-  const [vetSlots, setVetSlots] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Function to fetch data from the API
-  const fetchVetSlots = async () => {
-    try {
-      const response = await api.get(`/vetslot/vetslot-list`);
-      const data = response.data;
-
-      const events = data.map((slot) => ({
-        Id: slot.slotID,
-        Subject: `${slot.vetFirstName} ${slot.vetLastName}`,
-        StartTime: new Date(`2024-01-10T${slot.slotStartTime}`),
-        EndTime: new Date(`2024-01-10T${slot.slotEndTime}`),
-        IsAllDay: false,
-        Description: `Vet Name: ${slot.vetName}\nBooking Status: ${
-          slot.isBook ? "❌ Booked" : "✅ Available"
-        }`,
-      }));
-
-      setVetSlots(events);
-    } catch (error) {
-      console.error("Error fetching vet slots:", error);
-    }
-  };
+  const weekDays = Array.from({ length: 7 }, (_, i) =>
+    addDays(currentWeekStart, i)
+  );
 
   useEffect(() => {
-    fetchVetSlots();
+    async function fetchVetslots() {
+      try {
+        const response = await api.get("/vetslot/vetslot-list");
+        const data = response.data;
+        const formattedSlots = data.map((slot: any) => ({
+          id: slot.slotID.toString(),
+          day: slot.weekDate,
+          task: `${slot.vetFirstName} ${slot.vetLastName}`,
+        }));
+        setSlots(formattedSlots);
+      } catch (error) {
+        console.error("Error fetching vet slots:", error);
+      }
+    }
+    fetchVetslots();
   }, []);
 
-  // Handle add slot for the vet
-  const addVetSlot = async (vetID, slotID) => {
+  // Function to handle adding a new slot
+  const handleAddSlot = async (newSlot: Omit<Slot, "id">) => {
     try {
-      const values = { vetID, slotID };
-      const response = await api.post(`/vetslot/add-vetslot`, values);
-      console.log("Response: ", response.data);
-      toast.success("Add vet to slot success");
-      fetchVetSlots(); // Refresh the slots after adding one
+      // Prepare the data for the POST request
+      const vetId = newSlot.task.replace(/\s/g, "").toLowerCase(); // Generate vetId from task name
+
+      const requestBody = {
+        vetID: vetId,
+        slotID: parseInt(newSlot.id), // Use user-provided slot ID
+      };
+
+      // Make the POST request to add a new vet slot
+      const response = await api.post("/vetslot/add-vetslot", requestBody, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("New Slot Added:", response.data);
+
+      // Add the new slot to the local state after it’s successfully added
+      setSlots([
+        ...slots,
+        { ...newSlot, id: requestBody.slotID.toString(), vetId }, // Store vetId in slot object
+      ]);
     } catch (error) {
       console.error(
-        "Error posting vet slot: ",
+        "Error adding new vet slot:",
+        error.response ? error.response.data : error.message
+      );
+    }
+
+    setIsOpen(false);
+  };
+
+  const handleDeleteSlot = async (vetId: string, slotId: string) => {
+    try {
+      // Make the DELETE request to delete a vet slot using both vetId and slotId
+      const response = await api.delete(
+        `/vetslot/delete-vetslot/${vetId}/${slotId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Delete response:", response);
+
+      // Remove the deleted slot from the local state
+      setSlots(slots.filter((slot) => slot.id !== slotId));
+      console.log(`Slot with ID ${slotId} deleted successfully.`);
+    } catch (error) {
+      console.error(
+        "Error deleting vet slot:",
         error.response ? error.response.data : error.message
       );
     }
   };
 
-  const change = (args) => {
-    if (scheduleObj.current) {
-      scheduleObj.current.selectedDate = args.value;
-      scheduleObj.current.dataBind();
-    }
+  const handlePreviousWeek = () => {
+    setCurrentWeekStart(subWeeks(currentWeekStart, 1));
   };
 
-  const onDragStart = (arg) => {
-    arg.navigation.enable = true;
+  const handleNextWeek = () => {
+    setCurrentWeekStart(addWeeks(currentWeekStart, 1));
   };
 
   return (
-    <div className="flex h-screen bg-gray-900 text-gray-100 overflow-hidden">
-      {/* BG */}
+    <div className="flex h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 overflow-hidden">
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 opacity-80 " />
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 opacity-80" />
         <div className="absolute inset-0 backdrop-blur-sm" />
       </div>
       <Sidebar />
       <div className="flex-1 overflow-auto relative z-10">
-        <HeaderAd title="Schedules for Vet" />
-        <motion.div
-          className="m-2 md:m-10 mt-24 p-2 md:p-10 bg-white rounded-3xl"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <h1 className="text-2xl font-bold">Calendar</h1>
-          <button
-            className="bg-blue-500 text-white p-2 rounded mb-4"
-            onClick={() => setIsModalOpen(true)} // Open modal on click
+        <HeaderAd title="Schedules Assigned for Vets" />
+        <div className="p-6">
+          <motion.div
+            className="flex justify-between items-center mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
           >
-            Add Slot for Vet
-          </button>
-          <ScheduleComponent
-            height="650px"
-            ref={scheduleObj}
-            selectedDate={new Date(2024, 0, 10)}
-            eventSettings={{ dataSource: vetSlots }}
-            dragStart={onDragStart}
+            <h2 className="text-3xl font-bold text-gray-100">
+              Weekly Schedule
+            </h2>
+            <div className="flex items-center space-x-4">
+              <Button variant="secondary" onClick={handlePreviousWeek}>
+                <ChevronLeft className="h-4 w-4 mr-2" /> Previous Week
+              </Button>
+              <Button variant="secondary" onClick={handleNextWeek}>
+                Next Week <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+          </motion.div>
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-7 gap-6 mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
           >
-            <ViewsDirective>
-              {["Day", "Week", "WorkWeek", "Month", "Agenda"].map((item) => (
-                <ViewDirective key={item} option={item} />
-              ))}
-            </ViewsDirective>
-            <Inject
-              services={[
-                Day,
-                Week,
-                WorkWeek,
-                Month,
-                Agenda,
-                Resize,
-                DragAndDrop,
-              ]}
-            />
-          </ScheduleComponent>
-          <PropertyPane>
-            <table style={{ width: "100%", background: "white" }}>
-              <tbody>
-                <tr style={{ height: "50px" }}>
-                  <td style={{ width: "100%" }}>
-                    <DatePickerComponent
-                      value={new Date(2024, 0, 10)}
-                      showClearButton={false}
-                      placeholder="Current Date"
-                      floatLabelType="Always"
-                      change={change}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </PropertyPane>
-        </motion.div>
-
-        {/* Modal component */}
-        <Modal
-          isOpen={isModalOpen}
-          closeModal={() => setIsModalOpen(false)}
-          handleSubmit={addVetSlot}
-        />
+            {weekDays.map((day) => (
+              <Card
+                key={day.toISOString()}
+                className="col-span-1 bg-gray-800 border-gray-700 shadow-lg hover:shadow-xl transition-shadow duration-300"
+              >
+                <CardHeader className="bg-gray-700 rounded-t-lg">
+                  <CardTitle className="text-center text-xl font-bold">
+                    {format(day, "EEEE")}
+                  </CardTitle>
+                  <p className="text-center text-sm text-gray-300">
+                    {format(day, "MMM d")}
+                  </p>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  {slots
+                    .filter((slot) => slot.day === format(day, "EEEE"))
+                    .map((slot) => (
+                      <div
+                        key={slot.id}
+                        className="mb-3 p-3 bg-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium text-gray-100">
+                            {slot.task}
+                          </span>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setCurrentSlot(slot);
+                                setIsOpen(true);
+                              }}
+                              className="text-gray-300 hover:text-gray-100"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() =>
+                                handleDeleteSlot(
+                                  slot.task.replace(/\s/g, "").toLowerCase(),
+                                  slot.id
+                                )
+                              }
+                              className="text-gray-300 hover:text-red-400"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  <Button
+                    variant="outline"
+                    className="w-full mt-2 bg-gray-700 hover:bg-gray-600 text-gray-100"
+                    onClick={() => {
+                      setCurrentSlot({
+                        id: "",
+                        day: format(day, "EEEE"),
+                        task: "",
+                        vetId: "",
+                      });
+                      setIsOpen(true);
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" /> Add Slot
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </motion.div>
+        </div>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogContent className="bg-gray-800 text-gray-100">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">
+                {currentSlot?.id ? "Edit Slot" : "Add New Slot"}
+              </DialogTitle>
+              <DialogDescription className="text-gray-400">
+                {currentSlot?.id
+                  ? "Edit the details of the slot."
+                  : "Add a new slot to the schedule."}
+              </DialogDescription>
+            </DialogHeader>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const newSlot = {
+                  id: formData.get("slotID") as string,
+                  task: formData.get("vetId") as string,
+                  day: "",
+                  vetId: "",
+                };
+                handleAddSlot(newSlot);
+              }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="vetId" className="text-right text-gray-300">
+                  Vet ID
+                </Label>
+                <Input
+                  id="vetId"
+                  name="vetId"
+                  defaultValue={currentSlot?.task}
+                  className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="slotId" className="text-right text-gray-300">
+                  Slot ID
+                </Label>
+                <Input
+                  id="slotId"
+                  name="slotID"
+                  defaultValue={currentSlot?.id}
+                  className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {currentSlot?.id ? "Save Changes" : "Add Slot"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
-      <Toaster richColors position="top-right" />
     </div>
   );
-};
-
-export default Scheduler;
+}

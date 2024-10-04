@@ -299,7 +299,7 @@ const Process = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Orders</CardTitle>
+                  <CardTitle>Recent Bookings</CardTitle>
                   <div className="flex items-center space-x-2">
                     <Search className="h-4 w-4 text-muted-foreground" />
                     <Filter className="h-4 w-4 text-muted-foreground" />

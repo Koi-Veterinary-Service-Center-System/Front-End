@@ -15,6 +15,7 @@ import UsersPage from "./pages/UsersManagePage/Users";
 import ErrorBoundary from "./errorBoudary";
 import SchedulesMPage from "./pages/SchedulesMPage/SchedulesMPage";
 import { registerLicense } from "@syncfusion/ej2-base";
+import SchedulesV from "./pages/SchedulerVet";
 
 // Add your license key here
 registerLicense(
@@ -56,6 +57,10 @@ function App() {
     {
       path: "/schedules",
       element: <SchedulesMPage />,
+    },
+    {
+      path: "/schedulesV",
+      element: <SchedulesV />,
     },
     {
       path: "/service",

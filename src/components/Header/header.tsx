@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react"; // Import useState and useEffect
 import { profile } from "../../types/info";
 import api from "../../configs/axios";
+import { Bell, CalendarCheck2, Heart } from "lucide-react";
 
 function Header() {
   const { Search } = Input;
@@ -87,10 +88,13 @@ function Header() {
 
         <div className="icons">
           <Link to="/favorites" className="heart-icon" data-count="0">
-            <i className="bx bx-heart"></i>
+            <Heart />
           </Link>
           <Link to="/cart" className="cart-icon" data-count="2">
-            <i className="bx bx-cart"></i>
+            <Bell />
+          </Link>
+          <Link to="/schedulesV" className="cart-icon" data-count="2">
+            <CalendarCheck2 />
           </Link>
           <div>
             {isLoggedIn ? (
