@@ -1,9 +1,10 @@
+"use client";
+
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import "./profile.scss";
-import api from "../../configs/axios"; // Assuming Axios is used for making requests
-import { Button, Image, Input } from "antd";
-import { profile } from "../../types/info";
+import { motion } from "framer-motion";
+import api from "../../configs/axios";
+import { Button, Input } from "antd";
 import { Toaster, toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -18,8 +19,20 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+interface Profile {
+  imageURL: string;
+  userName: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  gender: string;
+  address: string;
+  email: string;
+  phoneNumber: string;
+}
+
 function Profile() {
-  const [profile, setProfile] = useState<profile | null>(null); // Use the Profile type
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeMenuItem, setActiveMenuItem] = useState("dashboard");
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -28,8 +41,6 @@ function Profile() {
   useEffect(() => {
     if (location.state && location.state.updateProfileSuccess) {
       toast.success("Profile updated successfully!");
-
-      // Reset location state to prevent duplicate toasts
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -38,17 +49,16 @@ function Profile() {
     try {
       const response = await api.get("/User/profile", {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Use token if available
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-      // Convert gender from boolean to "Male" or "Female"
       const genderProfile = {
         ...response.data,
-        gender: response.data.gender ? "Male" : "Female", // Gender conversion
+        gender: response.data.gender ? "Male" : "Female",
       };
 
-      setProfile(genderProfile); // Set the transformed profile data
+      setProfile(genderProfile);
     } catch (error) {
       setError(error.response?.data?.message || "Failed to fetch profile data");
     }
@@ -58,18 +68,15 @@ function Profile() {
     fetchProfile();
   }, []);
 
-  // Handle menu item click
   const handleMenuItemClick = (menuItem: string) => {
     setActiveMenuItem(menuItem);
   };
 
-  // Handle dark mode toggle
   const handleDarkModeSwitch = () => {
     setIsDarkMode(!isDarkMode);
     document.body.classList.toggle("dark", !isDarkMode);
   };
 
-  // Render loading or error state
   if (error) {
     return <div className="text-red-500">Error: {error}</div>;
   }
@@ -78,11 +85,25 @@ function Profile() {
     return <div>Loading...</div>;
   }
 
+  const sidebarVariants = {
+    hidden: { x: -300 },
+    visible: { x: 0, transition: { type: "spring", stiffness: 100 } },
+  };
+
+  const mainContentVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.5 } },
+  };
+
   return (
     <div className={`min-h-screen ${isDarkMode ? "dark" : ""}`}>
       <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-gray-100 dark:bg-gray-800 h-screen sticky top-0">
+        <motion.aside
+          className="w-64 bg-gray-100 dark:bg-gray-800 h-screen sticky top-0"
+          initial="hidden"
+          animate="visible"
+          variants={sidebarVariants}
+        >
           <div className="p-4">
             <Link to="/" className="flex items-center space-x-2 text-primary">
               <User className="h-6 w-6" />
@@ -96,8 +117,8 @@ function Profile() {
                   to="/profile"
                   className={`flex items-center space-x-2 p-2 ${
                     activeMenuItem === "dashboard"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
+                      ? "bg-blue-400 text-primary-foreground"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
                   onClick={() => handleMenuItemClick("dashboard")}
                 >
@@ -110,8 +131,8 @@ function Profile() {
                   to="/process"
                   className={`flex items-center space-x-2 p-2 ${
                     activeMenuItem === "my-store"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
+                      ? "bg-blue-400 text-primary-foreground"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
                   onClick={() => handleMenuItemClick("my-store")}
                 >
@@ -124,8 +145,8 @@ function Profile() {
                   to="/message"
                   className={`flex items-center space-x-2 p-2 ${
                     activeMenuItem === "message"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
+                      ? "bg-blue-400 text-primary-foreground"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
                   onClick={() => handleMenuItemClick("message")}
                 >
@@ -144,10 +165,14 @@ function Profile() {
               <ChevronLeft className="mr-2 h-4 w-4" /> Back
             </Button>
           </div>
-        </aside>
+        </motion.aside>
 
-        {/* Main Content */}
-        <main className="flex-1 bg-white dark:bg-gray-900">
+        <motion.main
+          className="flex-1 bg-white dark:bg-gray-900"
+          initial="hidden"
+          animate="visible"
+          variants={mainContentVariants}
+        >
           <header className="bg-white dark:bg-gray-800 shadow">
             <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -222,7 +247,7 @@ function Profile() {
               </CardContent>
             </Card>
           </div>
-        </main>
+        </motion.main>
       </div>
       <Toaster />
     </div>
