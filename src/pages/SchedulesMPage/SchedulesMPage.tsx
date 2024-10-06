@@ -26,19 +26,14 @@ import { format, addDays, startOfWeek, subWeeks, addWeeks } from "date-fns";
 import api from "@/configs/axios";
 import Sidebar from "@/components/Sidebar/sidebar";
 import HeaderAd from "@/components/common/header";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface Slot {
   id: string;
   day: string;
   task: string;
-  vetId: string; // Added vetId to store vet ID separately
+  vetId: string;
+  startTime: string; // Added startTime field for slots
+  endTime: string; // Added endTime field for slots
 }
 
 export default function SchedulePage() {
@@ -58,10 +53,15 @@ export default function SchedulePage() {
       try {
         const response = await api.get("/vetslot/vetslot-list");
         const data = response.data;
+
+        // Ensure vetId, startTime, and endTime are included in the slot object
         const formattedSlots = data.map((slot: any) => ({
           id: slot.slotID.toString(),
           day: slot.weekDate,
           task: `${slot.vetFirstName} ${slot.vetLastName}`,
+          vetId: slot.vetID, // Ensure vetId is mapped correctly
+          startTime: slot.slotStartTime || "09:00:00", // Provide default times if not present
+          endTime: slot.slotEndTime || "10:00:00", // Provide default times if not present
         }));
         setSlots(formattedSlots);
       } catch (error) {
@@ -75,11 +75,13 @@ export default function SchedulePage() {
   const handleAddSlot = async (newSlot: Omit<Slot, "id">) => {
     try {
       // Prepare the data for the POST request
-      const vetId = newSlot.task.replace(/\s/g, "").toLowerCase(); // Generate vetId from task name
+      const vetId = newSlot.vetId; // Keep vetId from the form input
 
       const requestBody = {
         vetID: vetId,
         slotID: parseInt(newSlot.id), // Use user-provided slot ID
+        slotStartTime: newSlot.startTime, // Send startTime
+        slotEndTime: newSlot.endTime, // Send endTime
       };
 
       // Make the POST request to add a new vet slot
@@ -107,6 +109,11 @@ export default function SchedulePage() {
   };
 
   const handleDeleteSlot = async (vetId: string, slotId: string) => {
+    if (!vetId || !slotId) {
+      console.error("vetId or slotId is missing!");
+      return;
+    }
+
     try {
       // Make the DELETE request to delete a vet slot using both vetId and slotId
       const response = await api.delete(
@@ -126,6 +133,40 @@ export default function SchedulePage() {
     } catch (error) {
       console.error(
         "Error deleting vet slot:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  };
+
+  //Handle edit shcedule for vet
+  const handleUpdateSlot = async (updatedSlot: Slot) => {
+    try {
+      const requestBody = {
+        vetID: updatedSlot.vetId,
+        slotID: parseInt(updatedSlot.id), // Ensure slotID is sent as an integer
+        isBook: true, // Assuming 'isBook' represents a booked slot
+      };
+
+      // Send the PUT request to update the slot
+      const response = await api.put("/vetslot/update-vetslot", requestBody, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("Slot Updated:", response.data);
+
+      // Update the local state with the updated slot information
+      setSlots((prevSlots) =>
+        prevSlots.map((slot) =>
+          slot.id === updatedSlot.id ? updatedSlot : slot
+        )
+      );
+
+      setIsOpen(false); // Close the dialog after the update
+    } catch (error) {
+      console.error(
+        "Error updating vet slot:",
         error.response ? error.response.data : error.message
       );
     }
@@ -191,12 +232,13 @@ export default function SchedulePage() {
                     .filter((slot) => slot.day === format(day, "EEEE"))
                     .map((slot) => (
                       <div
-                        key={slot.id}
+                        key={`${slot.id}-${format(day, "yyyy-MM-dd")}`}
                         className="mb-3 p-3 bg-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
                       >
                         <div className="flex justify-between items-center">
                           <span className="font-medium text-gray-100">
-                            {slot.task}
+                            {slot.task} - {slot.startTime} to {slot.endTime}{" "}
+                            {/* Show start and end time */}
                           </span>
                           <div className="flex space-x-2">
                             <Button
@@ -214,10 +256,7 @@ export default function SchedulePage() {
                               variant="ghost"
                               size="icon"
                               onClick={() =>
-                                handleDeleteSlot(
-                                  slot.task.replace(/\s/g, "").toLowerCase(),
-                                  slot.id
-                                )
+                                handleDeleteSlot(slot.vetId, slot.id)
                               }
                               className="text-gray-300 hover:text-red-400"
                             >
@@ -236,6 +275,8 @@ export default function SchedulePage() {
                         day: format(day, "EEEE"),
                         task: "",
                         vetId: "",
+                        startTime: "09:00:00", // Default start time
+                        endTime: "10:00:00", // Default end time
                       });
                       setIsOpen(true);
                     }}
@@ -266,8 +307,10 @@ export default function SchedulePage() {
                 const newSlot = {
                   id: formData.get("slotID") as string,
                   task: formData.get("vetId") as string,
-                  day: "",
-                  vetId: "",
+                  day: currentSlot?.day || "",
+                  vetId: formData.get("vetId") as string,
+                  startTime: formData.get("startTime") as string, // Capture startTime input
+                  endTime: formData.get("endTime") as string, // Capture endTime input
                 };
                 handleAddSlot(newSlot);
               }}
@@ -280,7 +323,7 @@ export default function SchedulePage() {
                 <Input
                   id="vetId"
                   name="vetId"
-                  defaultValue={currentSlot?.task}
+                  defaultValue={currentSlot?.vetId || ""}
                   className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
                 />
               </div>
@@ -291,7 +334,31 @@ export default function SchedulePage() {
                 <Input
                   id="slotId"
                   name="slotID"
-                  defaultValue={currentSlot?.id}
+                  defaultValue={currentSlot?.id || ""}
+                  className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="startTime" className="text-right text-gray-300">
+                  Start Time
+                </Label>
+                <Input
+                  id="startTime"
+                  name="startTime"
+                  type="time"
+                  defaultValue={currentSlot?.startTime || "09:00"}
+                  className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="endTime" className="text-right text-gray-300">
+                  End Time
+                </Label>
+                <Input
+                  id="endTime"
+                  name="endTime"
+                  type="time"
+                  defaultValue={currentSlot?.endTime || "10:00"}
                   className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
                 />
               </div>
