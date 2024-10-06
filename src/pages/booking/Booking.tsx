@@ -7,8 +7,9 @@ import { useLocation } from "react-router-dom";
 import Banner from "../../components/banner";
 import api from "../../configs/axios";
 import moment from "moment";
-import { Slot, Service, Vet } from "../../types/info";
+import { Slot, Service, Vet, koiOrPool, Payment } from "../../types/info";
 import { Toaster, toast } from "sonner";
+import { CircleDollarSign, Fish, Waves } from "lucide-react";
 
 const { Option } = Select;
 
@@ -29,6 +30,10 @@ function Booking() {
   const [isLoadingSlots, setLoadingSlots] = useState(false);
   const [isLoadingServices, setLoadingServices] = useState(false);
   const [isLoadingVets, setLoadingVets] = useState(false);
+  const [koiAndPools, setKoiAndPools] = useState<koiOrPool[]>([]);
+  const [isLoadingKoiAndPools, setLoadingKoiAndPools] = useState(false);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [isLoadingPayment, setLoadingPayment] = useState(false);
 
   // Ant Design form hook
   const [form] = Form.useForm();
@@ -89,6 +94,41 @@ function Booking() {
     fetchAllVets();
   }, []);
 
+  //Handle fetch fish or Pool
+  useEffect(() => {
+    const fetchKoiOrPools = async () => {
+      try {
+        setLoadingKoiAndPools(true);
+        const response = await api.get("/koi-or-pool/all-customer-koi-pool");
+        setKoiAndPools(response.data);
+      } catch (error) {
+        console.log("Error fetching koi and pools: ", error);
+        toast.error("Failed to load your koi and pools.");
+      } finally {
+        setLoadingKoiAndPools(false);
+      }
+    };
+    fetchKoiOrPools();
+  }, []);
+
+  //Fetch payment data
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        setLoadingPayment(true);
+        const response = await api.get("/payment/all-payment");
+        setPayments(response.data);
+      } catch (error) {
+        console.error("Error fetching payments: ", error);
+        toast.error("Failed to load payments.");
+      } finally {
+        setLoadingPayment(false);
+      }
+    };
+
+    fetchPayments();
+  }, []); // Empty dependency array means this effect runs once when component mounts
+
   // Fetch available Vets for a selected slot
   const fetchVetsBySlot = async (slotId: number) => {
     try {
@@ -130,11 +170,6 @@ function Booking() {
     console.log("Selected Vet Name:", selectedVetName); // Debugging
   };
 
-  // Handle payment method selection
-  const handlePaymentChange = (value) => {
-    setPaymentMethod(value);
-  };
-
   // Calculate total example logic
   const calculateTotal = () => {
     const servicePrice = 100; // Mock service price
@@ -143,14 +178,12 @@ function Booking() {
 
   const handleBooking = async (values: any) => {
     try {
-      // Format bookingDate as a string
       const bookingDate = moment(values.pickupDate).format("YYYY-MM-DD");
 
-      // Construct the booking data
       const bookingData = {
         note: values.note || "",
-        koiOrPoolId: values.fish || null,
-        vetName: form.getFieldValue("vetName") || "", // Ensure vetName is retrieved correctly
+        koiOrPoolId: values.koiOrPoolId || null,
+        vetName: form.getFieldValue("vetName") || "",
         totalAmount: total,
         location: values.location,
         slotId: values.slot || 0,
@@ -159,22 +192,46 @@ function Booking() {
         bookingDate: bookingDate,
       };
 
-      console.log("Booking Data:", bookingData); // Debug the data
+      console.log("Booking Data:", bookingData);
 
-      // Send booking data to backend API
       const response = await api.post("/booking/create-booking", bookingData);
 
-      // Handle success response
       if (response.status === 200 || response.status === 201) {
         toast.success("Booking successful!");
-      } else {
-        throw new Error("Unexpected response from server.");
       }
-    } catch (error) {
-      // Handle errors
-      toast.error(
-        "Booking failed: " + (error.response?.data?.message || error.message)
-      );
+    } catch (error: any) {
+      console.error("Booking error:", error);
+
+      if (error.response) {
+        const errorMessage =
+          error.response.data.message || error.response.data.error;
+
+        // Check if the error message contains specific keywords indicating a foreign key violation
+        if (
+          errorMessage &&
+          errorMessage.includes("FK_Bookings_Payments_PaymentID")
+        ) {
+          toast.error(
+            "Invalid payment method selected. Please choose a valid payment option."
+          );
+        } else if (errorMessage && errorMessage.includes("foreign key")) {
+          // Generic foreign key error
+          toast.error(
+            "There was an issue with your selection. Please ensure all options are valid."
+          );
+        } else {
+          // Other types of errors
+          toast.error(
+            `Booking failed: ${errorMessage || "An unexpected error occurred"}`
+          );
+        }
+      } else if (error.request) {
+        toast.error(
+          "Unable to connect to the server. Please check your connection and try again."
+        );
+      } else {
+        toast.error(`An error occurred: ${error.message}`);
+      }
     }
   };
 
@@ -344,18 +401,31 @@ function Booking() {
                     />
                   </Form.Item>
 
-                  <Form.Item label="Choose Fish or Pool" name="fish">
-                    <Select className="form-control">
-                      <Option value={1}>Fish 1</Option>
-                      <Option value={2}>Fish 2</Option>
-                      <Option value={3}>Pool 1</Option>
+                  <Form.Item label="Choose Fish or Pool" name="koiOrPoolId">
+                    <Select
+                      className="form-control"
+                      loading={isLoadingKoiAndPools}
+                      placeholder="Select a fish or pool"
+                    >
+                      {koiAndPools.map((item) => (
+                        <Option key={item.koiOrPoolID} value={item.koiOrPoolID}>
+                          <div className="flex items-center gap-2">
+                            <span>{item.name}</span>
+                            {item.isPool ? (
+                              <Waves className="text-cyan-400" />
+                            ) : (
+                              <Fish className="text-orange-500" />
+                            )}
+                          </div>
+                        </Option>
+                      ))}
                     </Select>
                   </Form.Item>
 
                   {/* Payment Method Section */}
                   <Form.Item
                     label="Payment Method"
-                    name="paymentMethod"
+                    name="paymentID"
                     rules={[
                       {
                         required: true,
@@ -363,9 +433,18 @@ function Booking() {
                       },
                     ]}
                   >
-                    <Select onChange={handlePaymentChange}>
-                      <Option value={1}>VNPay</Option>
-                      <Option value={2}>Cash on Delivery</Option>
+                    <Select
+                      className="form-control"
+                      loading={isLoadingPayment}
+                      placeholder="Select payment method"
+                    >
+                      {payments.map((item) => (
+                        <Option key={item.paymentID} value={item.paymentID}>
+                          <div className="flex items-center gap-2">
+                            <span>{item.type}</span>
+                          </div>
+                        </Option>
+                      ))}
                     </Select>
                   </Form.Item>
 

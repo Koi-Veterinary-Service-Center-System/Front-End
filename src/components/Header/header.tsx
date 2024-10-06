@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"; // Import useState and useEffect
 import { profile } from "../../types/info";
 import api from "../../configs/axios";
 import { Bell, CalendarCheck2, Heart } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 function Header() {
   const { Search } = Input;
@@ -100,7 +101,13 @@ function Header() {
             {isLoggedIn ? (
               <div className="user-profile-dropdown">
                 <div className="user-icon">
-                  <img src={profile?.imageURL} alt="" />
+                  <Avatar className="bg-gray-500">
+                    <AvatarImage src={profile?.imageURL} alt="Profile" />
+                    <AvatarFallback>
+                      {profile?.firstName?.[0]}
+                      {profile?.lastName?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
                   <i className="ion-chevron-down"></i>
                   <ul className="dropdown-menu">
                     <li>

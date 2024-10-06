@@ -50,3 +50,9 @@ export type vetSlots = {
   vetFirstName: string; // Set as string for dynamic first names
   vetLastName: string; // Set as string for dynamic last names
 };
+
+export type Payment = {
+  paymentID: string;
+  qrcode: string;
+  type: string;
+};

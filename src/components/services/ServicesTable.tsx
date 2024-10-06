@@ -231,6 +231,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({
         visible={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={null}
+        className=" bg-gray-800"
       >
         <Form form={form} onFinish={handleUpdateService}>
           <Form.Item

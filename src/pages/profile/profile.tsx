@@ -189,7 +189,10 @@ function Profile() {
                 </div>
                 <Avatar>
                   <AvatarImage src={profile.imageURL} alt="Profile" />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarFallback>
+                    {profile?.firstName?.[0]}
+                    {profile?.lastName?.[0]}
+                  </AvatarFallback>
                 </Avatar>
               </div>
             </div>
