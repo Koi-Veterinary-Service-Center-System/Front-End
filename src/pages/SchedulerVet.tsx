@@ -1,118 +1,112 @@
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Calendar,
-  Clock,
-  Fish,
-  User,
-  CheckCircle2,
-  XCircle,
-} from "lucide-react";
+"use client";
 
-// Mock data - in a real app, this would be an array of appointments
-const scheduleSlot = {
-  isBook: false,
-  slotID: 1,
-  slotStartTime: "09:00:00",
-  slotEndTime: "10:00:00",
-  weekDate: "Monday",
-  vetId: "v1",
-  vetName: "johndoe",
-  vetFirstName: "John",
-  vetLastName: "Doe",
+import { useState } from "react";
+import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+// Mock schedule data
+const mockSchedule = {
+  0: [{ start: "09:00", end: "17:00" }],
+  1: [{ start: "10:00", end: "18:00" }],
+  2: [{ start: "09:00", end: "17:00" }],
+  3: [{ start: "08:00", end: "16:00" }],
+  4: [{ start: "09:00", end: "17:00" }],
+  5: [], // Weekend off
+  6: [], // Weekend off
 };
 
-// For demonstration, creating multiple slots
-const mockSchedule = [
-  {
-    ...scheduleSlot,
-    isBook: true,
-    customerName: "Alice Smith",
-    serviceType: "Koi Health Check",
-  },
-  {
-    ...scheduleSlot,
-    slotStartTime: "10:00:00",
-    slotEndTime: "11:00:00",
-    isBook: false,
-  },
-  {
-    ...scheduleSlot,
-    slotStartTime: "11:00:00",
-    slotEndTime: "12:00:00",
-    isBook: true,
-    customerName: "Bob Johnson",
-    serviceType: "Pond Water Quality Assessment",
-  },
-];
+export default function Component() {
+  const [currentWeek, setCurrentWeek] = useState(new Date());
 
-export default function SchedulesV() {
+  const nextWeek = () => {
+    setCurrentWeek(new Date(currentWeek.getTime() + 7 * 24 * 60 * 60 * 1000));
+  };
+
+  const prevWeek = () => {
+    setCurrentWeek(new Date(currentWeek.getTime() - 7 * 24 * 60 * 60 * 1000));
+  };
+
+  const getDaysOfWeek = (date) => {
+    const start = new Date(date);
+    start.setDate(start.getDate() - start.getDay());
+    return Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(start);
+      day.setDate(day.getDate() + i);
+      return day;
+    });
+  };
+
+  const formatTime = (time) => {
+    return new Date(`2000-01-01T${time}`).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const daysOfWeek = getDaysOfWeek(currentWeek);
+
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Daily Schedule</h1>
-          <p className="text-gray-500">
-            Dr. {scheduleSlot.vetFirstName} {scheduleSlot.vetLastName}
-          </p>
+    <Card className="w-full max-w-4xl mx-auto">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        {/* ArrowLeft button to go back using window.history.back() */}
+        <Button
+          variant="ghost"
+          className="w-10 h-10 p-0"
+          onClick={() => window.history.back()}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="sr-only">Go back</span>
+        </Button>
+        <CardTitle>Fish Vet Schedule</CardTitle>
+        <div className="w-10 h-10" /> {/* Placeholder for symmetry */}
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">
+            {daysOfWeek[0].toLocaleDateString("default", {
+              month: "long",
+              year: "numeric",
+            })}
+          </h2>
+          <div className="flex space-x-2">
+            <Button variant="outline" size="icon" onClick={prevWeek}>
+              <ChevronLeft className="h-4 w-4" />
+              <span className="sr-only">Previous week</span>
+            </Button>
+            <Button variant="outline" size="icon" onClick={nextWeek}>
+              <ChevronRight className="h-4 w-4" />
+              <span className="sr-only">Next week</span>
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="text-blue-600" />
-          <span className="font-medium">{scheduleSlot.weekDate}</span>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {mockSchedule.map((slot, index) => (
-          <Card
-            key={index}
-            className={slot.isBook ? "border-l-4 border-l-blue-600" : ""}
-          >
-            <CardContent className="flex items-center justify-between p-4">
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col items-center justify-center w-20">
-                  <Clock className="text-gray-500 mb-1" size={20} />
-                  <span className="text-sm font-medium">
-                    {slot.slotStartTime.slice(0, 5)}
-                  </span>
+        <div className="grid grid-cols-7 gap-2">
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+            <div key={day} className="font-semibold text-sm py-2 text-center">
+              {day}
+            </div>
+          ))}
+          {daysOfWeek.map((date, index) => (
+            <div
+              key={date.toISOString()}
+              className="border rounded-md p-2 h-32 overflow-y-auto"
+            >
+              <div className="text-sm font-medium mb-1">{date.getDate()}</div>
+              {mockSchedule[index].map((slot, slotIndex) => (
+                <div
+                  key={slotIndex}
+                  className="text-xs bg-cyan-300 text-primary-foreground rounded px-1 py-0.5 mb-1"
+                >
+                  {formatTime(slot.start)} - {formatTime(slot.end)}
                 </div>
-
-                {slot.isBook ? (
-                  <div>
-                    <h3 className="font-medium flex items-center gap-2">
-                      <User size={20} className="text-gray-500" />
-                      {slot.customerName}
-                    </h3>
-                    <p className="text-gray-500 flex items-center gap-2 mt-1">
-                      <Fish size={16} />
-                      {slot.serviceType}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="text-gray-500">Available Slot</div>
-                )}
-              </div>
-
-              <div className="flex items-center">
-                {slot.isBook ? (
-                  <CheckCircle2 className="text-green-500" size={24} />
-                ) : (
-                  <XCircle className="text-gray-400" size={24} />
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="mt-6 flex gap-4">
-        <button className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          Add Availability
-        </button>
-        <button className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50">
-          Block Time Off
-        </button>
-      </div>
-    </div>
+              ))}
+              {mockSchedule[index].length === 0 && (
+                <div className="text-xs text-muted-foreground">Off duty</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

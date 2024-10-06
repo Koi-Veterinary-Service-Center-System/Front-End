@@ -16,6 +16,7 @@ import ErrorBoundary from "./errorBoudary";
 import SchedulesMPage from "./pages/SchedulesMPage/SchedulesMPage";
 import { registerLicense } from "@syncfusion/ej2-base";
 import SchedulesV from "./pages/SchedulerVet";
+import AllService from "./pages/AllService/allService";
 
 // Add your license key here
 registerLicense(
@@ -28,6 +29,10 @@ function App() {
       path: "/",
       element: <Home />,
       errorElement: <ErrorBoundary />,
+    },
+    {
+      path: "/allservice",
+      element: <AllService />,
     },
     {
       path: "/booking",

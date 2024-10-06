@@ -172,8 +172,13 @@ function Booking() {
 
   // Calculate total example logic
   const calculateTotal = () => {
-    const servicePrice = 100; // Mock service price
-    setTotal(servicePrice);
+    const selectedService = services.find(
+      (service) => service.serviceID === form.getFieldValue("serviceType")
+    );
+    if (selectedService) {
+      const totalAmount = selectedService.price + additionalCosts; // Adjust based on requirements
+      setTotal(totalAmount);
+    }
   };
 
   const handleBooking = async (values: any) => {
