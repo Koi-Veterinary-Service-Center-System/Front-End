@@ -26,6 +26,7 @@ import { format, addDays, startOfWeek, subWeeks, addWeeks } from "date-fns";
 import api from "@/configs/axios";
 import Sidebar from "@/components/Sidebar/sidebar";
 import HeaderAd from "@/components/common/header";
+import { Toaster, toast } from "sonner";
 
 interface Slot {
   id: string;
@@ -126,7 +127,7 @@ export default function SchedulePage() {
       );
 
       console.log("Delete response:", response);
-
+      toast.success("Deleted slot successful!");
       // Remove the deleted slot from the local state
       setSlots(slots.filter((slot) => slot.id !== slotId));
       console.log(`Slot with ID ${slotId} deleted successfully.`);
@@ -155,7 +156,7 @@ export default function SchedulePage() {
       });
 
       console.log("Slot Updated:", response.data);
-
+      toast.success("Updated slot successful!");
       // Update the local state with the updated slot information
       setSlots((prevSlots) =>
         prevSlots.map((slot) =>
@@ -245,13 +246,14 @@ export default function SchedulePage() {
                               variant="ghost"
                               size="icon"
                               onClick={() => {
-                                setCurrentSlot(slot);
-                                setIsOpen(true);
+                                setCurrentSlot(slot); // Set the current slot for editing
+                                setIsOpen(true); // Open the form modal
                               }}
                               className="text-gray-300 hover:text-gray-100"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
+
                             <Button
                               variant="ghost"
                               size="icon"
@@ -304,7 +306,7 @@ export default function SchedulePage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
-                const newSlot = {
+                const updatedSlot = {
                   id: formData.get("slotID") as string,
                   task: formData.get("vetId") as string,
                   day: currentSlot?.day || "",
@@ -312,7 +314,14 @@ export default function SchedulePage() {
                   startTime: formData.get("startTime") as string, // Capture startTime input
                   endTime: formData.get("endTime") as string, // Capture endTime input
                 };
-                handleAddSlot(newSlot);
+
+                // If there's an existing slot (Edit), call the update function
+                if (currentSlot?.id) {
+                  handleUpdateSlot(updatedSlot);
+                } else {
+                  // Else, add a new slot
+                  handleAddSlot(updatedSlot);
+                }
               }}
               className="space-y-4"
             >
@@ -374,6 +383,7 @@ export default function SchedulePage() {
           </DialogContent>
         </Dialog>
       </div>
+      <Toaster position="top-right" richColors />
     </div>
   );
 }
