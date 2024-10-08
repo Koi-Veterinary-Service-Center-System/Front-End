@@ -117,7 +117,6 @@ function Home() {
     <div>
       <Header />
       <Banner />
-      <Toaster richColors position="top-right" />
 
       <AnimatedSection>
         <div className="category-section">
@@ -295,6 +294,7 @@ function Home() {
       </FloatButton.Group>
 
       <Footer />
+      <Toaster richColors position="top-right" closeButton />
     </div>
   );
 }

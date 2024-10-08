@@ -64,7 +64,7 @@ function Banner() {
           Create Koi Or Pool
         </Button>
       </div>
-      <Toaster richColors position="top-right" />
+      <Toaster richColors position="top-right" closeButton />
 
       <div className="koi-banner">
         <img src="src/assets/images/bannerHome.png" alt="Koi Banner" />

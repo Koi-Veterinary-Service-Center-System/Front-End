@@ -61,7 +61,6 @@ function Register() {
   return (
     <div className="body-register">
       <Header />
-      <Toaster richColors position="top-right" />
       <div ref={registerRef} className="register-container">
         <div className="register-left">
           <h3 className="register-left-title">Register</h3>
@@ -239,6 +238,7 @@ function Register() {
         </div>
       </div>
       <Footer />
+      <Toaster richColors position="top-right" closeButton />
     </div>
   );
 }

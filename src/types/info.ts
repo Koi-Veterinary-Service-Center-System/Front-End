@@ -68,3 +68,13 @@ export type Booking = {
   paymentId: number;
   bookingDate: string;
 };
+
+export type User = {
+  userID: string;
+  firstName: string;
+  lastName: string;
+  role: "Customer" | "Admin" | "Vet"; // Giả sử các vai trò khác có thể tồn tại
+  gender: boolean; // true cho nam, false cho nữ
+  userName: string;
+  email: string;
+};

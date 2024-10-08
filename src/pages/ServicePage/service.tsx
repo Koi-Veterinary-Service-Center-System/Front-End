@@ -77,7 +77,7 @@ const Service = () => {
         </main>
 
         {/* Toaster component to show toast notifications */}
-        <Toaster richColors position="top-right" />
+        <Toaster richColors position="top-right" closeButton />
       </div>
     </div>
   );

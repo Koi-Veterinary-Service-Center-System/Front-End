@@ -383,7 +383,7 @@ export default function SchedulePage() {
           </DialogContent>
         </Dialog>
       </div>
-      <Toaster position="top-right" richColors />
+      <Toaster richColors position="top-right" closeButton />
     </div>
   );
 }

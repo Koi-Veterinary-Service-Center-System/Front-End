@@ -256,7 +256,7 @@ function Booking() {
     <div>
       <Header />
       <Banner />
-      <Toaster richColors position="top-right" />
+
       <div ref={bookingRef} id="booking" className="section">
         <div className="section-center">
           <div className="container">
@@ -437,7 +437,7 @@ function Booking() {
                   {/* Payment Method Section */}
                   <Form.Item
                     label="Payment Method"
-                    name="paymentID"
+                    name="paymentMethod" // Đảm bảo tên trường trong Form.Item giống tên trong getFieldValue
                     rules={[
                       {
                         required: true,
@@ -485,6 +485,7 @@ function Booking() {
         </div>
       </div>
       <Footer />
+      <Toaster richColors position="top-right" closeButton />
     </div>
   );
 }

@@ -1,18 +1,8 @@
-"use client";
-
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import api from "../../configs/axios";
-import {
-  Button,
-  Form,
-  Image,
-  Input,
-  Upload,
-  UploadFile,
-  UploadProps,
-} from "antd";
+import { Button, Form, Input, Upload, UploadFile, UploadProps } from "antd";
 import {
   AimOutlined,
   AuditOutlined,
@@ -390,7 +380,7 @@ function UpdateProfile() {
           </div>
         </motion.section>
       </div>
-      <Toaster />
+      <Toaster richColors position="top-right" closeButton />
     </div>
   );
 }

@@ -22,7 +22,7 @@ import {
   Store,
   User,
 } from "lucide-react";
-import { Checkbox, Form, Input, message, Modal } from "antd";
+import { Checkbox, Form, Input, Modal } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import ModalDelete from "@/components/ModalDelete/ModalDelete/ModalDelete";
 import { Button } from "@/components/ui/button";
@@ -187,7 +187,6 @@ const Process = () => {
 
   return (
     <div className={`min-h-screen bg-gray-100 ${isDarkMode ? "dark" : ""}`}>
-      <Toaster richColors position="top-right" />
       <div className="flex">
         <motion.aside
           className="w-64 bg-gray-100 dark:bg-gray-800 h-screen sticky top-0"
@@ -513,6 +512,7 @@ const Process = () => {
       )}
 
       {error && <div className="text-red-500 mt-4">{error}</div>}
+      <Toaster richColors position="top-right" closeButton />
     </div>
   );
 };

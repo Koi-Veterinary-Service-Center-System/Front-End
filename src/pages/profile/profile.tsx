@@ -252,7 +252,7 @@ function Profile() {
           </div>
         </motion.main>
       </div>
-      <Toaster />
+      <Toaster richColors position="top-right" closeButton />
     </div>
   );
 }

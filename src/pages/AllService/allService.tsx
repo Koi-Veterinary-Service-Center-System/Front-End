@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { useInView } from "react-intersection-observer";
@@ -162,7 +160,7 @@ export default function AllService() {
                 <img
                   src={service.image}
                   alt={service.title}
-                  className="w-full h-64 object-cover"
+                  className="w-full h-96 object-cover"
                 />
                 <div className="p-6">
                   <h2 className="text-2xl font-semibold mb-4 text-blue-700">
