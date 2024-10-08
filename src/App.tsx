@@ -17,6 +17,8 @@ import AllService from "./pages/AllService/allService";
 import ErrorBoundary from "./errorBoudary";
 import { registerLicense } from "@syncfusion/ej2-base";
 import "./index.css";
+import AnalyticsPage from "./pages/AnalyticsPage/AnalyticsPage";
+import SettingsPage from "./pages/settingpage/setting";
 
 // Add your license key here
 registerLicense(
@@ -48,6 +50,8 @@ function App() {
         { path: "/process", element: <Process /> },
         { path: "/admin", element: <AdminDashbroad /> },
         { path: "/overview", element: <OverviewPage /> },
+        { path: "/analytics", element: <AnalyticsPage /> },
+        { path: "/settings", element: <SettingsPage /> },
         { path: "/schedules", element: <SchedulesMPage /> },
         { path: "/schedulesV", element: <SchedulesV /> },
         { path: "/service", element: <Service /> },
