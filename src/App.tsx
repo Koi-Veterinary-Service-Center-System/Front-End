@@ -19,6 +19,7 @@ import { registerLicense } from "@syncfusion/ej2-base";
 import "./index.css";
 import AnalyticsPage from "./pages/AnalyticsPage/AnalyticsPage";
 import SettingsPage from "./pages/settingpage/setting";
+import FishPrescription from "./pages/prescriptions/prescription";
 
 // Add your license key here
 registerLicense(
@@ -54,6 +55,7 @@ function App() {
         { path: "/settings", element: <SettingsPage /> },
         { path: "/schedules", element: <SchedulesMPage /> },
         { path: "/schedulesV", element: <SchedulesV /> },
+        { path: "/prescription", element: <FishPrescription /> },
         { path: "/service", element: <Service /> },
         { path: "/users", element: <UsersPage /> },
         { path: "/register", element: <Register /> },
