@@ -6,11 +6,33 @@ import { useInView } from "react-intersection-observer";
 import Footer from "@/components/Footer/footer";
 import Header from "@/components/Header/header";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 };
+
+const teamMembers = [
+  {
+    name: "Phuong An",
+    role: "Seller",
+    image: "src/assets/images/phuongAn.jpg",
+    color: "bg-yellow-400",
+  },
+  {
+    name: "Nhat Nguyen",
+    role: "Seller",
+    image: "src/assets/images/nhatNguyen.png",
+    color: "bg-teal-400",
+  },
+  {
+    name: "Chu Lu",
+    role: "Seller",
+    image: "src/assets/images/chu.png",
+    color: "bg-red-400",
+  },
+];
 
 const staggerChildren = {
   hidden: { opacity: 0 },
@@ -49,154 +71,115 @@ function AnimatedSection({ children }) {
 
 export default function AllService() {
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <Header />
-      <div className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-16">
         <motion.h1
-          className="text-3xl font-bold text-center mb-8"
+          className="text-5xl font-bold text-center mb-16 text-blue-800"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          Our Team
+          Our Services
         </motion.h1>
+
         <AnimatedSection>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            {[
-              {
-                name: "Nhat Nguyen",
-                image: "src/assets/images/nhatNguyen.png",
-              },
-              { name: "Phuong An", image: "src/assets/images/phuongAn.jpg" },
-              { name: "Bao Chu", image: "src/assets/images/chu.png" },
-            ].map((person, index) => (
-              <motion.div
+          <h2 className="text-4xl font-bold text-center mb-12 text-blue-700">
+            Our Team
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            {teamMembers.map((member, index) => (
+              <Card
                 key={index}
-                className="text-center"
-                variants={fadeInUp}
+                className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
               >
-                <div className="w-32 h-32 mx-auto rounded-full overflow-hidden mb-2">
-                  <img
-                    src={person.image}
-                    alt={person.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <p className="font-semibold">{person.name}</p>
-              </motion.div>
+                <CardContent className="p-0">
+                  <div className={`relative w-full pt-[100%] ${member.color}`}>
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="absolute inset-0 w-full h-full object-cover rounded-t-lg filter"
+                    />
+                  </div>
+                  <div className="p-6 text-center bg-white">
+                    <h3 className="text-xl font-semibold text-gray-800">
+                      {member.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-2">{member.role}</p>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </AnimatedSection>
 
         <AnimatedSection>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <motion.div variants={fadeInUp}>
-              <img
-                src="src/assets/images/fish-tank-service-1024x536.jpg"
-                alt="Pond Subsurface Suction"
-                className="w-full h-64 object-cover mb-4"
-              />
-              <h2 className="text-xl font-semibold mb-2">
-                Pond Subsurface Suction
-              </h2>
-              <p className="mb-4">
-                Our advanced pond subsurface suction technique allows for
-                efficient cleaning and maintenance of your fish pond, ensuring a
-                healthy environment for your aquatic pets.
-              </p>
-              <Button>Request Appointment</Button>
-            </motion.div>
-            <motion.div variants={fadeInUp}>
-              <img
-                src="src/assets/images/woman-with-koi-pond.jpg"
-                alt="Pond Fish Pathology"
-                className="w-full h-64 object-cover mb-4"
-              />
-              <h2 className="text-xl font-semibold mb-2">
-                Pond Fish Pathology
-              </h2>
-              <p className="mb-4">
-                Our expert veterinarians specialize in pond fish pathology,
-                providing comprehensive diagnoses and treatment plans for
-                various fish diseases and conditions.
-              </p>
-              <Button>Request Appointment</Button>
-            </motion.div>
-          </div>
-        </AnimatedSection>
-
-        <AnimatedSection>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <motion.div variants={fadeInUp}>
-              <img
-                src="src/assets/images/Water-Treatment-Jessie-Sanders-Fish-Vetranarian-1024x683.jpg"
-                alt="Aquatic Telemedicine Consult"
-                className="w-full h-64 object-cover mb-4"
-              />
-              <h2 className="text-xl font-semibold mb-2">
-                Aquatic Telemedicine Consult
-              </h2>
-              <p className="mb-4">
-                Get expert advice from our fish veterinarians through our
-                convenient telemedicine consultations. We can assess your fish's
-                health and provide guidance remotely.
-              </p>
-              <Button>Request Appointment</Button>
-            </motion.div>
-            <motion.div variants={fadeInUp}>
-              <img
-                src="src/assets/images/fish-online-training.jpg"
-                alt="Aquatic Veterinary Consult"
-                className="w-full h-64 object-cover mb-4"
-              />
-              <h2 className="text-xl font-semibold mb-2">
-                Aquatic Veterinary Consult
-              </h2>
-              <p className="mb-4">
-                Our in-person aquatic veterinary consultations offer
-                comprehensive examinations and personalized care plans for your
-                fish, ensuring their optimal health and well-being.
-              </p>
-              <Button>Request Appointment</Button>
-            </motion.div>
-          </div>
-        </AnimatedSection>
-
-        <AnimatedSection>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <motion.div variants={fadeInUp}>
-              <img
-                src="src/assets/images/fish-Surgery.jpg"
-                alt="Fish Surgery"
-                className="w-full h-64 object-cover mb-4"
-              />
-              <h2 className="text-xl font-semibold mb-2">Fish Surgery</h2>
-              <p className="mb-4">
-                Our skilled veterinarians perform delicate fish surgeries using
-                state-of-the-art techniques and equipment, addressing a wide
-                range of fish health issues.
-              </p>
-              <Button>Request Appointment</Button>
-            </motion.div>
-            <motion.div variants={fadeInUp}>
-              <img
-                src="src/assets/images/Fish-Surgery-1.jpg"
-                alt="Fish Surgery"
-                className="w-full h-64 object-cover mb-4"
-              />
-              <h2 className="text-xl font-semibold mb-2">Fish Surgery</h2>
-              <p className="mb-4">
-                From minor procedures to complex operations, our fish surgery
-                services are designed to improve the health and quality of life
-                for your aquatic pets.
-              </p>
-              <Button>Request Appointment</Button>
-            </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
+            {[
+              {
+                title: "Pond Subsurface Suction",
+                description:
+                  "Our advanced pond subsurface suction technique allows for efficient cleaning and maintenance of your fish pond, ensuring a healthy environment for your aquatic pets.",
+                image: "src/assets/images/fish-tank-service-1024x536.jpg",
+              },
+              {
+                title: "Pond Fish Pathology",
+                description:
+                  "Our expert veterinarians specialize in pond fish pathology, providing comprehensive diagnoses and treatment plans for various fish diseases and conditions.",
+                image: "src/assets/images/woman-with-koi-pond.jpg",
+              },
+              {
+                title: "Aquatic Telemedicine Consult",
+                description:
+                  "Get expert advice from our fish veterinarians through our convenient telemedicine consultations. We can assess your fish's health and provide guidance remotely.",
+                image:
+                  "src/assets/images/Water-Treatment-Jessie-Sanders-Fish-Vetranarian-1024x683.jpg",
+              },
+              {
+                title: "Aquatic Veterinary Consult",
+                description:
+                  "Our in-person aquatic veterinary consultations offer comprehensive examinations and personalized care plans for your fish, ensuring their optimal health and well-being.",
+                image: "src/assets/images/fish-online-training.jpg",
+              },
+              {
+                title: "Fish Surgery",
+                description:
+                  "Our skilled veterinarians perform delicate fish surgeries using state-of-the-art techniques and equipment, addressing a wide range of fish health issues.",
+                image: "src/assets/images/fish-Surgery.jpg",
+              },
+              {
+                title: "Advanced Fish Surgery",
+                description:
+                  "From minor procedures to complex operations, our fish surgery services are designed to improve the health and quality of life for your aquatic pets.",
+                image: "src/assets/images/Fish-Surgery-1.jpg",
+              },
+            ].map((service, index) => (
+              <motion.div
+                key={index}
+                variants={fadeInUp}
+                className="bg-white rounded-lg shadow-lg overflow-hidden"
+              >
+                <img
+                  src={service.image}
+                  alt={service.title}
+                  className="w-full h-64 object-cover"
+                />
+                <div className="p-6">
+                  <h2 className="text-2xl font-semibold mb-4 text-blue-700">
+                    {service.title}
+                  </h2>
+                  <p className="mb-6 text-gray-600">{service.description}</p>
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                    Request Appointment
+                  </Button>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </AnimatedSection>
 
         <motion.div
-          className="text-center"
+          className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
@@ -204,14 +187,14 @@ export default function AllService() {
           <img
             src="src/assets/images/good-water-quality-in-fish-tank-1024x536.jpg"
             alt="USDA Service Center"
-            className="mx-auto mb-4"
+            className="mx-auto mb-4 rounded-lg shadow-lg"
           />
           <p className="text-sm text-gray-600">
             U.S. Department of Agriculture
           </p>
         </motion.div>
-      </div>
+      </main>
       <Footer />
-    </>
+    </div>
   );
 }

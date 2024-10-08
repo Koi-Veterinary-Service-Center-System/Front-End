@@ -1,112 +1,117 @@
-"use client";
+import React, { useEffect, useState } from "react";
+import {
+  ScheduleComponent,
+  ViewsDirective,
+  ViewDirective,
+  Day,
+  Week,
+  WorkWeek,
+  Month,
+  Agenda,
+  Inject,
+  Resize,
+  DragAndDrop,
+} from "@syncfusion/ej2-react-schedule";
+import { DatePickerComponent } from "@syncfusion/ej2-react-calendars";
+import axios from "axios";
 
-import { useState } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+const PropertyPane = (props) => <div className="mt-5">{props.children}</div>;
 
-// Mock schedule data
-const mockSchedule = {
-  0: [{ start: "09:00", end: "17:00" }],
-  1: [{ start: "10:00", end: "18:00" }],
-  2: [{ start: "09:00", end: "17:00" }],
-  3: [{ start: "08:00", end: "16:00" }],
-  4: [{ start: "09:00", end: "17:00" }],
-  5: [], // Weekend off
-  6: [], // Weekend off
-};
+const Scheduler = () => {
+  const [scheduleObj, setScheduleObj] = useState(null);
+  const [scheduleData, setScheduleData] = useState([]);
 
-export default function Component() {
-  const [currentWeek, setCurrentWeek] = useState(new Date());
+  // Fetch data from API on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5155/api/vetslot/vetslot-list",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
-  const nextWeek = () => {
-    setCurrentWeek(new Date(currentWeek.getTime() + 7 * 24 * 60 * 60 * 1000));
+        // Log the API response to check structure
+        console.log("API Response:", response.data);
+
+        // Access the correct structure (adjust as necessary)
+        const data = Array.isArray(response.data)
+          ? response.data
+          : response.data.data;
+
+        const transformedData = data.map((item) => ({
+          Id: item.slotID,
+          Subject: `${item.vetFirstName} ${item.vetLastName}`,
+          StartTime: new Date(`2024-01-10T${item.slotStartTime}`),
+          EndTime: new Date(`2024-01-10T${item.slotEndTime}`),
+          IsAllDay: false,
+          RecurrenceRule: item.isBook ? "" : null,
+        }));
+
+        // Log transformed data to verify structure
+        console.log("Transformed Schedule Data:", transformedData);
+
+        setScheduleData(transformedData);
+      } catch (error) {
+        console.error("Error fetching schedule data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const change = (args) => {
+    if (scheduleObj) {
+      scheduleObj.selectedDate = args.value;
+      scheduleObj.dataBind();
+    }
   };
 
-  const prevWeek = () => {
-    setCurrentWeek(new Date(currentWeek.getTime() - 7 * 24 * 60 * 60 * 1000));
+  const onDragStart = (arg) => {
+    arg.navigation.enable = true;
   };
-
-  const getDaysOfWeek = (date) => {
-    const start = new Date(date);
-    start.setDate(start.getDate() - start.getDay());
-    return Array.from({ length: 7 }, (_, i) => {
-      const day = new Date(start);
-      day.setDate(day.getDate() + i);
-      return day;
-    });
-  };
-
-  const formatTime = (time) => {
-    return new Date(`2000-01-01T${time}`).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const daysOfWeek = getDaysOfWeek(currentWeek);
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        {/* ArrowLeft button to go back using window.history.back() */}
-        <Button
-          variant="ghost"
-          className="w-10 h-10 p-0"
-          onClick={() => window.history.back()}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="sr-only">Go back</span>
-        </Button>
-        <CardTitle>Fish Vet Schedule</CardTitle>
-        <div className="w-10 h-10" /> {/* Placeholder for symmetry */}
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">
-            {daysOfWeek[0].toLocaleDateString("default", {
-              month: "long",
-              year: "numeric",
-            })}
-          </h2>
-          <div className="flex space-x-2">
-            <Button variant="outline" size="icon" onClick={prevWeek}>
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">Previous week</span>
-            </Button>
-            <Button variant="outline" size="icon" onClick={nextWeek}>
-              <ChevronRight className="h-4 w-4" />
-              <span className="sr-only">Next week</span>
-            </Button>
-          </div>
-        </div>
-        <div className="grid grid-cols-7 gap-2">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-            <div key={day} className="font-semibold text-sm py-2 text-center">
-              {day}
-            </div>
+    <div className="m-2 md:m-10 mt-24 p-2 md:p-10 bg-white rounded-3xl">
+      <h2 className="text-2xl font-bold">Calendar</h2>
+      <ScheduleComponent
+        height="650px"
+        ref={(schedule) => setScheduleObj(schedule)}
+        selectedDate={new Date(2024, 0, 10)} // Ensure this date matches one of the event dates
+        eventSettings={{ dataSource: scheduleData }}
+        dragStart={onDragStart}
+      >
+        <ViewsDirective>
+          {["Day", "Week", "WorkWeek", "Month", "Agenda"].map((item) => (
+            <ViewDirective key={item} option={item} />
           ))}
-          {daysOfWeek.map((date, index) => (
-            <div
-              key={date.toISOString()}
-              className="border rounded-md p-2 h-32 overflow-y-auto"
-            >
-              <div className="text-sm font-medium mb-1">{date.getDate()}</div>
-              {mockSchedule[index].map((slot, slotIndex) => (
-                <div
-                  key={slotIndex}
-                  className="text-xs bg-cyan-300 text-primary-foreground rounded px-1 py-0.5 mb-1"
-                >
-                  {formatTime(slot.start)} - {formatTime(slot.end)}
-                </div>
-              ))}
-              {mockSchedule[index].length === 0 && (
-                <div className="text-xs text-muted-foreground">Off duty</div>
-              )}
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+        </ViewsDirective>
+        <Inject
+          services={[Day, Week, WorkWeek, Month, Agenda, Resize, DragAndDrop]}
+        />
+      </ScheduleComponent>
+      <PropertyPane>
+        <table style={{ width: "100%", background: "white" }}>
+          <tbody>
+            <tr style={{ height: "50px" }}>
+              <td style={{ width: "100%" }}>
+                <DatePickerComponent
+                  value={new Date(2024, 0, 10)}
+                  showClearButton={false}
+                  placeholder="Current Date"
+                  floatLabelType="Always"
+                  change={change}
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </PropertyPane>
+    </div>
   );
-}
+};
+
+export default Scheduler;
