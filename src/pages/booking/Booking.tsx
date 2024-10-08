@@ -10,6 +10,7 @@ import moment from "moment";
 import { Slot, Service, Vet, koiOrPool, Payment } from "../../types/info";
 import { Toaster, toast } from "sonner";
 import { CircleDollarSign, Fish, Waves } from "lucide-react";
+import TextArea from "antd/es/input/TextArea";
 
 const { Option } = Select;
 
@@ -425,6 +426,12 @@ function Booking() {
                         </Option>
                       ))}
                     </Select>
+                  </Form.Item>
+
+                  {/* Note  */}
+
+                  <Form.Item label="Note" name="note">
+                    <TextArea className="form-control"></TextArea>
                   </Form.Item>
 
                   {/* Payment Method Section */}

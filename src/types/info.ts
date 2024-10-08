@@ -56,3 +56,15 @@ export type Payment = {
   qrcode: string;
   type: string;
 };
+
+export type Booking = {
+  note: string;
+  koiOrPoolId: number;
+  vetName: string;
+  totalAmount: number;
+  location: string;
+  slotId: number;
+  serviceId: number;
+  paymentId: number;
+  bookingDate: string;
+};

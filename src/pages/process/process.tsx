@@ -1,10 +1,8 @@
-"use client";
-
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../../configs/axios";
-import { koiOrPool, profile } from "../../types/info";
+import { Booking, koiOrPool, profile } from "../../types/info";
 import {
   Fish,
   Pencil,
@@ -24,7 +22,7 @@ import {
   Store,
   User,
 } from "lucide-react";
-import { Checkbox, Form, Input, Modal } from "antd";
+import { Checkbox, Form, Input, message, Modal } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import ModalDelete from "@/components/ModalDelete/ModalDelete/ModalDelete";
 import { Button } from "@/components/ui/button";
@@ -46,6 +44,27 @@ const Process = () => {
   );
   const [form] = Form.useForm();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [bookings, setBookings] = useState<Booking[]>([]); // Changed to array
+  const [totalFishKoi, setTotalFishKoi] = useState(0);
+  const [totalBookings, setTotalBookings] = useState(0);
+
+  // Fetch all booking and calculate totals
+  const fetchBooking = async (userId?: string) => {
+    try {
+      const response = await api.get(`/booking/all-booking`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        params: { userId },
+      });
+      const fetchedBookings = response.data;
+      setBookings(fetchedBookings);
+
+      setTotalBookings(fetchedBookings.length);
+    } catch (error: any) {
+      setError(error.message || "Failed to fetch bookings data");
+    }
+  };
 
   const fetchKoiOrPool = async (userId?: string) => {
     try {
@@ -55,7 +74,13 @@ const Process = () => {
         },
         params: { userId },
       });
-      setKoiOrPool(response.data);
+
+      const fetchedKoiOrPool = response.data;
+      setKoiOrPool(fetchedKoiOrPool);
+
+      // Calculate the total count of fish and pools
+      const totalFishKoiCount = fetchedKoiOrPool.length;
+      setTotalFishKoi(totalFishKoiCount);
     } catch (error: any) {
       setError(error.message || "Failed to fetch koi or pool data");
     }
@@ -74,10 +99,20 @@ const Process = () => {
     }
   };
 
+  // Call fetchBooking in useEffect
   useEffect(() => {
     fetchProfile();
     fetchKoiOrPool();
-  }, []);
+    fetchBooking(profile?.userId); // Fetch bookings with user ID
+  }, [profile]);
+
+  // Memoize the booking totals to avoid recalculating them unnecessarily
+  const bookingSummary = useMemo(
+    () => ({
+      totalBookings,
+    }),
+    [totalBookings]
+  );
 
   const handleMenuItemClick = (menuItem: string) => {
     setActiveMenuItem(menuItem);
@@ -269,7 +304,7 @@ const Process = () => {
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">1,020</div>
+                  <div className="text-2xl font-bold">{totalFishKoi}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -280,7 +315,9 @@ const Process = () => {
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">2,834</div>
+                  <div className="text-2xl font-bold">
+                    {bookingSummary.totalBookings}
+                  </div>
                 </CardContent>
               </Card>
               <Card>
@@ -315,28 +352,33 @@ const Process = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td className="py-2">
-                          <div className="flex items-center space-x-2">
-                            <Avatar>
-                              <AvatarImage src={profile?.imageURL} alt="User" />
-                              <AvatarFallback>
-                                {profile?.firstName?.[0]}
-                                {profile?.lastName?.[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span>
-                              {profile?.firstName} {profile?.lastName}
+                      {bookings.map((booking) => (
+                        <tr key={booking.bookingDate}>
+                          <td className="py-2">
+                            <div className="flex items-center space-x-2">
+                              <Avatar>
+                                <AvatarImage
+                                  src={profile?.imageURL}
+                                  alt="User"
+                                />
+                                <AvatarFallback>
+                                  {profile?.firstName?.[0]}
+                                  {profile?.lastName?.[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span>
+                                {profile?.firstName} {profile?.lastName}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-2">{booking.bookingDate}</td>
+                          <td className="py-2">
+                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                              Completed
                             </span>
-                          </div>
-                        </td>
-                        <td className="py-2">01-10-2021</td>
-                        <td className="py-2">
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                            Completed
-                          </span>
-                        </td>
-                      </tr>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </CardContent>
