@@ -18,7 +18,7 @@ const UsersTable = () => {
   // Fetch users from API
   const fetchUser = async () => {
     try {
-      const response = await api.get("User/view-user", {
+      const response = await api.get("User/all-user", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Link, useLocation } from "react-router-dom";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { FloatButton, Button } from "antd";
 import { QuestionCircleOutlined, CloseOutlined } from "@ant-design/icons";
 import Banner from "../../components/banner";
@@ -294,7 +294,6 @@ function Home() {
       </FloatButton.Group>
 
       <Footer />
-      <Toaster richColors position="top-right" closeButton />
     </div>
   );
 }

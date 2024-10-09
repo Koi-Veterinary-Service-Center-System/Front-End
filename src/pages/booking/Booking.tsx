@@ -8,8 +8,8 @@ import Banner from "../../components/banner";
 import api from "../../configs/axios";
 import moment from "moment";
 import { Slot, Service, Vet, koiOrPool, Payment } from "../../types/info";
-import { Toaster, toast } from "sonner";
-import { CircleDollarSign, Fish, Waves } from "lucide-react";
+import { toast } from "sonner";
+import { Fish, Waves } from "lucide-react";
 import TextArea from "antd/es/input/TextArea";
 
 const { Option } = Select;
@@ -485,7 +485,6 @@ function Booking() {
         </div>
       </div>
       <Footer />
-      <Toaster richColors position="top-right" closeButton />
     </div>
   );
 }

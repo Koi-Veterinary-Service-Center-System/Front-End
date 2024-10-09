@@ -1,15 +1,13 @@
 import { Button, Form } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import Input from "antd/es/input/Input";
-import "./login.scss"; // Import the CSS file
+
 import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
 import { Link, useLocation, useNavigate } from "react-router-dom"; // Import useLocation
 import { useEffect, useRef } from "react"; // Import useEffect, useRef
 import api from "../../configs/axios";
-import { signInWithPopup } from "firebase/auth";
-import { GoogleAuthProvider } from "firebase/auth/web-extension";
-import { auth, googleProvider } from "../../configs/firebase";
+
 import { Toaster, toast } from "sonner";
 
 function Login() {
@@ -28,18 +26,28 @@ function Login() {
     }
   }, [location.hash]);
 
-  // Handle Login with Google
-  const handleLoginGoogle = () => {
-    signInWithPopup(auth, googleProvider)
-      .then((result) => {
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        console.log(credential);
-        toast.success("Logged in with Google successfully!");
-        navigate("/", { state: { loginSuccess: true } });
-      })
-      .catch((error) => {
-        toast.error("Google login failed: " + error.message);
-      });
+  //Handle Login google
+  const handleLoginGoogle = async () => {
+    window.location.href = "http://localhost:5155/api/User/google-login";
+    try {
+      const response = await api.get("User/google-login"); // Adjust to your API client or use fetch directly
+      const { token, message } = response.data;
+
+      // Store the token and user info in localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(response.data));
+
+      // Show a success message
+      toast.success(message);
+
+      // Navigate to the home page
+      navigate("/", { state: { loginSuccess: true } });
+    } catch (error) {
+      toast.error(
+        "Google login failed: " +
+          (error.response?.data?.message || error.message)
+      );
+    }
   };
 
   // Handle Login
@@ -70,24 +78,26 @@ function Login() {
   };
 
   return (
-    <div className="body-login">
-      {/* Toast Container for React Toastify */}
-      <Toaster richColors position="top-right" closeButton />
-
+    <div
+      className="min-h-screen bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: "url('/src/assets/images/background_image.png')",
+      }}
+    >
       <Header />
-      <div ref={loginRef} className="login-container">
-        <div className="login-left">
-          <h3 className="login-left-title">Sign in</h3>
+      <div className="flex justify-center items-center w-[70%] mx-auto my-20 rounded-2xl shadow-lg bg-gray-100 p-8">
+        <div className="bg-[#FDF2E9] w-2/5 flex flex-col items-center justify-center py-8 px-6 rounded-xl opacity-70">
+          <h3 className="text-2xl font-bold mb-8">Sign in</h3>
           <img
             src="src/assets/images/banner_login.png"
             alt="Koi"
-            className="login-image"
+            className="w-4/5 rounded-lg"
           />
         </div>
-        <div className="login-right">
-          <h3 className="login-right-title">Sign in Account</h3>
-          <div className="in">
-            <Form onFinish={handleLogin}>
+        <div className="bg-white w-3/5 py-16 px-12 shadow-md rounded-xl">
+          <h3 className="text-2xl font-bold mb-8">Sign in Account</h3>
+          <div className="flex flex-col items-center justify-center">
+            <Form onFinish={handleLogin} className="w-full">
               <Form.Item
                 name="username"
                 rules={[
@@ -106,7 +116,7 @@ function Login() {
               >
                 <Input
                   placeholder="Username"
-                  className="login-input"
+                  className="mb-6 h-12 text-lg rounded-md"
                   prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
                 />
               </Form.Item>
@@ -119,37 +129,44 @@ function Login() {
                 <Input.Password
                   placeholder="Password"
                   type="password"
-                  className="login-input"
+                  className="mb-6 h-12 text-lg rounded-md"
                   prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
                 />
               </Form.Item>
-
-              <Button className="login-button" htmlType="submit">
+              <Button
+                className="w-full bg-[#2a3c79] text-white h-12 text-lg rounded-md mb-6"
+                htmlType="submit"
+              >
                 Login
               </Button>
             </Form>
-            <p className="register-text">
-              Don't have an account? <Link to="/register">Register</Link>
+            <p className="text-center text-gray-700 mt-4">
+              Don't have an account?{" "}
+              <Link to="/register" className="text-teal-500">
+                Register
+              </Link>
             </p>
-            <div className="divider">OR</div>
-            <div className="social-login">
+            <div className="text-center text-gray-400 my-6 font-semibold">
+              OR
+            </div>
+            <div className="flex space-x-4">
               <Button
-                className="social-button google-button"
+                className="w-1/2 h-12 text-lg rounded-md bg-white text-black border border-gray-200 hover:opacity-90"
                 onClick={handleLoginGoogle}
               >
                 <img
-                  className="icon"
+                  className="w-6 inline"
                   src="src/assets/images/google.png"
-                  alt=""
-                />
+                  alt="Google icon"
+                />{" "}
                 Sign in with Google
               </Button>
-              <Button className="social-button facebook-button">
+              <Button className="w-1/2 h-12 text-lg rounded-md bg-blue-600 text-white hover:opacity-90">
                 <img
-                  className="icon"
+                  className="w-6 inline"
                   src="src/assets/images/facebook.png"
-                  alt=""
-                />
+                  alt="Facebook icon"
+                />{" "}
                 Sign in with Facebook
               </Button>
             </div>

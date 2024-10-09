@@ -20,6 +20,7 @@ import "./index.css";
 import AnalyticsPage from "./pages/AnalyticsPage/AnalyticsPage";
 import SettingsPage from "./pages/settingpage/setting";
 import FishPrescription from "./pages/prescriptions/prescription";
+import { Toaster } from "sonner";
 
 // Add your license key here
 registerLicense(
@@ -30,6 +31,12 @@ registerLicense(
 function MainLayout() {
   return (
     <>
+      <Toaster
+        richColors
+        closeButton
+        position="top-right"
+        toastOptions={{ className: "toasts" }}
+      />
       <ScrollToTop /> {/* This ensures scroll reset on every route change */}
       <Outlet /> {/* Renders the selected route's component */}
     </>

@@ -26,7 +26,7 @@ import { format, addDays, startOfWeek, subWeeks, addWeeks } from "date-fns";
 import api from "@/configs/axios";
 import Sidebar from "@/components/Sidebar/sidebar";
 import HeaderAd from "@/components/common/header";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 
 interface Slot {
   id: string;
@@ -383,7 +383,6 @@ export default function SchedulePage() {
           </DialogContent>
         </Dialog>
       </div>
-      <Toaster richColors position="top-right" closeButton />
     </div>
   );
 }

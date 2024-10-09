@@ -26,7 +26,7 @@ import { Checkbox, Form, Input, Modal } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import ModalDelete from "@/components/ModalDelete/ModalDelete/ModalDelete";
 import { Button } from "@/components/ui/button";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -512,7 +512,6 @@ const Process = () => {
       )}
 
       {error && <div className="text-red-500 mt-4">{error}</div>}
-      <Toaster richColors position="top-right" closeButton />
     </div>
   );
 };

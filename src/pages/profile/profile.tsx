@@ -1,11 +1,9 @@
-"use client";
-
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import api from "../../configs/axios";
 import { Button, Input } from "antd";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
@@ -41,7 +39,7 @@ function Profile() {
   useEffect(() => {
     if (location.state && location.state.updateProfileSuccess) {
       toast.success("Profile updated successfully!");
-      window.history.replaceState({}, document.title);
+      // window.history.replaceState({}, document.title);
     }
   }, [location.state]);
 
@@ -252,7 +250,6 @@ function Profile() {
           </div>
         </motion.main>
       </div>
-      <Toaster richColors position="top-right" closeButton />
     </div>
   );
 }

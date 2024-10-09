@@ -14,7 +14,7 @@ import {
 import { profile as ProfileType } from "../../types/info";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "../../configs/firebase";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import {
   ChevronLeft,
   MessageSquare,
@@ -380,7 +380,6 @@ function UpdateProfile() {
           </div>
         </motion.section>
       </div>
-      <Toaster richColors position="top-right" closeButton />
     </div>
   );
 }

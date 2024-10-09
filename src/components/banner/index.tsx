@@ -5,7 +5,7 @@ import TextArea from "antd/es/input/TextArea";
 import "./index.scss";
 import api from "@/configs/axios";
 import { koiOrPool } from "@/types/info";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 
 function Banner() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,7 +64,6 @@ function Banner() {
           Create Koi Or Pool
         </Button>
       </div>
-      <Toaster richColors position="top-right" closeButton />
 
       <div className="koi-banner">
         <img src="src/assets/images/bannerHome.png" alt="Koi Banner" />
