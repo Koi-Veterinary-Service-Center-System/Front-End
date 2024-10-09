@@ -51,7 +51,7 @@ const Process = () => {
   // Fetch all booking and calculate totals
   const fetchBooking = async (userId?: string) => {
     try {
-      const response = await api.get(`/booking/all-booking`, {
+      const response = await api.get(`/booking/view-booking-process`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -62,7 +62,10 @@ const Process = () => {
 
       setTotalBookings(fetchedBookings.length);
     } catch (error: any) {
-      setError(error.message || "Failed to fetch bookings data");
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch bookings data";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -82,7 +85,10 @@ const Process = () => {
       const totalFishKoiCount = fetchedKoiOrPool.length;
       setTotalFishKoi(totalFishKoiCount);
     } catch (error: any) {
-      setError(error.message || "Failed to fetch koi or pool data");
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch koi or pool data";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -95,7 +101,10 @@ const Process = () => {
       });
       setProfile(response.data);
     } catch (error: any) {
-      setError(error.message || "Failed to fetch profile data");
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch profile data";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -150,8 +159,10 @@ const Process = () => {
       form.resetFields();
       setIsModalOpen(false);
     } catch (error: any) {
-      console.error("Update failed: ", error.response || error);
-      setError(error.message || "Failed to update Koi or Pool");
+      const errorMessage =
+        error.response?.data?.message || "Failed to update Koi or Pool";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

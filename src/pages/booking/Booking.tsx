@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Banner from "../../components/banner";
 import api from "../../configs/axios";
-import moment from "moment";
+
 import { Slot, Service, Vet, koiOrPool, Payment } from "../../types/info";
 import { toast } from "sonner";
 import { Fish, Waves } from "lucide-react";
@@ -177,14 +177,19 @@ function Booking() {
       (service) => service.serviceID === form.getFieldValue("serviceType")
     );
     if (selectedService) {
-      const totalAmount = selectedService.price + additionalCosts; // Adjust based on requirements
+      const totalAmount = selectedService.price; // Adjust based on requirements
       setTotal(totalAmount);
     }
   };
 
   const handleBooking = async (values: any) => {
     try {
-      const bookingDate = moment(values.pickupDate).format("YYYY-MM-DD");
+      // Định dạng ngày thành YYYY-MM-DD theo timezone mặc định của hệ thống
+      const bookingDate = new Intl.DateTimeFormat("en-CA", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(values.pickupDate.toDate());
 
       const bookingData = {
         note: values.note || "",
@@ -212,7 +217,6 @@ function Booking() {
         const errorMessage =
           error.response.data.message || error.response.data.error;
 
-        // Check if the error message contains specific keywords indicating a foreign key violation
         if (
           errorMessage &&
           errorMessage.includes("FK_Bookings_Payments_PaymentID")
@@ -221,12 +225,10 @@ function Booking() {
             "Invalid payment method selected. Please choose a valid payment option."
           );
         } else if (errorMessage && errorMessage.includes("foreign key")) {
-          // Generic foreign key error
           toast.error(
             "There was an issue with your selection. Please ensure all options are valid."
           );
         } else {
-          // Other types of errors
           toast.error(
             `Booking failed: ${errorMessage || "An unexpected error occurred"}`
           );
@@ -240,17 +242,6 @@ function Booking() {
       }
     }
   };
-
-  // Scroll to section based on hash
-  useEffect(() => {
-    if (location.hash === "#section") {
-      setTimeout(() => {
-        if (bookingRef.current) {
-          bookingRef.current.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 100);
-    }
-  }, [location.hash]);
 
   return (
     <div>
@@ -266,14 +257,12 @@ function Booking() {
                   <h1>Book a Service</h1>
                 </div>
 
-                {/* Ant Design Form */}
                 <Form
                   form={form}
                   name="bookingForm"
                   layout="vertical"
                   onFinish={handleBooking}
                 >
-                  {/* Pickup Date */}
                   <div className="row">
                     <div className="col-sm-5">
                       <Form.Item
@@ -290,7 +279,6 @@ function Booking() {
                       </Form.Item>
                     </div>
                   </div>
-
                   {/* Service, Slot, and Vet */}
                   <div className="row">
                     <div className="col-sm-4">
@@ -326,7 +314,7 @@ function Booking() {
                         <Select
                           className="form-control"
                           loading={isLoadingSlots}
-                          onChange={handleSlotChange} // Handle slot change
+                          onChange={handleSlotChange}
                           value={selectedSlot}
                         >
                           {slots.map((slot) => (
@@ -349,7 +337,7 @@ function Booking() {
                         <Select
                           className="form-control"
                           loading={isLoadingVets}
-                          onChange={handleVetChange} // Handle vet change
+                          onChange={handleVetChange}
                           value={selectedVet}
                         >
                           {vets.map((vet) => (
@@ -362,30 +350,26 @@ function Booking() {
                     </div>
                   </div>
 
-                  <div className="row">
-                    <div className="col-sm-6">
-                      <Form.Item
-                        label="Location"
-                        name="location"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please enter your location",
-                          },
-                          {
-                            pattern: /^[^\s].+$/,
-                            message:
-                              "Location cannot start with a space or contain special characters",
-                          },
-                        ]}
-                      >
-                        <Input
-                          className="form-control"
-                          placeholder="Enter your location"
-                        />
-                      </Form.Item>
-                    </div>
-                  </div>
+                  <Form.Item
+                    label="Location"
+                    name="location"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please enter your location",
+                      },
+                      {
+                        pattern: /^[^\s].+$/,
+                        message:
+                          "Location cannot start with a space or contain special characters",
+                      },
+                    ]}
+                  >
+                    <Input
+                      className="form-control"
+                      placeholder="Enter your location"
+                    />
+                  </Form.Item>
 
                   <Form.Item
                     label="Phone"
@@ -428,16 +412,13 @@ function Booking() {
                     </Select>
                   </Form.Item>
 
-                  {/* Note  */}
-
                   <Form.Item label="Note" name="note">
                     <TextArea className="form-control"></TextArea>
                   </Form.Item>
 
-                  {/* Payment Method Section */}
                   <Form.Item
                     label="Payment Method"
-                    name="paymentMethod" // Đảm bảo tên trường trong Form.Item giống tên trong getFieldValue
+                    name="paymentMethod"
                     rules={[
                       {
                         required: true,
@@ -460,7 +441,6 @@ function Booking() {
                     </Select>
                   </Form.Item>
 
-                  {/* Total Amount Section */}
                   <h3>Total: {total} $</h3>
                   <Button
                     onClick={calculateTotal}

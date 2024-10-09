@@ -50,7 +50,7 @@ const UsersTable = () => {
         }
       );
       const successMessage = response.data.message;
-      toast.success(successMessage);
+      toast.success("Deleted user successfully");
       setUsers(users.filter((user) => user.userID !== userToDelete.userID));
       setFilteredUsers(
         filteredUsers.filter((user) => user.userID !== userToDelete.userID)
