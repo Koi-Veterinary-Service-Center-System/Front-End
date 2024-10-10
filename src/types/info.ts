@@ -78,3 +78,11 @@ export type User = {
   userName: string;
   email: string;
 };
+
+export type Prescription = {
+  diseaseName: string;
+  symptoms: string;
+  medication: string;
+  note: string;
+  bookingID: string;
+};

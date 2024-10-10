@@ -135,7 +135,7 @@ function Header() {
                   <i className="ion-chevron-down"></i>
                   <ul className="dropdown-menu">
                     <li>
-                      <Link to="/login#login-container">
+                      <Link to="/login">
                         <Button>Login</Button>
                       </Link>
                     </li>

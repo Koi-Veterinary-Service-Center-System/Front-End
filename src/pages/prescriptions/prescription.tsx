@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Fish,
@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -28,42 +29,49 @@ import {
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface Prescription {
-  id: number;
-  bookingID: string;
-  ownerName: string;
-  fishSpecies: string;
-  medication: string;
-  dosage: string;
-  frequency: string;
-  duration: string;
-  note: string;
-  symptoms: string;
-  diseaseName: string;
-}
+import { Prescription } from "@/types/info";
+import api from "@/configs/axios";
 
 export default function FishPrescriptionSystem() {
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>([
-    {
-      id: 1,
-      bookingID: "BOOK001",
-      ownerName: "John Doe",
-      fishSpecies: "Goldfish",
-      medication: "Aqua-Mox",
-      dosage: "5ml",
-      frequency: "daily",
-      duration: "7 days",
-      note: "Administer with care",
-      symptoms: "Loss of appetite, lethargy",
-      diseaseName: "Fin rot",
-    },
-  ]);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentPrescription, setCurrentPrescription] =
     useState<Prescription | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+
+  // Fetch prescriptions from the server
+  const fetchPrescriptions = async () => {
+    try {
+      const response = await api.get("pres-rec/list");
+      if (response.status === 200) {
+        setPrescriptions(response.data);
+      } else {
+        toast.error("Failed to fetch prescriptions.");
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to fetch prescriptions!");
+    }
+  };
+
+  useEffect(() => {
+    fetchPrescriptions(); // Fetch data on component mount
+  }, []);
+
+  const handleAddPrescription = async (values: Prescription) => {
+    try {
+      const response = await api.post("pres-rec/create-presRec", values);
+      if (response.status === 200) {
+        toast.success("Successfully added!");
+        fetchPrescriptions(); // Refresh the list after adding
+        setIsDialogOpen(false);
+      } else {
+        toast.error("Failed to add the prescription.");
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to add the prescription!");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -76,7 +84,6 @@ export default function FishPrescriptionSystem() {
       ownerName: formData.get("ownerName") as string,
       fishSpecies: formData.get("fishSpecies") as string,
       medication: formData.get("medication") as string,
-      dosage: formData.get("dosage") as string,
       frequency: formData.get("frequency") as string,
       duration: formData.get("duration") as string,
       note: formData.get("note") as string,
@@ -84,24 +91,22 @@ export default function FishPrescriptionSystem() {
       diseaseName: formData.get("diseaseName") as string,
     };
 
-    // Simulating API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     if (currentPrescription) {
+      // Update existing prescription
       setPrescriptions(
         prescriptions.map((p) =>
           p.id === currentPrescription.id ? newPrescription : p
         )
       );
     } else {
+      // Add new prescription
       setPrescriptions([...prescriptions, newPrescription]);
     }
 
     setIsSubmitting(false);
     setIsDialogOpen(false);
     setCurrentPrescription(null);
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 3000);
+    toast.success("Prescription has been saved successfully.");
   };
 
   const handleEdit = (prescription: Prescription) => {
@@ -111,11 +116,17 @@ export default function FishPrescriptionSystem() {
 
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this prescription?")) {
-      // Simulating API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setPrescriptions(prescriptions.filter((p) => p.id !== id));
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
+      try {
+        const response = await api.delete(`pres-rec/delete/${id}`);
+        if (response.status === 200) {
+          toast.success("Prescription deleted successfully!");
+          fetchPrescriptions(); // Refresh the list after deleting
+        } else {
+          toast.error("Failed to delete the prescription.");
+        }
+      } catch (error) {
+        toast.error(error.message || "Failed to delete the prescription!");
+      }
     }
   };
 
@@ -162,7 +173,7 @@ export default function FishPrescriptionSystem() {
                           name="bookingID"
                           id="bookingID"
                           required
-                          defaultValue={currentPrescription?.bookingID}
+                          defaultValue={currentPrescription?.bookingID || ""}
                           className="mt-1"
                         />
                       </div>
@@ -178,7 +189,7 @@ export default function FishPrescriptionSystem() {
                           name="ownerName"
                           id="ownerName"
                           required
-                          defaultValue={currentPrescription?.ownerName}
+                          defaultValue={currentPrescription?.ownerName || ""}
                           className="mt-1"
                         />
                       </div>
@@ -195,7 +206,7 @@ export default function FishPrescriptionSystem() {
                         name="fishSpecies"
                         id="fishSpecies"
                         required
-                        defaultValue={currentPrescription?.fishSpecies}
+                        defaultValue={currentPrescription?.fishSpecies || ""}
                         className="mt-1"
                       />
                     </div>
@@ -207,17 +218,14 @@ export default function FishPrescriptionSystem() {
                         >
                           Medication
                         </label>
-                        <div className="relative mt-1">
-                          <Pill className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                          <Input
-                            type="text"
-                            name="medication"
-                            id="medication"
-                            required
-                            className="pl-10"
-                            defaultValue={currentPrescription?.medication}
-                          />
-                        </div>
+                        <Input
+                          type="text"
+                          name="medication"
+                          id="medication"
+                          required
+                          defaultValue={currentPrescription?.medication || ""}
+                          className="mt-1"
+                        />
                       </div>
                       <div>
                         <label
@@ -226,17 +234,14 @@ export default function FishPrescriptionSystem() {
                         >
                           Dosage
                         </label>
-                        <div className="relative mt-1">
-                          <Droplet className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                          <Input
-                            type="text"
-                            name="dosage"
-                            id="dosage"
-                            required
-                            className="pl-10"
-                            defaultValue={currentPrescription?.dosage}
-                          />
-                        </div>
+                        <Input
+                          type="text"
+                          name="dosage"
+                          id="dosage"
+                          required
+                          defaultValue={currentPrescription?.dosage || ""}
+                          className="mt-1"
+                        />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -249,7 +254,6 @@ export default function FishPrescriptionSystem() {
                         </label>
                         <Select
                           name="frequency"
-                          id="frequency"
                           required
                           defaultValue={currentPrescription?.frequency || ""}
                           className="mt-1"
@@ -268,18 +272,15 @@ export default function FishPrescriptionSystem() {
                         >
                           Duration
                         </label>
-                        <div className="relative mt-1">
-                          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                          <Input
-                            type="text"
-                            name="duration"
-                            id="duration"
-                            required
-                            className="pl-10"
-                            placeholder="e.g., 7 days"
-                            defaultValue={currentPrescription?.duration}
-                          />
-                        </div>
+                        <Input
+                          type="text"
+                          name="duration"
+                          id="duration"
+                          required
+                          defaultValue={currentPrescription?.duration || ""}
+                          className="mt-1"
+                          placeholder="e.g., 7 days"
+                        />
                       </div>
                     </div>
                     <div>
@@ -293,9 +294,9 @@ export default function FishPrescriptionSystem() {
                         name="note"
                         id="note"
                         rows={2}
-                        defaultValue={currentPrescription?.note}
+                        defaultValue={currentPrescription?.note || ""}
                         className="mt-1"
-                      ></Textarea>
+                      />
                     </div>
                     <div>
                       <label
@@ -308,9 +309,9 @@ export default function FishPrescriptionSystem() {
                         name="symptoms"
                         id="symptoms"
                         rows={2}
-                        defaultValue={currentPrescription?.symptoms}
+                        defaultValue={currentPrescription?.symptoms || ""}
                         className="mt-1"
-                      ></Textarea>
+                      />
                     </div>
                     <div>
                       <label
@@ -324,7 +325,7 @@ export default function FishPrescriptionSystem() {
                         name="diseaseName"
                         id="diseaseName"
                         required
-                        defaultValue={currentPrescription?.diseaseName}
+                        defaultValue={currentPrescription?.diseaseName || ""}
                         className="mt-1"
                       />
                     </div>
@@ -333,144 +334,21 @@ export default function FishPrescriptionSystem() {
                       className="w-full bg-blue-600 hover:bg-blue-700"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{
-                            duration: 1,
-                            repeat: Infinity,
-                            ease: "linear",
-                          }}
-                        >
-                          <Send className="h-5 w-5" />
-                        </motion.div>
-                      ) : (
-                        <>
-                          <Send className="mr-2 h-5 w-5" />
-                          {currentPrescription ? "Update" : "Create"}{" "}
-                          Prescription
-                        </>
-                      )}
+                      {isSubmitting
+                        ? "Saving..."
+                        : currentPrescription
+                        ? "Update"
+                        : "Create"}{" "}
+                      Prescription
                     </Button>
                   </form>
                 </DialogContent>
               </Dialog>
             </div>
           </CardHeader>
-          <CardContent className="p-6">
-            <AnimatePresence>
-              {prescriptions.map((prescription) => (
-                <motion.div
-                  key={prescription.id}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-white shadow-md rounded-lg p-6 mb-4 border border-gray-200 hover:shadow-lg transition-shadow duration-200"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-xl font-semibold text-blue-600">
-                        {prescription.ownerName}'s {prescription.fishSpecies}
-                      </h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Booking ID: {prescription.bookingID}
-                      </p>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(prescription)}
-                        className="text-blue-600 hover:bg-blue-50"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(prescription.id)}
-                        className="text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center">
-                      <Pill className="h-4 w-4 mr-2 text-blue-500" />
-                      <span className="font-medium">Medication:</span>{" "}
-                      {prescription.medication}
-                    </div>
-                    <div className="flex items-center">
-                      <Droplet className="h-4 w-4 mr-2 text-blue-500" />
-                      <span className="font-medium">Dosage:</span>{" "}
-                      {prescription.dosage}
-                    </div>
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2 text-blue-500" />
-                      <span className="font-medium">Frequency:</span>{" "}
-                      {prescription.frequency}
-                    </div>
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2 text-blue-500" />
-                      <span className="font-medium">Duration:</span>{" "}
-                      {prescription.duration}
-                    </div>
-                  </div>
-                  <div className="mt-4 text-sm bg-blue-50 p-3 rounded-md">
-                    <div className="flex items-start mb-2">
-                      <FileText className="h-4 w-4 mr-2 text-blue-500 mt-1" />
-                      <div>
-                        <span className="font-medium  text-blue-700">
-                          Note:
-                        </span>{" "}
-                        {prescription.note}
-                      </div>
-                    </div>
-                    <div className="flex items-start mb-2">
-                      <Stethoscope className="h-4 w-4 mr-2 text-blue-500 mt-1" />
-                      <div>
-                        <span className="font-medium text-blue-700">
-                          Symptoms:
-                        </span>{" "}
-                        {prescription.symptoms}
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <AlertTriangle className="h-4 w-4 mr-2 text-blue-500" />
-                      <span className="font-medium text-blue-700">
-                        Disease:
-                      </span>{" "}
-                      {prescription.diseaseName}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </CardContent>
+          {/* Render the prescription cards */}
         </Card>
       </motion.div>
-      <AnimatePresence>
-        {showAlert && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            transition={{ duration: 0.3 }}
-            className="fixed bottom-4 right-4"
-          >
-            <Alert variant="default" className="bg-green-100 border-green-500">
-              <AlertTriangle className="h-4 w-4 text-green-600" />
-              <AlertTitle className="text-green-800">Success</AlertTitle>
-              <AlertDescription className="text-green-700">
-                Prescription has been{" "}
-                {currentPrescription ? "updated" : "created"} successfully.
-              </AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

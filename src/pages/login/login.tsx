@@ -29,25 +29,6 @@ function Login() {
   //Handle Login google
   const handleLoginGoogle = async () => {
     window.location.href = "http://localhost:5155/api/User/google-login";
-    try {
-      const response = await api.get("User/google-login"); // Adjust to your API client or use fetch directly
-      const { token, message } = response.data;
-
-      // Store the token and user info in localStorage
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(response.data));
-
-      // Show a success message
-      toast.success(message);
-
-      // Navigate to the home page
-      navigate("/", { state: { loginSuccess: true } });
-    } catch (error) {
-      toast.error(
-        "Google login failed: " +
-          (error.response?.data?.message || error.message)
-      );
-    }
   };
 
   // Handle Login

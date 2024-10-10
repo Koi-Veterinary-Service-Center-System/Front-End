@@ -53,7 +53,12 @@ function Profile() {
 
       const genderProfile = {
         ...response.data,
-        gender: response.data.gender ? "Male" : "Female",
+        gender:
+          response.data.gender === undefined
+            ? "None"
+            : response.data.gender
+            ? "Male"
+            : "Female",
       };
 
       setProfile(genderProfile);

@@ -62,10 +62,10 @@ const Process = () => {
 
       setTotalBookings(fetchedBookings.length);
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to fetch bookings data";
-      setError(errorMessage);
-      toast.error(errorMessage);
+      // const errorMessage =
+      //   error.response?.data?.message || "Failed to fetch bookings data";
+      // setError(errorMessage);
+      // toast.error(errorMessage);
     }
   };
 
@@ -85,10 +85,10 @@ const Process = () => {
       const totalFishKoiCount = fetchedKoiOrPool.length;
       setTotalFishKoi(totalFishKoiCount);
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to fetch koi or pool data";
-      setError(errorMessage);
-      toast.error(errorMessage);
+      // const errorMessage =
+      //   error.response?.data?.message || "Failed to fetch koi or pool data";
+      // setError(errorMessage);
+      // toast.error(errorMessage);
     }
   };
 
