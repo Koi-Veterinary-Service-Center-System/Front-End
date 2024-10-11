@@ -2,18 +2,13 @@ import { useState, useEffect } from "react";
 import {
   AlertCircle,
   Info,
-  Lock,
   LockKeyhole,
   Mail,
   Search,
-  User,
-  UserPlus,
   UserPlus2,
-  UserRound,
-  Users,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import api from "@/configs/axios";
@@ -22,7 +17,6 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -42,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { User } from "@/types/info";
 
 // Define schema using zod
 const userSchema = z.object({
@@ -54,40 +49,40 @@ const userSchema = z.object({
   role: z.string().min(1, "Role is required"),
 });
 
-// Define type for form data using inferred type from zod schema
 type UserFormData = z.infer<typeof userSchema>;
 
 const UsersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Initialize form with react-hook-form and zod schema
-  const methods = useForm<UserFormData>({
+  const form = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      userName: "",
+      password: "",
+      email: "",
+      gender: "male",
+      role: "",
+    },
   });
-  const {
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = methods;
 
-  // Fetch users from API
   const fetchUser = async () => {
     try {
       const response = await api.get("User/all-user", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      const fetchedUsers = response.data;
-      setUsers(fetchedUsers);
-      setFilteredUsers(fetchedUsers);
+      setUsers(response.data);
+      setFilteredUsers(response.data);
       setError(null);
     } catch (error: any) {
       console.error("Failed to fetch user data:", error.message);
@@ -99,55 +94,84 @@ const UsersTable = () => {
     fetchUser();
   }, []);
 
-  // Handle Add User
-  const handleAddUser = async (data: UserFormData) => {
+  const handleAdd = () => {
+    setIsEditMode(false);
+    form.reset({
+      firstName: "",
+      lastName: "",
+      userName: "",
+      password: "",
+      email: "",
+      gender: "male",
+      role: "",
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleEdit = (user: User) => {
+    setCurrentUser(user);
+    setIsEditMode(true);
+
+    // Reset the form with the user's data
+    form.reset({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      userName: user.userName,
+      password: "", // Keep this blank for security, or prompt the user to enter a new one
+      email: user.email,
+      gender: user.gender ? "male" : "female", // Assuming gender is stored as boolean (true for male)
+      role: user.role,
+    });
+
+    setIsDialogOpen(true);
+  };
+
+  const handleSubmit = async (data: UserFormData) => {
     setLoading(true);
     try {
-      // Modify gender to boolean
-      const modifiedData = {
-        ...data,
+      // Construct the payload based on API requirements
+      const payload = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        userName: data.userName,
+        password: data.password,
+        email: data.email,
         gender: data.gender === "male", // true if male, false if female
+        role: data.role,
       };
 
-      // Wrap in UserDTO object
-      const payload = { userDTO: modifiedData };
+      if (isEditMode && currentUser) {
+        await api.put(`/User/update-user/${currentUser.userID}`, payload, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        toast.success("User updated successfully!");
+      } else {
+        await api.post(`/User/create-user`, payload, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        console.log(payload);
+        toast.success("User created successfully!");
+      }
 
-      // Log the payload before sending it to the API
-      console.log("Payload being sent to API:", payload);
-
-      // Make the API call
-      const response = await api.post(`/User/create-user`, payload, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-
-      // Log the API response to verify what is returned
-      console.log("API response:", response);
-
-      toast.success("User added successfully!");
-      fetchUser(); // Fetch the updated user list
-      setIsAddModalOpen(false);
-      reset(); // Clear form after submission
-    } catch (error) {
-      console.error("Error during user creation:", error);
-      toast.error("Failed to add user. Please try again.");
+      fetchUser();
+      setIsDialogOpen(false);
+      form.reset();
+    } catch (error: any) {
+      console.error("Operation failed:", error.response?.data || error.message);
+      toast.error("Operation failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  //Hanlde Delete User
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
     setLoading(true);
     setError(null);
     try {
-      const response = await api.delete(
-        `/User/delete-user?userID=${userToDelete.userID}`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-      const successMessage = response.data.message;
+      await api.delete(`/User/delete-user?userID=${userToDelete.userID}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
       toast.success("Deleted user successfully");
       setUsers(users.filter((user) => user.userID !== userToDelete.userID));
       setFilteredUsers(
@@ -180,123 +204,98 @@ const UsersTable = () => {
           />
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)}>
+        <Button onClick={handleAdd}>
           <UserPlus2 className="mr-2" />
           Add User
         </Button>
       </div>
 
-      {/* Add User Modal */}
-      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <DialogTrigger asChild>
-          <Button onClick={() => setIsAddModalOpen(true)}>Add User</Button>
-        </DialogTrigger>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">
-              Add New User
+              {isEditMode ? "Edit User" : "Add New User"}
             </DialogTitle>
           </DialogHeader>
-          <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(handleAddUser)} className="space-y-6">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-6"
+            >
+              {/* Form Fields */}
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                {/* First Name */}
                 <FormField
+                  control={form.control}
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>First Name</FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <Info className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                          <Input
-                            placeholder="First Name"
-                            {...field}
-                            className="pl-10"
-                          />
-                        </div>
+                        <Input {...field} placeholder="First Name" />
                       </FormControl>
-                      <FormMessage>{errors.firstName?.message}</FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
+                  control={form.control}
                   name="lastName"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Last Name</FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <Info className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                          <Input
-                            placeholder="Last Name"
-                            {...field}
-                            className="pl-10"
-                          />
-                        </div>
+                        <Input {...field} placeholder="Last Name" />
                       </FormControl>
-                      <FormMessage>{errors.lastName?.message}</FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
+                  control={form.control}
                   name="userName"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <UserRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                          <Input
-                            placeholder="Username"
-                            {...field}
-                            className="pl-10"
-                          />
-                        </div>
+                        <Input {...field} placeholder="Username" />
                       </FormControl>
-                      <FormMessage>{errors.userName?.message}</FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
+                  control={form.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <LockKeyhole className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                          <Input
-                            type="password"
-                            placeholder="Password"
-                            {...field}
-                            className="pl-10"
-                          />
-                        </div>
+                        <Input
+                          {...field}
+                          type="password"
+                          placeholder="Password"
+                        />
                       </FormControl>
-                      <FormMessage>{errors.password?.message}</FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
+                  control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                          <Input
-                            placeholder="Email"
-                            {...field}
-                            className="pl-10"
-                          />
-                        </div>
+                        <Input {...field} placeholder="Email" />
                       </FormControl>
-                      <FormMessage>{errors.email?.message}</FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
+                  control={form.control}
                   name="gender"
                   render={({ field }) => (
                     <FormItem>
@@ -315,11 +314,12 @@ const UsersTable = () => {
                           <SelectItem value="female">Female</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage>{errors.gender?.message}</FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
+                  control={form.control}
                   name="role"
                   render={({ field }) => (
                     <FormItem>
@@ -334,13 +334,13 @@ const UsersTable = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="customer">Customer</SelectItem>
-                          <SelectItem value="vet">Vet</SelectItem>
-                          <SelectItem value="staff">Staff</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="Customer">Customer</SelectItem>
+                          <SelectItem value="Vet">Vet</SelectItem>
+                          <SelectItem value="Staff">Staff</SelectItem>
+                          <SelectItem value="Manager">Manager</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage>{errors.role?.message}</FormMessage>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -349,30 +349,22 @@ const UsersTable = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setIsAddModalOpen(false)}
+                  onClick={() => setIsDialogOpen(false)}
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  {loading ? (
-                    <>
-                      <Users className="mr-2 h-4 w-4 animate-spin" />
-                      Adding...
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      Add User
-                    </>
-                  )}
+                <Button type="submit" disabled={loading}>
+                  {loading
+                    ? isEditMode
+                      ? "Saving..."
+                      : "Adding..."
+                    : isEditMode
+                    ? "Save"
+                    : "Add"}
                 </Button>
               </div>
             </form>
-          </FormProvider>
+          </Form>
         </DialogContent>
       </Dialog>
 
@@ -441,7 +433,10 @@ const UsersTable = () => {
                     </td>
 
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      <button className="text-indigo-400 hover:text-indigo-300 mr-2">
+                      <button
+                        className="text-indigo-400 hover:text-indigo-300 mr-2"
+                        onClick={() => handleEdit(user)}
+                      >
                         Edit
                       </button>
                       <button

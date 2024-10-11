@@ -49,10 +49,7 @@ const serviceSchema = z.object({
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
 
-const ServicesTable: React.FC<ServicesTableProps> = ({
-  onDeleteSuccess,
-  onAddSuccess,
-}) => {
+const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [services, setServices] = useState<services[]>([]);
   const [filteredServices, setFilteredServices] = useState<services[]>([]);
