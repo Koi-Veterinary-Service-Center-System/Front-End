@@ -6,7 +6,7 @@ import Register from "./pages/register/register";
 import Login from "./pages/login/login";
 import Profile from "./pages/profile/profile";
 import UpdateProfile from "./pages/updateProfile/updateProfile";
-import Process from "./pages/process/process";
+
 import AdminDashbroad from "./pages/adminDashbroad/adminDashbroad";
 import OverviewPage from "./pages/OverviewPage/overView";
 import Service from "./pages/ServicePage/service";
@@ -22,6 +22,8 @@ import SettingsPage from "./pages/settingpage/setting";
 import FishPrescription from "./pages/prescriptions/prescription";
 import { Toaster } from "sonner";
 import FishPrescriptionSystem from "./pages/prescriptions/prescription";
+import History from "./pages/History/history";
+import Process from "./pages/bookingProcess/bookingProcess";
 
 // Add your license key here
 registerLicense(
@@ -56,6 +58,7 @@ function App() {
         { path: "/booking", element: <Booking /> },
         { path: "/profile", element: <Profile /> },
         { path: "/updateProfile", element: <UpdateProfile /> },
+        { path: "/history", element: <History /> },
         { path: "/process", element: <Process /> },
         { path: "/admin", element: <AdminDashbroad /> },
         { path: "/overview", element: <OverviewPage /> },

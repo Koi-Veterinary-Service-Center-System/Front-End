@@ -47,7 +47,7 @@ function Header() {
     localStorage.removeItem("token"); // Remove token from localStorage
     localStorage.removeItem("user"); // Optionally remove user info
     setIsLoggedIn(false); // Set logged-in state to false
-    navigate("/login#login-container"); // Redirect to login page
+    navigate("/login"); // Redirect to login page
   };
 
   const onSearch = (value: string) => {
@@ -88,12 +88,16 @@ function Header() {
         </Form>
 
         <div className="icons">
-          <Link to="/admin" className="absolute text-xs">
-            <Gauge />
-          </Link>
-          <Link to="/prescription" className="heart-icon" data-count="0">
-            <Pill />
-          </Link>
+          {profile?.role === "Manager" && (
+            <Link to="/admin" className="absolute text-xs">
+              <Gauge />
+            </Link>
+          )}
+          {profile?.role === "Vet" && (
+            <Link to="/prescription" className="heart-icon" data-count="0">
+              <Pill />
+            </Link>
+          )}
           <Link to="/favorites" className="heart-icon" data-count="0">
             <Heart />
           </Link>

@@ -59,9 +59,9 @@ function Banner() {
           rhoncus quisque eget sit
         </p>
         <div className="flex gap-3">
-          <button className="">
-            <Link to="/booking">Booking Service</Link>
-          </button>
+          <ShimmerButton href="/booking" className="shadow-2xl">
+            Booking Service
+          </ShimmerButton>
           <ShimmerButton className="fakeButton" onClick={handleOpenModal}>
             Create Koi Or Pool
           </ShimmerButton>

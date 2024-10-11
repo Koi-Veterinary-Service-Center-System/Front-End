@@ -39,6 +39,13 @@ export type services = {
   estimatedDuration: number;
 };
 
+export type Distance = {
+  distanceID: number;
+  district: string;
+  area: string;
+  price: number;
+};
+
 export type vetSlots = {
   isBook: boolean;
   slotID: number;
@@ -58,15 +65,28 @@ export type Payment = {
 };
 
 export type Booking = {
-  note: string;
-  koiOrPoolId: number;
-  vetName: string;
-  totalAmount: number;
-  location: string;
-  slotId: number;
-  serviceId: number;
-  paymentId: number;
+  bookingID: number;
   bookingDate: string;
+  location: string;
+  note: string;
+  totalAmount: number;
+  bookingStatus: string;
+  meetURL: string | null;
+  paymentID: number;
+  paymentType: string;
+  serviceID: number;
+  serviceName: string;
+  slotID: number;
+  slotStartTime: string;
+  slotEndTime: string;
+  slotWeekDate: string;
+  customerID: string;
+  customerName: string;
+  phoneNumber: string;
+  vetID: string;
+  vetName: string;
+  koiOrPoolID: number;
+  koiOrPoolName: string;
 };
 
 export type User = {

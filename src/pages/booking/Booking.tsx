@@ -1,13 +1,20 @@
 import "./booking.scss";
 import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
-import { Input, Form, Button, Select, DatePicker, message } from "antd";
+import { Input, Form, Button, Select, DatePicker } from "antd";
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+
 import Banner from "../../components/banner";
 import api from "../../configs/axios";
 
-import { Slot, Service, Vet, koiOrPool, Payment } from "../../types/info";
+import {
+  Slot,
+  Service,
+  Vet,
+  koiOrPool,
+  Payment,
+  Distance,
+} from "../../types/info";
 import { toast } from "sonner";
 import { Fish, Waves } from "lucide-react";
 import TextArea from "antd/es/input/TextArea";
@@ -30,9 +37,11 @@ function Booking() {
   const [isLoadingSlots, setLoadingSlots] = useState(false);
   const [isLoadingServices, setLoadingServices] = useState(false);
   const [isLoadingVets, setLoadingVets] = useState(false);
+  const [isLoadingDistance, setLoadingDistance] = useState(false);
   const [koiAndPools, setKoiAndPools] = useState<koiOrPool[]>([]);
   const [isLoadingKoiAndPools, setLoadingKoiAndPools] = useState(false);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [distances, setDistances] = useState<Distance[]>([]);
   const [isLoadingPayment, setLoadingPayment] = useState(false);
 
   // Ant Design form hook
@@ -92,6 +101,22 @@ function Booking() {
     };
 
     fetchAllVets();
+  }, []);
+
+  useEffect(() => {
+    const fetchDistance = async () => {
+      try {
+        setLoadingDistance(true);
+        const response = await api.get("/Distance/all-distance");
+        setDistances(response.data);
+      } catch (error) {
+        console.error("Error fetching payments: ", error);
+        toast.error("Failed to load payments.");
+      } finally {
+        setLoadingDistance(false);
+      }
+    };
+    fetchDistance();
   }, []);
 
   //Handle fetch fish or Pool
@@ -183,19 +208,27 @@ function Booking() {
 
   const handleBooking = async (values: any) => {
     try {
-      // Định dạng ngày thành YYYY-MM-DD theo timezone mặc định của hệ thống
+      // Format the date to YYYY-MM-DD according to the system's default timezone
       const bookingDate = new Intl.DateTimeFormat("en-CA", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
       }).format(values.pickupDate.toDate());
 
+      // Retrieve selected district's information
+      const selectedDistrict = distances.find(
+        (distance) => distance.distanceID === values.district
+      );
+
+      // Combine user input location with selected district and area
+      const fullLocation = `${values.location}, ${selectedDistrict?.district}, ${selectedDistrict?.area}`;
+
       const bookingData = {
         note: values.note || "",
         koiOrPoolId: values.koiOrPoolId || null,
         vetName: form.getFieldValue("vetName") || "",
         totalAmount: total,
-        location: values.location,
+        location: fullLocation, // Use the combined location here
         slotId: values.slot || 0,
         serviceId: values.serviceType || 0,
         paymentId: values.paymentMethod || 0,
@@ -239,6 +272,24 @@ function Booking() {
       } else {
         toast.error(`An error occurred: ${error.message}`);
       }
+    }
+  };
+
+  const calculateTota = () => {
+    const selectedService = services.find(
+      (service) => service.serviceID === form.getFieldValue("serviceType")
+    );
+    const selectedDistance = distances.find(
+      (distance) => distance.distanceID === form.getFieldValue("district")
+    );
+
+    if (selectedService && selectedDistance) {
+      const totalAmount = selectedService.price + selectedDistance.price; // Adjust based on requirements
+      setTotal(totalAmount);
+    } else if (selectedService) {
+      setTotal(selectedService.price);
+    } else {
+      setTotal(0);
     }
   };
 
@@ -294,6 +345,7 @@ function Booking() {
                         <Select
                           className="form-control"
                           loading={isLoadingServices}
+                          onChange={() => calculateTota()} // Trigger calculation on service change
                         >
                           {services.map((service) => (
                             <Option
@@ -370,24 +422,23 @@ function Booking() {
                     />
                   </Form.Item>
 
-                  <Form.Item
-                    label="Phone"
-                    name="phone"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please enter your phone number",
-                      },
-                      {
-                        pattern: /^[0-9]{10}$/,
-                        message: "Phone number must be 10 digits",
-                      },
-                    ]}
-                  >
-                    <Input
+                  <Form.Item label="Choose District" name="district">
+                    <Select
                       className="form-control"
-                      placeholder="Enter your phone number"
-                    />
+                      loading={isLoadingDistance}
+                      placeholder="Select a district"
+                      onChange={() => calculateTota()} // Trigger calculation on district change
+                    >
+                      {distances.map((distance) => (
+                        <Option
+                          key={distance.distanceID}
+                          value={distance.distanceID}
+                        >
+                          {distance.district} - {distance.area} ($
+                          {distance.price})
+                        </Option>
+                      ))}
+                    </Select>
                   </Form.Item>
 
                   <Form.Item label="Choose Fish or Pool" name="koiOrPoolId">
@@ -441,13 +492,6 @@ function Booking() {
                   </Form.Item>
 
                   <h3>Total: {total} $</h3>
-                  <Button
-                    onClick={calculateTotal}
-                    className="calculate-total-btn"
-                  >
-                    Calculate Total
-                  </Button>
-
                   <div className="form-btn">
                     <Button
                       type="primary"

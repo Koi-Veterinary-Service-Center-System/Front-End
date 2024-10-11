@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
+  CalendarClock,
   ChevronLeft,
   MessageSquare,
   Moon,
@@ -119,11 +120,11 @@ function Profile() {
                 <Link
                   to="/profile"
                   className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "dashboard"
+                    activeMenuItem === "profile"
                       ? "bg-blue-400 text-primary-foreground"
                       : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
-                  onClick={() => handleMenuItemClick("dashboard")}
+                  onClick={() => handleMenuItemClick("profile")}
                 >
                   <User className="h-5 w-5" />
                   <span>Your Profile</span>
@@ -131,16 +132,30 @@ function Profile() {
               </li>
               <li>
                 <Link
-                  to="/process"
+                  to="/history"
                   className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "my-store"
+                    activeMenuItem === "history"
                       ? "bg-blue-400 text-primary-foreground"
                       : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
-                  onClick={() => handleMenuItemClick("my-store")}
+                  onClick={() => handleMenuItemClick("history")}
                 >
                   <Store className="h-5 w-5" />
                   <span>Service History</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/process"
+                  className={`flex items-center space-x-2 p-2 ${
+                    activeMenuItem === "process"
+                      ? "bg-blue-400 text-primary-foreground"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
+                  }`}
+                  onClick={() => handleMenuItemClick("process")}
+                >
+                  <CalendarClock className="h-5 w-5" />
+                  <span>Service Process</span>
                 </Link>
               </li>
               <li>

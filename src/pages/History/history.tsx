@@ -21,6 +21,7 @@ import {
   MessageSquare,
   Store,
   User,
+  CalendarClock,
 } from "lucide-react";
 import { Checkbox, Form, Input, Modal } from "antd";
 import TextArea from "antd/es/input/TextArea";
@@ -31,7 +32,7 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const Process = () => {
+const History = () => {
   const [profile, setProfile] = useState<profile | null>(null);
   const [koiOrPool, setKoiOrPool] = useState<koiOrPool[] | null>(null);
   const [error, setError] = useState(null);
@@ -51,7 +52,7 @@ const Process = () => {
   // Fetch all booking and calculate totals
   const fetchBooking = async (userId?: string) => {
     try {
-      const response = await api.get(`/booking/view-booking-process`, {
+      const response = await api.get(`/booking/view-booking-history`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -217,11 +218,11 @@ const Process = () => {
                 <Link
                   to="/profile"
                   className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "dashboard"
+                    activeMenuItem === "profile"
                       ? "bg-blue-400 text-primary-foreground"
                       : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
-                  onClick={() => handleMenuItemClick("dashboard")}
+                  onClick={() => handleMenuItemClick("profile")}
                 >
                   <User className="h-5 w-5" />
                   <span>Your Profile</span>
@@ -229,16 +230,30 @@ const Process = () => {
               </li>
               <li>
                 <Link
-                  to="/process"
+                  to="/history"
                   className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "my-store"
+                    activeMenuItem === "history"
                       ? "bg-blue-400 text-primary-foreground"
                       : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
-                  onClick={() => handleMenuItemClick("my-store")}
+                  onClick={() => handleMenuItemClick("history")}
                 >
                   <Store className="h-5 w-5" />
                   <span>Service History</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/process"
+                  className={`flex items-center space-x-2 p-2 ${
+                    activeMenuItem === "process"
+                      ? "bg-blue-400 text-primary-foreground"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
+                  }`}
+                  onClick={() => handleMenuItemClick("process")}
+                >
+                  <CalendarClock className="h-5 w-5" />
+                  <span>Service Process</span>
                 </Link>
               </li>
               <li>
@@ -383,8 +398,8 @@ const Process = () => {
                           </td>
                           <td className="py-2">{booking.bookingDate}</td>
                           <td className="py-2">
-                            <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                              Completed
+                            <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
+                              {booking.bookingStatus}
                             </span>
                           </td>
                         </tr>
@@ -527,4 +542,4 @@ const Process = () => {
   );
 };
 
-export default Process;
+export default History;
