@@ -1,10 +1,61 @@
 import { useState, useEffect } from "react";
-import { AlertCircle } from "lucide-react";
+import {
+  AlertCircle,
+  Info,
+  Lock,
+  LockKeyhole,
+  Mail,
+  Search,
+  User,
+  UserPlus,
+  UserPlus2,
+  UserRound,
+  Users,
+} from "lucide-react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
-import { User } from "@/types/info";
+import { useForm, FormProvider } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import api from "@/configs/axios";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Define schema using zod
+const userSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  userName: z.string().min(1, "Username is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email("Invalid email address"),
+  gender: z.enum(["male", "female"]).optional(),
+  role: z.string().min(1, "Role is required"),
+});
+
+// Define type for form data using inferred type from zod schema
+type UserFormData = z.infer<typeof userSchema>;
 
 const UsersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,7 +64,18 @@ const UsersTable = () => {
   const [error, setError] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Initialize form with react-hook-form and zod schema
+  const methods = useForm<UserFormData>({
+    resolver: zodResolver(userSchema),
+  });
+  const {
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = methods;
 
   // Fetch users from API
   const fetchUser = async () => {
@@ -37,7 +99,43 @@ const UsersTable = () => {
     fetchUser();
   }, []);
 
-  // Handle Delete user
+  // Handle Add User
+  const handleAddUser = async (data: UserFormData) => {
+    setLoading(true);
+    try {
+      // Modify gender to boolean
+      const modifiedData = {
+        ...data,
+        gender: data.gender === "male", // true if male, false if female
+      };
+
+      // Wrap in UserDTO object
+      const payload = { userDTO: modifiedData };
+
+      // Log the payload before sending it to the API
+      console.log("Payload being sent to API:", payload);
+
+      // Make the API call
+      const response = await api.post(`/User/create-user`, payload, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+
+      // Log the API response to verify what is returned
+      console.log("API response:", response);
+
+      toast.success("User added successfully!");
+      fetchUser(); // Fetch the updated user list
+      setIsAddModalOpen(false);
+      reset(); // Clear form after submission
+    } catch (error) {
+      console.error("Error during user creation:", error);
+      toast.error("Failed to add user. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //Hanlde Delete User
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
     setLoading(true);
@@ -64,21 +162,6 @@ const UsersTable = () => {
     }
   };
 
-  // Handle search input and filter users
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-
-    const filtered = users.filter(
-      (user) =>
-        `${user.firstName ?? ""} ${user.lastName ?? ""}`
-          .toLowerCase()
-          .includes(term) || user.email?.toLowerCase().includes(term)
-    );
-
-    setFilteredUsers(filtered);
-  };
-
   return (
     <motion.div
       className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
@@ -94,11 +177,204 @@ const UsersTable = () => {
             placeholder="Search users..."
             className="bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={searchTerm}
-            onChange={handleSearch}
           />
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
         </div>
+        <Button onClick={() => setIsAddModalOpen(true)}>
+          <UserPlus2 className="mr-2" />
+          Add User
+        </Button>
       </div>
+
+      {/* Add User Modal */}
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogTrigger asChild>
+          <Button onClick={() => setIsAddModalOpen(true)}>Add User</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">
+              Add New User
+            </DialogTitle>
+          </DialogHeader>
+          <FormProvider {...methods}>
+            <form onSubmit={handleSubmit(handleAddUser)} className="space-y-6">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <FormField
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Name</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Info className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                          <Input
+                            placeholder="First Name"
+                            {...field}
+                            className="pl-10"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage>{errors.firstName?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Info className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                          <Input
+                            placeholder="Last Name"
+                            {...field}
+                            className="pl-10"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage>{errors.lastName?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="userName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <UserRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                          <Input
+                            placeholder="Username"
+                            {...field}
+                            className="pl-10"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage>{errors.userName?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <LockKeyhole className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                          <Input
+                            type="password"
+                            placeholder="Password"
+                            {...field}
+                            className="pl-10"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage>{errors.password?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                          <Input
+                            placeholder="Email"
+                            {...field}
+                            className="pl-10"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage>{errors.email?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="gender"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gender</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Gender" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage>{errors.gender?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="customer">Customer</SelectItem>
+                          <SelectItem value="vet">Vet</SelectItem>
+                          <SelectItem value="staff">Staff</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage>{errors.role?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex justify-end space-x-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  {loading ? (
+                    <>
+                      <Users className="mr-2 h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Add User
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </FormProvider>
+        </DialogContent>
+      </Dialog>
 
       {error ? (
         <div className="text-red-400 text-sm mb-4">{error}</div>
@@ -228,7 +504,6 @@ const UsersTable = () => {
           </div>
         </div>
       )}
-      <Toaster richColors position="top-right" closeButton />
     </motion.div>
   );
 };

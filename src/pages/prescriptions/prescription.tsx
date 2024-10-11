@@ -1,24 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Fish,
-  Pill,
-  Droplet,
-  Calendar,
-  Plus,
-  Edit,
-  Trash2,
-  Send,
-  AlertTriangle,
-  FileText,
-  Stethoscope,
-} from "lucide-react";
+import { motion } from "framer-motion";
+import { Fish, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -27,10 +14,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Prescription } from "@/types/info";
 import api from "@/configs/axios";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function FishPrescriptionSystem() {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
@@ -38,7 +33,17 @@ export default function FishPrescriptionSystem() {
   const [currentPrescription, setCurrentPrescription] =
     useState<Prescription | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
+
+  // Form fields states
+  const [bookingID, setBookingID] = useState("");
+  const [ownerName, setOwnerName] = useState("");
+  const [fishSpecies, setFishSpecies] = useState("");
+  const [medication, setMedication] = useState("");
+  const [frequency, setFrequency] = useState("");
+  const [duration, setDuration] = useState("");
+  const [note, setNote] = useState("");
+  const [symptoms, setSymptoms] = useState("");
+  const [diseaseName, setDiseaseName] = useState("");
 
   // Fetch prescriptions from the server
   const fetchPrescriptions = async () => {
@@ -58,76 +63,70 @@ export default function FishPrescriptionSystem() {
     fetchPrescriptions(); // Fetch data on component mount
   }, []);
 
-  const handleAddPrescription = async (values: Prescription) => {
-    try {
-      const response = await api.post("pres-rec/create-presRec", values);
-      if (response.status === 200) {
-        toast.success("Successfully added!");
-        fetchPrescriptions(); // Refresh the list after adding
-        setIsDialogOpen(false);
-      } else {
-        toast.error("Failed to add the prescription.");
-      }
-    } catch (error) {
-      toast.error(error.message || "Failed to add the prescription!");
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const formData = new FormData(e.currentTarget);
     const newPrescription: Prescription = {
       id: currentPrescription ? currentPrescription.id : Date.now(),
-      bookingID: formData.get("bookingID") as string,
-      ownerName: formData.get("ownerName") as string,
-      fishSpecies: formData.get("fishSpecies") as string,
-      medication: formData.get("medication") as string,
-      frequency: formData.get("frequency") as string,
-      duration: formData.get("duration") as string,
-      note: formData.get("note") as string,
-      symptoms: formData.get("symptoms") as string,
-      diseaseName: formData.get("diseaseName") as string,
+      bookingID,
+      ownerName,
+      fishSpecies,
+      medication,
+      frequency,
+      duration,
+      note,
+      symptoms,
+      diseaseName,
     };
 
-    if (currentPrescription) {
-      // Update existing prescription
-      setPrescriptions(
-        prescriptions.map((p) =>
-          p.id === currentPrescription.id ? newPrescription : p
-        )
-      );
-    } else {
-      // Add new prescription
-      setPrescriptions([...prescriptions, newPrescription]);
+    try {
+      if (currentPrescription) {
+        // Update existing prescription
+        await api.put(
+          `pres-rec/update/${currentPrescription.id}`,
+          newPrescription
+        );
+      } else {
+        // Add new prescription
+        await api.post("pres-rec/create-presRec", newPrescription);
+      }
+      toast.success("Prescription has been saved successfully.");
+      fetchPrescriptions(); // Refresh list after save
+      setIsDialogOpen(false);
+      resetForm(); // Clear form after submission
+    } catch (error) {
+      toast.error(error.message || "Failed to save the prescription!");
+    } finally {
+      setIsSubmitting(false);
+      setCurrentPrescription(null);
     }
-
-    setIsSubmitting(false);
-    setIsDialogOpen(false);
-    setCurrentPrescription(null);
-    toast.success("Prescription has been saved successfully.");
   };
 
   const handleEdit = (prescription: Prescription) => {
     setCurrentPrescription(prescription);
+    setBookingID(prescription.bookingID);
+    setOwnerName(prescription.ownerName);
+    setFishSpecies(prescription.fishSpecies);
+    setMedication(prescription.medication);
+    setFrequency(prescription.frequency);
+    setDuration(prescription.duration);
+    setNote(prescription.note);
+    setSymptoms(prescription.symptoms);
+    setDiseaseName(prescription.diseaseName);
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this prescription?")) {
-      try {
-        const response = await api.delete(`pres-rec/delete/${id}`);
-        if (response.status === 200) {
-          toast.success("Prescription deleted successfully!");
-          fetchPrescriptions(); // Refresh the list after deleting
-        } else {
-          toast.error("Failed to delete the prescription.");
-        }
-      } catch (error) {
-        toast.error(error.message || "Failed to delete the prescription!");
-      }
-    }
+  const resetForm = () => {
+    setBookingID("");
+    setOwnerName("");
+    setFishSpecies("");
+    setMedication("");
+    setFrequency("");
+    setDuration("");
+    setNote("");
+    setSymptoms("");
+    setDiseaseName("");
   };
 
   return (
@@ -147,7 +146,10 @@ export default function FishPrescriptionSystem() {
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
-                    onClick={() => setCurrentPrescription(null)}
+                    onClick={() => {
+                      setCurrentPrescription(null);
+                      resetForm();
+                    }}
                     className="bg-white text-blue-600 hover:bg-blue-50 transition-colors duration-200"
                   >
                     <Plus className="mr-2 h-4 w-4" /> New Prescription
@@ -160,186 +162,91 @@ export default function FishPrescriptionSystem() {
                     </DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label
-                          htmlFor="bookingID"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Booking ID
-                        </label>
-                        <Input
-                          type="text"
-                          name="bookingID"
-                          id="bookingID"
-                          required
-                          defaultValue={currentPrescription?.bookingID || ""}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="ownerName"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Owner's Name
-                        </label>
-                        <Input
-                          type="text"
-                          name="ownerName"
-                          id="ownerName"
-                          required
-                          defaultValue={currentPrescription?.ownerName || ""}
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="fishSpecies"
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Fish Species
-                      </label>
-                      <Input
-                        type="text"
-                        name="fishSpecies"
-                        id="fishSpecies"
-                        required
-                        defaultValue={currentPrescription?.fishSpecies || ""}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label
-                          htmlFor="medication"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Medication
-                        </label>
-                        <Input
-                          type="text"
-                          name="medication"
-                          id="medication"
-                          required
-                          defaultValue={currentPrescription?.medication || ""}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="dosage"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Dosage
-                        </label>
-                        <Input
-                          type="text"
-                          name="dosage"
-                          id="dosage"
-                          required
-                          defaultValue={currentPrescription?.dosage || ""}
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label
-                          htmlFor="frequency"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Frequency
-                        </label>
-                        <Select
-                          name="frequency"
-                          required
-                          defaultValue={currentPrescription?.frequency || ""}
-                          className="mt-1"
-                        >
-                          <option value="">Select frequency</option>
-                          <option value="daily">Daily</option>
-                          <option value="twice-daily">Twice Daily</option>
-                          <option value="weekly">Weekly</option>
-                          <option value="as-needed">As Needed</option>
-                        </Select>
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="duration"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Duration
-                        </label>
-                        <Input
-                          type="text"
-                          name="duration"
-                          id="duration"
-                          required
-                          defaultValue={currentPrescription?.duration || ""}
-                          className="mt-1"
-                          placeholder="e.g., 7 days"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="note"
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Note
-                      </label>
-                      <Textarea
-                        name="note"
-                        id="note"
-                        rows={2}
-                        defaultValue={currentPrescription?.note || ""}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="symptoms"
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Symptoms
-                      </label>
-                      <Textarea
-                        name="symptoms"
-                        id="symptoms"
-                        rows={2}
-                        defaultValue={currentPrescription?.symptoms || ""}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="diseaseName"
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Disease Name
-                      </label>
-                      <Input
-                        type="text"
-                        name="diseaseName"
-                        id="diseaseName"
-                        required
-                        defaultValue={currentPrescription?.diseaseName || ""}
-                        className="mt-1"
-                      />
-                    </div>
+                    <Input
+                      type="text"
+                      name="bookingID"
+                      placeholder="Booking ID"
+                      value={bookingID}
+                      onChange={(e) => setBookingID(e.target.value)}
+                      required
+                    />
+                    <Input
+                      type="text"
+                      name="ownerName"
+                      placeholder="Owner's Name"
+                      value={ownerName}
+                      onChange={(e) => setOwnerName(e.target.value)}
+                      required
+                    />
+                    <Input
+                      type="text"
+                      name="fishSpecies"
+                      placeholder="Fish Species"
+                      value={fishSpecies}
+                      onChange={(e) => setFishSpecies(e.target.value)}
+                      required
+                    />
+                    <Input
+                      type="text"
+                      name="medication"
+                      placeholder="Medication"
+                      value={medication}
+                      onChange={(e) => setMedication(e.target.value)}
+                      required
+                    />
+                    <Select
+                      onValueChange={(value) => setFrequency(value)}
+                      value={frequency}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select Frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Frequency</SelectLabel>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="twice-daily">
+                            Twice daily
+                          </SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="as-needed">As Needed</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      type="text"
+                      name="duration"
+                      placeholder="Duration"
+                      value={duration}
+                      onChange={(e) => setDuration(e.target.value)}
+                      required
+                    />
+                    <Textarea
+                      name="note"
+                      placeholder="Notes"
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                    />
+                    <Textarea
+                      name="symptoms"
+                      placeholder="Symptoms"
+                      value={symptoms}
+                      onChange={(e) => setSymptoms(e.target.value)}
+                    />
+                    <Input
+                      type="text"
+                      name="diseaseName"
+                      placeholder="Disease Name"
+                      value={diseaseName}
+                      onChange={(e) => setDiseaseName(e.target.value)}
+                      required
+                    />
                     <Button
                       type="submit"
-                      className="w-full bg-blue-600 hover:bg-blue-700"
                       disabled={isSubmitting}
+                      className="w-full bg-blue-600 hover:bg-blue-700"
                     >
-                      {isSubmitting
-                        ? "Saving..."
-                        : currentPrescription
-                        ? "Update"
-                        : "Create"}{" "}
-                      Prescription
+                      {isSubmitting ? "Saving..." : "Save Prescription"}
                     </Button>
                   </form>
                 </DialogContent>

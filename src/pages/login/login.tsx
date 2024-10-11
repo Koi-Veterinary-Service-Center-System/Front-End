@@ -4,31 +4,30 @@ import Input from "antd/es/input/Input";
 
 import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
-import { Link, useLocation, useNavigate } from "react-router-dom"; // Import useLocation
-import { useEffect, useRef } from "react"; // Import useEffect, useRef
+import { Link, useNavigate } from "react-router-dom"; // Import useLocation
 import api from "../../configs/axios";
 
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 
 function Login() {
-  const location = useLocation(); // Hook để truy cập URL
-  const loginRef = useRef(null); // Tạo ref để tham chiếu đến div login-container
+  // Tạo ref để tham chiếu đến div login-container
   const navigate = useNavigate();
-
-  // Auto scroll to the login container
-  useEffect(() => {
-    if (location.hash === "#login-container") {
-      setTimeout(() => {
-        if (loginRef.current) {
-          loginRef.current.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 100);
-    }
-  }, [location.hash]);
 
   //Handle Login google
   const handleLoginGoogle = async () => {
-    window.location.href = "http://localhost:5155/api/User/google-login";
+    try {
+      // Giả định token trả về sau đăng nhập thành công
+      const response = await api.get("User/google-login"); // hoặc điều hướng nếu là OAuth
+
+      const { token, user } = response.data;
+      localStorage.setItem("token", token); // Lưu token trước khi điều hướng
+      localStorage.setItem("user", JSON.stringify(user));
+
+      toast.success("Login successful with Google!");
+      navigate("/", { state: { loginSuccess: true } });
+    } catch (error: any) {
+      toast.error("An error occurred while logging in.");
+    }
   };
 
   // Handle Login
