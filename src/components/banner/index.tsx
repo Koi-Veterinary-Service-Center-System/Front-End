@@ -6,6 +6,7 @@ import "./index.scss";
 import api from "@/configs/axios";
 import { koiOrPool } from "@/types/info";
 import { toast } from "sonner";
+import ShimmerButton from "../ui/shimmer-button";
 
 function Banner() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -57,12 +58,14 @@ function Banner() {
           At a vehicula est proin turpis pellentesque sinulla a aliquam amet
           rhoncus quisque eget sit
         </p>
-        <Button className="fakeButton">
-          <Link to="/booking#section">Booking Service</Link>
-        </Button>
-        <Button className="fakeButton" onClick={handleOpenModal}>
-          Create Koi Or Pool
-        </Button>
+        <div className="flex gap-3">
+          <button className="">
+            <Link to="/booking">Booking Service</Link>
+          </button>
+          <ShimmerButton className="fakeButton" onClick={handleOpenModal}>
+            Create Koi Or Pool
+          </ShimmerButton>
+        </div>
       </div>
 
       <div className="koi-banner">

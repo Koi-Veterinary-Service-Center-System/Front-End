@@ -27,6 +27,7 @@ import {
 } from "../ui/form";
 import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
+import ShimmerButton from "../ui/shimmer-button";
 
 interface ServicesTableProps {
   onDeleteSuccess: () => void;
@@ -189,10 +190,10 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
           />
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
         </div>
-        <Button onClick={handleAdd}>
+        <ShimmerButton onClick={handleAdd}>
           <PlusCircle className="mr-2" />
           Add Service
-        </Button>
+        </ShimmerButton>
       </div>
 
       <div className="overflow-x-auto">

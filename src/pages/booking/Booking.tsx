@@ -17,7 +17,6 @@ const { Option } = Select;
 function Booking() {
   const [total, setTotal] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("");
-  const location = useLocation();
   const bookingRef = useRef(null);
 
   const [slots, setSlots] = useState<Slot[]>([]);

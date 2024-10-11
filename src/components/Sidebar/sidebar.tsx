@@ -1,6 +1,7 @@
 import {
   BarChart2,
   Calendar,
+  House,
   Menu,
   Settings,
   ShoppingBag,
@@ -19,6 +20,7 @@ const SIDEBAR_ITEMS = [
   { name: "Schedules", icon: Calendar, color: "#10B981", path: "/schedules" },
   { name: "Orders", icon: ShoppingCart, color: "#F59E0B", path: "/orders" },
   { name: "Analytics", icon: TrendingUp, color: "#3B82F6", path: "/analytics" },
+  { name: "HomePage", icon: House, color: "#3B82F6", path: "/" },
   { name: "Settings", icon: Settings, color: "#6EE7B7", path: "/settings" },
 ];
 

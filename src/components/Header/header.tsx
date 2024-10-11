@@ -1,10 +1,10 @@
 import "./header.scss";
-import { Button, Form, Input, message } from "antd";
+import { Button, Form, Input } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react"; // Import useState and useEffect
 import { profile } from "../../types/info";
 import api from "../../configs/axios";
-import { Bell, CalendarCheck2, Heart, Pill } from "lucide-react";
+import { Bell, CalendarCheck2, Gauge, Heart, Pill } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 function Header() {
@@ -88,6 +88,9 @@ function Header() {
         </Form>
 
         <div className="icons">
+          <Link to="/admin" className="absolute text-xs">
+            <Gauge />
+          </Link>
           <Link to="/prescription" className="heart-icon" data-count="0">
             <Pill />
           </Link>

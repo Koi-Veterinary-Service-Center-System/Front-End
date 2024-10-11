@@ -1,12 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  AlertCircle,
-  Info,
-  LockKeyhole,
-  Mail,
-  Search,
-  UserPlus2,
-} from "lucide-react";
+import { AlertCircle, Search, UserPlus2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -37,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { User } from "@/types/info";
+import ShimmerButton from "../ui/shimmer-button";
 
 // Define schema using zod
 const userSchema = z.object({
@@ -204,10 +198,10 @@ const UsersTable = () => {
           />
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
         </div>
-        <Button onClick={handleAdd}>
+        <ShimmerButton onClick={handleAdd}>
           <UserPlus2 className="mr-2" />
           Add User
-        </Button>
+        </ShimmerButton>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
