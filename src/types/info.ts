@@ -9,7 +9,7 @@ export type Slot = {
   weekDate: string;
 };
 
-export type profile = {
+export type Profile = {
   userId: string;
   userName: string;
   firstName: string;
@@ -65,7 +65,7 @@ export type Payment = {
 };
 
 export type Booking = {
-  bookingID: number;
+  bookingID: string;
   bookingDate: string;
   location: string;
   note: string;
@@ -105,4 +105,6 @@ export type Prescription = {
   medication: string;
   note: string;
   bookingID: string;
+  frequency: string;
+  createAt: string;
 };

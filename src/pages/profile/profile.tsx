@@ -17,20 +17,9 @@ import {
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Profile } from "@/types/info";
 
-interface Profile {
-  imageURL: string;
-  userName: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  gender: string;
-  address: string;
-  email: string;
-  phoneNumber: string;
-}
-
-function Profile() {
+function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeMenuItem, setActiveMenuItem] = useState("dashboard");
@@ -274,4 +263,4 @@ function Profile() {
   );
 }
 
-export default Profile;
+export default ProfilePage;

@@ -1,11 +1,8 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Fish, Plus } from "lucide-react";
+import { Fish, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -17,116 +14,38 @@ import {
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Prescription } from "@/types/info";
 import api from "@/configs/axios";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export default function FishPrescriptionSystem() {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentPrescription, setCurrentPrescription] =
-    useState<Prescription | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Form fields states
-  const [bookingID, setBookingID] = useState("");
-  const [ownerName, setOwnerName] = useState("");
-  const [fishSpecies, setFishSpecies] = useState("");
-  const [medication, setMedication] = useState("");
-  const [frequency, setFrequency] = useState("");
-  const [duration, setDuration] = useState("");
-  const [note, setNote] = useState("");
-  const [symptoms, setSymptoms] = useState("");
-  const [diseaseName, setDiseaseName] = useState("");
-
-  // Fetch prescriptions from the server
-  const fetchPrescriptions = async () => {
+  // Fetch prescriptions based on customer name
+  const fetchPrescriptions = async (customerName = "") => {
     try {
-      const response = await api.get("pres-rec/list");
+      const endpoint = customerName
+        ? `/pres-rec/list-preRec-CusName/${customerName}`
+        : "/pres-rec/list";
+      const response = await api.get(endpoint, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       if (response.status === 200) {
         setPrescriptions(response.data);
       } else {
         toast.error("Failed to fetch prescriptions.");
       }
     } catch (error) {
-      toast.error(error.message || "Failed to fetch prescriptions!");
+      toast.error("Failed to fetch prescriptions!");
     }
   };
 
   useEffect(() => {
-    fetchPrescriptions(); // Fetch data on component mount
+    fetchPrescriptions(); // Fetch all prescriptions on component mount
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    const newPrescription: Prescription = {
-      id: currentPrescription ? currentPrescription.id : Date.now(),
-      bookingID,
-      ownerName,
-      fishSpecies,
-      medication,
-      frequency,
-      duration,
-      note,
-      symptoms,
-      diseaseName,
-    };
-
-    try {
-      if (currentPrescription) {
-        // Update existing prescription
-        await api.put(
-          `pres-rec/update/${currentPrescription.id}`,
-          newPrescription
-        );
-      } else {
-        // Add new prescription
-        await api.post("pres-rec/create-presRec", newPrescription);
-      }
-      toast.success("Prescription has been saved successfully.");
-      fetchPrescriptions(); // Refresh list after save
-      setIsDialogOpen(false);
-      resetForm(); // Clear form after submission
-    } catch (error) {
-      toast.error(error.message || "Failed to save the prescription!");
-    } finally {
-      setIsSubmitting(false);
-      setCurrentPrescription(null);
-    }
-  };
-
-  const handleEdit = (prescription: Prescription) => {
-    setCurrentPrescription(prescription);
-    setBookingID(prescription.bookingID);
-    setOwnerName(prescription.ownerName);
-    setFishSpecies(prescription.fishSpecies);
-    setMedication(prescription.medication);
-    setFrequency(prescription.frequency);
-    setDuration(prescription.duration);
-    setNote(prescription.note);
-    setSymptoms(prescription.symptoms);
-    setDiseaseName(prescription.diseaseName);
-    setIsDialogOpen(true);
-  };
-
-  const resetForm = () => {
-    setBookingID("");
-    setOwnerName("");
-    setFishSpecies("");
-    setMedication("");
-    setFrequency("");
-    setDuration("");
-    setNote("");
-    setSymptoms("");
-    setDiseaseName("");
+  const handleSearch = () => {
+    fetchPrescriptions(searchTerm);
   };
 
   return (
@@ -143,117 +62,82 @@ export default function FishPrescriptionSystem() {
               <CardTitle className="text-3xl font-bold flex items-center">
                 <Fish className="mr-2 h-8 w-8" /> Fish Prescription System
               </CardTitle>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <Dialog open={false} onOpenChange={() => {}}>
                 <DialogTrigger asChild>
-                  <Button
-                    onClick={() => {
-                      setCurrentPrescription(null);
-                      resetForm();
-                    }}
-                    className="bg-white text-blue-600 hover:bg-blue-50 transition-colors duration-200"
-                  >
+                  <Button className="bg-white text-blue-600 hover:bg-blue-50 transition-colors duration-200">
                     <Plus className="mr-2 h-4 w-4" /> New Prescription
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[600px]">
                   <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-blue-600">
-                      {currentPrescription ? "Edit" : "New"} Prescription
+                      New Prescription
                     </DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <Input
-                      type="text"
-                      name="bookingID"
-                      placeholder="Booking ID"
-                      value={bookingID}
-                      onChange={(e) => setBookingID(e.target.value)}
-                      required
-                    />
-                    <Input
-                      type="text"
-                      name="ownerName"
-                      placeholder="Owner's Name"
-                      value={ownerName}
-                      onChange={(e) => setOwnerName(e.target.value)}
-                      required
-                    />
-                    <Input
-                      type="text"
-                      name="fishSpecies"
-                      placeholder="Fish Species"
-                      value={fishSpecies}
-                      onChange={(e) => setFishSpecies(e.target.value)}
-                      required
-                    />
-                    <Input
-                      type="text"
-                      name="medication"
-                      placeholder="Medication"
-                      value={medication}
-                      onChange={(e) => setMedication(e.target.value)}
-                      required
-                    />
-                    <Select
-                      onValueChange={(value) => setFrequency(value)}
-                      value={frequency}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select Frequency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Frequency</SelectLabel>
-                          <SelectItem value="daily">Daily</SelectItem>
-                          <SelectItem value="twice-daily">
-                            Twice daily
-                          </SelectItem>
-                          <SelectItem value="weekly">Weekly</SelectItem>
-                          <SelectItem value="as-needed">As Needed</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      type="text"
-                      name="duration"
-                      placeholder="Duration"
-                      value={duration}
-                      onChange={(e) => setDuration(e.target.value)}
-                      required
-                    />
-                    <Textarea
-                      name="note"
-                      placeholder="Notes"
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                    />
-                    <Textarea
-                      name="symptoms"
-                      placeholder="Symptoms"
-                      value={symptoms}
-                      onChange={(e) => setSymptoms(e.target.value)}
-                    />
-                    <Input
-                      type="text"
-                      name="diseaseName"
-                      placeholder="Disease Name"
-                      value={diseaseName}
-                      onChange={(e) => setDiseaseName(e.target.value)}
-                      required
-                    />
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full bg-blue-600 hover:bg-blue-700"
-                    >
-                      {isSubmitting ? "Saving..." : "Save Prescription"}
-                    </Button>
-                  </form>
                 </DialogContent>
               </Dialog>
             </div>
           </CardHeader>
-          {/* Render the prescription cards */}
+          <div className="p-4">
+            {/* Search input for customer name */}
+            <div className="mb-4 flex items-center">
+              <Input
+                type="text"
+                placeholder="Search by customer name"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="mr-2"
+              />
+              <Button onClick={handleSearch} className="bg-blue-500 text-white">
+                <Search className="mr-2 h-4 w-4" />
+                Search
+              </Button>
+            </div>
+
+            {/* Display fetched prescriptions */}
+            {prescriptions.length > 0 ? (
+              prescriptions.map((prescription) => (
+                <Card key={prescription.prescriptionRecordID} className="mb-4">
+                  <CardHeader>
+                    <CardTitle>Prescription Details</CardTitle>
+                  </CardHeader>
+                  <div className="p-4">
+                    {prescription.createAt && (
+                      <p>
+                        <strong>Created At:</strong>{" "}
+                        {new Date(prescription.createAt).toLocaleString()}
+                      </p>
+                    )}
+                    {prescription.frequency && (
+                      <p>
+                        <strong>Frequency:</strong> {prescription.frequency}
+                      </p>
+                    )}
+                    {prescription.medication && (
+                      <p>
+                        <strong>Medication:</strong> {prescription.medication}
+                      </p>
+                    )}
+                    {prescription.symptoms && (
+                      <p>
+                        <strong>Symptoms:</strong> {prescription.symptoms}
+                      </p>
+                    )}
+                    {prescription.diseaseName && (
+                      <p>
+                        <strong>Disease Name:</strong>{" "}
+                        {prescription.diseaseName}
+                      </p>
+                    )}
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <p className="text-center text-gray-600">
+                No prescriptions found.
+              </p>
+            )}
+          </div>
         </Card>
       </motion.div>
     </div>

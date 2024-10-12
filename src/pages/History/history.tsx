@@ -113,7 +113,7 @@ const History = () => {
   useEffect(() => {
     fetchProfile();
     fetchKoiOrPool();
-    fetchBooking(profile?.userId); // Fetch bookings with user ID
+    fetchBooking(); // Fetch bookings with user ID
   }, []);
 
   // Memoize the booking totals to avoid recalculating them unnecessarily

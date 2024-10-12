@@ -20,8 +20,22 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 const Process = () => {
   const [profile, setProfile] = useState<profile | null>(null);
@@ -29,6 +43,10 @@ const Process = () => {
   const [activeMenuItem, setActiveMenuItem] = useState("dashboard");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
+    null
+  );
 
   // Fetch all booking and calculate totals
   const fetchBooking = async (userId: string) => {
@@ -40,7 +58,6 @@ const Process = () => {
         params: { userId },
       });
 
-      console.log("API Response:", response.data);
       const fetchedBookings = response.data;
       setBookings(fetchedBookings);
       console.log("Fetched Bookings:", fetchedBookings);
@@ -83,13 +100,44 @@ const Process = () => {
   // Call fetchBooking in useEffect
   // Fetch Profile once on component mount
   useEffect(() => {
-    console.log("Fetching profile...");
     fetchProfile();
   }, []);
 
   useEffect(() => {
     fetchBooking();
   }, []);
+
+  const handlePayOnline = (bookingId: string) => {
+    // Implement pay online logic here
+    console.log(`Paying online for booking ${bookingId}`);
+    toast.success(`Payment initiated for booking ${bookingId}`);
+  };
+
+  const openCancelDialog = (bookingId: string) => {
+    setSelectedBookingId(bookingId);
+    setIsCancelDialogOpen(true);
+  };
+
+  const handleCancelBooking = async () => {
+    if (!selectedBookingId) return;
+
+    try {
+      await api.patch(
+        `/booking/cancel-booking/${selectedBookingId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      toast.success(`Booking ${selectedBookingId} has been cancelled`);
+      setIsCancelDialogOpen(false);
+      fetchBooking(); // Refresh bookings after cancellation
+    } catch (error) {
+      toast.error("Failed to cancel booking.");
+    }
+  };
 
   const handleDarkModeSwitch = () => {
     setIsDarkMode(!isDarkMode);
@@ -231,7 +279,6 @@ const Process = () => {
               <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
                 Booking Details
               </h2>
-              {error && <div className="text-red-500 mb-4">{error}</div>}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {bookings.length > 0 ? (
                   bookings.map((booking) => (
@@ -287,6 +334,41 @@ const Process = () => {
                           </div>
                         </div>
                       </CardContent>
+                      <CardFooter className="flex justify-between">
+                        <Button
+                          variant="outline"
+                          onClick={() => handlePayOnline(booking.bookingID)}
+                        >
+                          Pay Online
+                        </Button>
+                        <Dialog
+                          open={isCancelDialogOpen}
+                          onOpenChange={setIsCancelDialogOpen}
+                        >
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              onClick={() =>
+                                openCancelDialog(booking.bookingID)
+                              }
+                            >
+                              Cancel Booking
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Cancel Booking</DialogTitle>
+                            </DialogHeader>
+                            <p>Are you sure you want to cancel this booking?</p>
+                            <Button
+                              className="mt-4 w-full bg-red-600"
+                              onClick={handleCancelBooking}
+                            >
+                              Confirm Cancel
+                            </Button>
+                          </DialogContent>
+                        </Dialog>
+                      </CardFooter>
                     </Card>
                   ))
                 ) : (
@@ -296,8 +378,6 @@ const Process = () => {
                 )}
               </div>
             </div>
-
-            {error && <div className="text-red-500 mt-4">{error}</div>}
           </div>
         </main>
       </div>

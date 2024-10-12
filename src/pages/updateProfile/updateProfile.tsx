@@ -2,7 +2,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import api from "../../configs/axios";
-import { Button, Form, Input, Upload, UploadFile, UploadProps } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Select,
+  Upload,
+  UploadFile,
+  UploadProps,
+} from "antd";
 import {
   AimOutlined,
   AuditOutlined,
@@ -370,10 +378,12 @@ function UpdateProfile() {
                       </motion.div>
                       <motion.div variants={formItemVariants}>
                         <Form.Item label="Gender" name="gender">
-                          <Input
-                            placeholder={profile?.gender || "Enter gender"}
-                            className="rounded-md"
-                          />
+                          <Select
+                          // placeholder={profile?.gender || "Enter gender"}
+                          >
+                            <Select.Option value="Male">Male</Select.Option>
+                            <Select.Option value="Female">Female</Select.Option>
+                          </Select>
                         </Form.Item>
                       </motion.div>
                     </div>
