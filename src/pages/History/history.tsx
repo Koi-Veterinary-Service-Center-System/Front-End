@@ -63,10 +63,10 @@ const History = () => {
 
       setTotalBookings(fetchedBookings.length);
     } catch (error: any) {
-      // const errorMessage =
-      //   error.response?.data?.message || "Failed to fetch bookings data";
-      // setError(errorMessage);
-      // toast.error(errorMessage);
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch bookings data";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -86,10 +86,10 @@ const History = () => {
       const totalFishKoiCount = fetchedKoiOrPool.length;
       setTotalFishKoi(totalFishKoiCount);
     } catch (error: any) {
-      // const errorMessage =
-      //   error.response?.data?.message || "Failed to fetch koi or pool data";
-      // setError(errorMessage);
-      // toast.error(errorMessage);
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch koi or pool data";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -114,7 +114,7 @@ const History = () => {
     fetchProfile();
     fetchKoiOrPool();
     fetchBooking(profile?.userId); // Fetch bookings with user ID
-  }, [profile]);
+  }, []);
 
   // Memoize the booking totals to avoid recalculating them unnecessarily
   const bookingSummary = useMemo(
@@ -398,9 +398,15 @@ const History = () => {
                           </td>
                           <td className="py-2">{booking.bookingDate}</td>
                           <td className="py-2">
-                            <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
-                              {booking.bookingStatus}
-                            </span>
+                            {booking.bookingStatus === "Completed" ? (
+                              <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                                {booking.bookingStatus}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
+                                {booking.bookingStatus}
+                              </span>
+                            )}
                           </td>
                         </tr>
                       ))}

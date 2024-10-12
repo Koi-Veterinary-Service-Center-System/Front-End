@@ -10,6 +10,7 @@ import {
 
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import api from "@/configs/axios";
+import { toast } from "sonner";
 
 interface ModalDeleteProps {
   koiOrPoolID: string;
@@ -37,7 +38,8 @@ export default function ModalDelete({
       onDeleteSuccess(); // Trigger the success callback to refresh or update the data
       setOpen(false); // Close modal after successful deletion
     } catch (err: any) {
-      setError(err.message || "Failed to delete Fish or Pool");
+      toast.error("Fish Or Pool is booked!");
+      setError(err.message || "Fish or Pool is booked!");
     } finally {
       setLoading(false);
     }

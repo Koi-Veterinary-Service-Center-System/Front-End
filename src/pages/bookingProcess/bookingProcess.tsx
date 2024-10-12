@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import api from "../../configs/axios";
 import { Booking, profile } from "../../types/info";
 import {
-  Search,
-  Filter,
   ChevronLeft,
   Moon,
   Sun,
@@ -33,7 +31,7 @@ const Process = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
 
   // Fetch all booking and calculate totals
-  const fetchBooking = async (userId) => {
+  const fetchBooking = async (userId: string) => {
     try {
       const response = await api.get(`/booking/view-booking-process`, {
         headers: {
@@ -43,10 +41,7 @@ const Process = () => {
       });
 
       console.log("API Response:", response.data);
-      const fetchedBookings = Array.isArray(response.data)
-        ? response.data
-        : response.data.bookings || []; // Fallback to empty array
-
+      const fetchedBookings = response.data;
       setBookings(fetchedBookings);
       console.log("Fetched Bookings:", fetchedBookings);
     } catch (error) {
@@ -93,11 +88,8 @@ const Process = () => {
   }, []);
 
   useEffect(() => {
-    if (profile?.userId) {
-      console.log("Fetching bookings for user ID:", profile.userId);
-      fetchBooking(profile.userId);
-    }
-  }, [profile?.userId]);
+    fetchBooking();
+  }, []);
 
   const handleDarkModeSwitch = () => {
     setIsDarkMode(!isDarkMode);
