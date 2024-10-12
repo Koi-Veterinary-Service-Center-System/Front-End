@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import { motion } from "framer-motion";
 import api from "@/configs/axios";
+import { Link } from "react-router-dom";
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const timeSlots = [
@@ -189,11 +190,14 @@ export default function VetCalendar() {
                 return (
                   <div
                     key={`${timeIndex}-${dayIndex}`}
-                    className="border-r border-b last:border-r-0 relative p-1"
+                    className="border-r border-b last:border-r-0 relative p-6"
                   >
                     {event && (
                       <div className="absolute inset-0 bg-blue-100 border border-blue-300 rounded p-0">
-                        <div className="font-semibold">{event.vetName}</div>
+                        <Link to="/detail">
+                          <div className="font-semibold">{event.vetName}</div>
+                        </Link>
+
                         <div className="text-xs">
                           {event.slotStartTime} - {event.slotEndTime}
                         </div>

@@ -24,6 +24,7 @@ import { Toaster } from "sonner";
 import FishPrescriptionSystem from "./pages/prescriptions/prescription";
 import History from "./pages/History/history";
 import Process from "./pages/bookingProcess/bookingProcess";
+import AppointmentDetail from "./pages/Detail Appointment Page/detailAp";
 
 // Add your license key here
 registerLicense(
@@ -60,6 +61,7 @@ function App() {
         { path: "/updateProfile", element: <UpdateProfile /> },
         { path: "/history", element: <History /> },
         { path: "/process", element: <Process /> },
+        { path: "/detail", element: <AppointmentDetail /> },
         { path: "/admin", element: <AdminDashbroad /> },
         { path: "/overview", element: <OverviewPage /> },
         { path: "/analytics", element: <AnalyticsPage /> },
