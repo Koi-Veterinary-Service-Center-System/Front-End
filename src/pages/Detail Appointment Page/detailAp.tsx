@@ -35,6 +35,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+// Define the prescription form schema with zod
+const prescriptionSchema = z.object({
+  prescriptionRecordID: z.number().optional(),
+  diseaseName: z.string().min(1, "Disease name is required"),
+  symptoms: z.string().min(1, "Symptoms are required"),
+  medication: z.string().min(1, "Medication is required"),
+  frequency: z.string().min(1, "Frequency is required"),
+  note: z.string().optional(),
+});
 
 export default function AppointmentList() {
   const [appointments, setAppointments] = useState<Booking[]>([]);
@@ -47,6 +68,17 @@ export default function AppointmentList() {
     duration: "",
     specialInstructions: "",
     vetNotes: "",
+  });
+  // Initialize the form with react-hook-form
+  const form = useForm({
+    resolver: zodResolver(prescriptionSchema),
+    defaultValues: {
+      diseaseName: "",
+      symptoms: "",
+      medication: "",
+      frequency: "",
+      note: "",
+    },
   });
 
   // Fetch appointments from the server
@@ -113,7 +145,7 @@ export default function AppointmentList() {
   );
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleAddPrescription = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Prescription data:", prescriptionData);
     setOpen(false);
@@ -229,102 +261,112 @@ export default function AppointmentList() {
                           when you're done.
                         </DialogDescription>
                       </DialogHeader>
-                      <form onSubmit={handleSubmit}>
-                        <div className="grid gap-4 py-4">
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="medication" className="text-right">
-                              Medication
-                            </Label>
-                            <Input
-                              id="medication"
+                      <Form {...form}>
+                        <form
+                          onSubmit={form.handleSubmit(handleAddPrescription)}
+                        >
+                          <div className="grid gap-4 py-4">
+                            <FormField
+                              control={form.control}
+                              name="diseaseName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Disease Name</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      placeholder="Disease Name"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="symptoms"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Symptoms</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} placeholder="Symptoms" />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
                               name="medication"
-                              value={prescriptionData.medication}
-                              onChange={handleInputChange}
-                              className="col-span-3"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Medication</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      placeholder="Medication"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="frequency"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Frequency</FormLabel>
+                                  <Select
+                                    onValueChange={(value) =>
+                                      field.onChange(value)
+                                    }
+                                    defaultValue={field.value}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select frequency" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="once">
+                                        Once daily
+                                      </SelectItem>
+                                      <SelectItem value="twice">
+                                        Twice daily
+                                      </SelectItem>
+                                      <SelectItem value="thrice">
+                                        Three times daily
+                                      </SelectItem>
+                                      <SelectItem value="asNeeded">
+                                        As needed
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="note"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Note</FormLabel>
+                                  <FormControl>
+                                    <Textarea
+                                      {...field}
+                                      placeholder="Special Instructions"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
                             />
                           </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="dosage" className="text-right">
-                              Dosage
-                            </Label>
-                            <Input
-                              id="dosage"
-                              name="dosage"
-                              value={prescriptionData.dosage}
-                              onChange={handleInputChange}
-                              className="col-span-3"
-                            />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="frequency" className="text-right">
-                              Frequency
-                            </Label>
-                            <Select
-                              onValueChange={handleSelectChange("frequency")}
-                              defaultValue={prescriptionData.frequency}
-                            >
-                              <SelectTrigger className="col-span-3">
-                                <SelectValue placeholder="Select frequency" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="once">Once daily</SelectItem>
-                                <SelectItem value="twice">
-                                  Twice daily
-                                </SelectItem>
-                                <SelectItem value="thrice">
-                                  Three times daily
-                                </SelectItem>
-                                <SelectItem value="asNeeded">
-                                  As needed
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="duration" className="text-right">
-                              Duration
-                            </Label>
-                            <Input
-                              id="duration"
-                              name="duration"
-                              value={prescriptionData.duration}
-                              onChange={handleInputChange}
-                              className="col-span-3"
-                              placeholder="e.g., 7 days"
-                            />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label
-                              htmlFor="specialInstructions"
-                              className="text-right"
-                            >
-                              Special Instructions
-                            </Label>
-                            <Textarea
-                              id="specialInstructions"
-                              name="specialInstructions"
-                              value={prescriptionData.specialInstructions}
-                              onChange={handleInputChange}
-                              className="col-span-3"
-                            />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="vetNotes" className="text-right">
-                              Vet Notes
-                            </Label>
-                            <Textarea
-                              id="vetNotes"
-                              name="vetNotes"
-                              value={prescriptionData.vetNotes}
-                              onChange={handleInputChange}
-                              className="col-span-3"
-                            />
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button type="submit">Save Prescription</Button>
-                        </DialogFooter>
-                      </form>
+                          <DialogFooter>
+                            <Button type="submit">Save Prescription</Button>
+                          </DialogFooter>
+                        </form>
+                      </Form>
                     </DialogContent>
                   </Dialog>
                   <Button

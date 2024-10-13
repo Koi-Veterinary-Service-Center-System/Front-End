@@ -100,11 +100,14 @@ export type User = {
 };
 
 export type Prescription = {
+  prescriptionRecordID: number;
   diseaseName: string;
   symptoms: string;
   medication: string;
-  note: string;
-  bookingID: string;
   frequency: string;
+  note: string;
+  refundMoney: number | null;
+  refundPercent: number | null;
+  bookingID: number;
   createAt: string;
 };

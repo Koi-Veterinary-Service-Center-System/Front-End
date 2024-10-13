@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import api from "../../configs/axios";
-import { Booking, profile } from "../../types/info";
+import { Booking, Profile } from "../../types/info";
 import {
   ChevronLeft,
   Moon,
@@ -38,7 +38,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 const Process = () => {
-  const [profile, setProfile] = useState<profile | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState(null);
   const [activeMenuItem, setActiveMenuItem] = useState("dashboard");
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -49,20 +49,29 @@ const Process = () => {
   );
 
   // Fetch all booking and calculate totals
+  // Fetch all booking and calculate totals based on the user's role
   const fetchBooking = async (userId: string) => {
     try {
-      const response = await api.get(`/booking/view-booking-process`, {
+      // Determine the endpoint based on user role
+      const endpoint =
+        profile?.role === "Staff"
+          ? `/booking/all-booking`
+          : `/booking/view-booking-process`;
+
+      // Fetch bookings from the determined endpoint
+      const response = await api.get(endpoint, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         params: { userId },
       });
 
+      // Set the bookings data
       const fetchedBookings = response.data;
       setBookings(fetchedBookings);
       console.log("Fetched Bookings:", fetchedBookings);
     } catch (error) {
-      console.error("Fetch error:", error);
+      console.error("Fetch error:", error); // Log the entire error object
       const errorMessage =
         error.response?.data?.message || "Failed to fetch bookings";
       console.log("Error message:", errorMessage);
@@ -107,10 +116,61 @@ const Process = () => {
     fetchBooking();
   }, []);
 
-  const handlePayOnline = (bookingId: string) => {
-    // Implement pay online logic here
-    console.log(`Paying online for booking ${bookingId}`);
-    toast.success(`Payment initiated for booking ${bookingId}`);
+  const handlePayOnline = async (bookingID: Booking) => {
+    try {
+      // Make the POST request to the API endpoint with bookingId as a query parameter
+      const response = await api.post(`/payment/create-paymentUrl`, null, {
+        params: { bookingID },
+      });
+
+      // If the request is successful, process the response (e.g., redirect to payment URL)
+      if (response.status === 200 && response.data.paymentUrl) {
+        window.location.href = response.data.paymentUrl; // Redirect to the payment URL
+
+        // After redirecting for payment, we can't automatically check for status,
+        // so we will add a listener or refresh bookings manually on return
+
+        // Wait for the user to come back and then refresh bookings
+        // Note: This requires the user to return back to the page after payment
+        window.onfocus = () => {
+          fetchBooking(); // Refresh bookings to get the latest status
+          window.onfocus = null; // Remove the event listener after fetching once
+        };
+      } else {
+        console.error("Failed to retrieve payment URL.");
+        toast.error("Failed to initiate payment.");
+      }
+    } catch (error) {
+      console.error("Payment initiation error:", error);
+      toast.error("An error occurred while initiating the payment.");
+    }
+  };
+
+  const handleUpdateStatus = async (
+    bookingID: Booking,
+    bookingStatus: Booking
+  ) => {
+    try {
+      // Make a PATCH request to the API endpoint
+      const response = await api.patch(`/booking/schedule/${bookingID}`, null, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      // Check if the request was successful
+      if (response.status === 200) {
+        toast.success(
+          `Booking ${bookingID} status updated to ${bookingStatus}`
+        );
+        fetchBooking(); // Refresh bookings to show updated status
+      } else {
+        toast.error("Failed to update booking status.");
+      }
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      toast.error("An error occurred while updating the booking status.");
+    }
   };
 
   const openCancelDialog = (bookingId: string) => {
@@ -335,39 +395,72 @@ const Process = () => {
                         </div>
                       </CardContent>
                       <CardFooter className="flex justify-between">
-                        <Button
-                          variant="outline"
-                          onClick={() => handlePayOnline(booking.bookingID)}
-                        >
-                          Pay Online
-                        </Button>
-                        <Dialog
-                          open={isCancelDialogOpen}
-                          onOpenChange={setIsCancelDialogOpen}
-                        >
-                          <DialogTrigger asChild>
+                        {profile?.role === "Staff" ? (
+                          // Buttons for staff to update status
+                          <>
                             <Button
-                              variant="destructive"
+                              variant="outline"
                               onClick={() =>
-                                openCancelDialog(booking.bookingID)
+                                handleUpdateStatus(
+                                  booking.bookingID,
+                                  "Scheduled"
+                                )
                               }
                             >
-                              Cancel Booking
+                              Set Scheduled
                             </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Cancel Booking</DialogTitle>
-                            </DialogHeader>
-                            <p>Are you sure you want to cancel this booking?</p>
                             <Button
-                              className="mt-4 w-full bg-red-600"
-                              onClick={handleCancelBooking}
+                              variant="outline"
+                              onClick={() =>
+                                handleUpdateStatus(
+                                  booking.bookingID,
+                                  "Completed"
+                                )
+                              }
                             >
-                              Confirm Cancel
+                              Set Completed
                             </Button>
-                          </DialogContent>
-                        </Dialog>
+                          </>
+                        ) : (
+                          // Buttons for customer to pay or cancel
+                          <>
+                            <Button
+                              variant="outline"
+                              onClick={() => handlePayOnline(booking.bookingID)}
+                            >
+                              Pay Online
+                            </Button>
+                            <Dialog
+                              open={isCancelDialogOpen}
+                              onOpenChange={setIsCancelDialogOpen}
+                            >
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="destructive"
+                                  onClick={() =>
+                                    openCancelDialog(booking.bookingID)
+                                  }
+                                >
+                                  Cancel Booking
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Cancel Booking</DialogTitle>
+                                </DialogHeader>
+                                <p>
+                                  Are you sure you want to cancel this booking?
+                                </p>
+                                <Button
+                                  className="mt-4 w-full bg-red-600"
+                                  onClick={handleCancelBooking}
+                                >
+                                  Confirm Cancel
+                                </Button>
+                              </DialogContent>
+                            </Dialog>
+                          </>
+                        )}
                       </CardFooter>
                     </Card>
                   ))
