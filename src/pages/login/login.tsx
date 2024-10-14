@@ -4,31 +4,43 @@ import Input from "antd/es/input/Input";
 
 import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
-import { Link, useNavigate } from "react-router-dom"; // Import useLocation
+import { Link, useLocation, useNavigate } from "react-router-dom"; // Import useLocation
 import api from "../../configs/axios";
 
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 function Login() {
   // Tạo ref để tham chiếu đến div login-container
   const navigate = useNavigate();
+  const location = useLocation();
 
   //Handle Login google
-  const handleLoginGoogle = async () => {
-    try {
-      // Giả định token trả về sau đăng nhập thành công
-      const response = await api.get("User/google-login"); // hoặc điều hướng nếu là OAuth
-
-      const { token, user } = response.data;
-      localStorage.setItem("token", token); // Lưu token trước khi điều hướng
-      localStorage.setItem("user", JSON.stringify(user));
-
-      toast.success("Login successful with Google!");
-      navigate("/", { state: { loginSuccess: true } });
-    } catch (error: any) {
-      toast.error("An error occurred while logging in.");
-    }
+  const handleLoginGoogle = () => {
+    // This opens a new window or redirects the user for Google login
+    window.open("http://localhost:5155/api/User/google-login", "_self");
   };
+
+  useEffect(() => {
+    // Extract query parameters from the URL (after redirection from Google login)
+    const queryParams = new URLSearchParams(location.search);
+    const token = queryParams.get("token");
+    const user = queryParams.get("user");
+    const error = queryParams.get("error");
+
+    // Handle successful login
+    if (token && user) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", user);
+
+      toast.success(`Welcome ${user}!`);
+      navigate("/", { state: { loginSuccess: true } });
+    }
+    // Handle login failure, but only if the login process was initiated
+    else if (error) {
+      toast.error("Google login failed.");
+    }
+  }, [location, navigate]);
 
   // Handle Login
   const handleLogin = async (values: string) => {

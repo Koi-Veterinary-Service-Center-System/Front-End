@@ -5,10 +5,10 @@ import {
   Calendar as CalendarIcon,
   MoreVertical,
 } from "lucide-react";
-import axios from "axios";
 import { motion } from "framer-motion";
 import api from "@/configs/axios";
 import { Link } from "react-router-dom";
+import { Vet } from "@/types/info";
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const timeSlots = [
@@ -28,9 +28,9 @@ export default function VetCalendar() {
 
   // Lấy dữ liệu từ API
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchVet = async (id: Vet) => {
       try {
-        const response = await api.get("/vetslot/vetslot-list", {
+        const response = await api.get(`/vetslot/${id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -47,7 +47,7 @@ export default function VetCalendar() {
             Saturday: 6,
           };
 
-          // Xác định ngày dựa trên `weekDate`
+          // Determine the event date based on `weekDate`
           const eventDate = new Date(currentDate);
           eventDate.setDate(
             eventDate.getDate() -
@@ -55,7 +55,7 @@ export default function VetCalendar() {
               dayOfWeekMap[item.weekDate]
           );
 
-          // Gán giờ cho sự kiện
+          // Set hours and minutes for start and end times
           const [startHour, startMinute] = item.slotStartTime.split(":");
           const [endHour, endMinute] = item.slotEndTime.split(":");
 
@@ -75,13 +75,13 @@ export default function VetCalendar() {
           };
         });
 
-        setEvents(data); // Cập nhật dữ liệu vào state `events`
+        setEvents(data); // Update events state
       } catch (error) {
         console.error("Error fetching schedule data:", error);
       }
     };
 
-    fetchData();
+    fetchVet();
   }, [currentDate]); // Tải lại khi `currentDate` thay đổi để cập nhật dữ liệu trong tuần mới
 
   const getStartOfWeek = (date) => {

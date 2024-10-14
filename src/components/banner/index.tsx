@@ -52,7 +52,7 @@ function Banner() {
   return (
     <div className="banner-section">
       <div className="right">
-        <h1>Pet Shop</h1>
+        <h1>Koi Shop</h1>
         <h3>If animals could talk, they'd talk about us!</h3>
         <p>
           At a vehicula est proin turpis pellentesque sinulla a aliquam amet

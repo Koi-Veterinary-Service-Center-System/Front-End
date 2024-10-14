@@ -2,14 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import {
-  Calendar,
-  Edit,
-  Plus,
-  Trash2,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Edit, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -27,6 +20,8 @@ import api from "@/configs/axios";
 import Sidebar from "@/components/Sidebar/sidebar";
 import HeaderAd from "@/components/common/header";
 import { toast } from "sonner";
+import { Vet } from "@/types/info";
+import { Select } from "antd";
 
 interface Slot {
   id: string;
@@ -35,11 +30,13 @@ interface Slot {
   vetId: string;
   startTime: string; // Added startTime field for slots
   endTime: string; // Added endTime field for slots
+  weekDate: string;
 }
 
 export default function SchedulePage() {
   const [slots, setSlots] = useState<Slot[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [vets, setVets] = useState<Vet[]>([]);
   const [currentSlot, setCurrentSlot] = useState<Slot | null>(null);
   const [currentWeekStart, setCurrentWeekStart] = useState(
     startOfWeek(new Date())
@@ -48,6 +45,43 @@ export default function SchedulePage() {
   const weekDays = Array.from({ length: 7 }, (_, i) =>
     addDays(currentWeekStart, i)
   );
+
+  const fetchVet = async (values: Vet) => {
+    try {
+      const response = await api.get(`/vet/all-vet`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      setVets(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching vets:", error);
+      toast.error("Failed to fetch vets. Please try again.");
+    }
+  };
+
+  const fetchSlot = async (values: Slot) => {
+    try {
+      const response = await api.get(`slot/all-slot`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      setSlots(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching slots:", error);
+      toast.error("Failed to fetch slots. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    fetchVet();
+    fetchSlot();
+  }, []);
 
   useEffect(() => {
     async function fetchVetslots() {
@@ -327,25 +361,37 @@ export default function SchedulePage() {
             >
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="vetId" className="text-right text-gray-300">
-                  Vet ID
+                  Vet
                 </Label>
-                <Input
+                <Select
                   id="vetId"
                   name="vetId"
                   defaultValue={currentSlot?.vetId || ""}
                   className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
-                />
+                >
+                  {vets.map((vet) => (
+                    <option key={vet.id} value={vet.id}>
+                      {vet.firstName} {vet.lastName}
+                    </option>
+                  ))}
+                </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="slotId" className="text-right text-gray-300">
                   Slot ID
                 </Label>
-                <Input
+                <Select
                   id="slotId"
                   name="slotID"
                   defaultValue={currentSlot?.id || ""}
                   className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
-                />
+                >
+                  {slots.map((slot) => (
+                    <option key={slot.id} value={slot.id}>
+                      {slot.startTime} - {slot.endTime}
+                    </option>
+                  ))}
+                </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="startTime" className="text-right text-gray-300">

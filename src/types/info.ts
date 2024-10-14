@@ -48,7 +48,7 @@ export type Distance = {
 
 export type vetSlots = {
   isBook: boolean;
-  slotID: number;
+  slotID: string;
   slotStartTime: string; // Set as string for any valid time format
   slotEndTime: string; // Similarly set as string
   weekDate: string; // Set as string to allow various days
@@ -97,6 +97,16 @@ export type User = {
   gender: boolean; // true cho nam, false cho nữ
   userName: string;
   email: string;
+};
+
+export type Vet = {
+  id: string;
+  vetName: string;
+  firstName: string;
+  lastName: string;
+  gender: boolean;
+  experienceYears: number | null;
+  imageURL: string | null;
 };
 
 export type Prescription = {
