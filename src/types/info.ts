@@ -118,6 +118,6 @@ export type Prescription = {
   note: string;
   refundMoney: number | null;
   refundPercent: number | null;
-  bookingID: number;
+  bookingID: string;
   createAt: string;
 };

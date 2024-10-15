@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar,
   Clock,
@@ -26,7 +26,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -46,10 +45,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { toast } from "sonner";
 
-// Define the prescription form schema with zod
+// Định nghĩa schema cho form
 const prescriptionSchema = z.object({
-  prescriptionRecordID: z.number().optional(),
+  bookingID: z.string().optional(), // Add bookingID as optional
   diseaseName: z.string().min(1, "Disease name is required"),
   symptoms: z.string().min(1, "Symptoms are required"),
   medication: z.string().min(1, "Medication is required"),
@@ -57,22 +57,18 @@ const prescriptionSchema = z.object({
   note: z.string().optional(),
 });
 
+type PrescriptionForm = z.infer<typeof prescriptionSchema>;
+
 export default function AppointmentList() {
   const [appointments, setAppointments] = useState<Booking[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
-  const [prescriptionData, setPrescriptionData] = useState({
-    medication: "",
-    dosage: "",
-    frequency: "",
-    duration: "",
-    specialInstructions: "",
-    vetNotes: "",
-  });
-  // Initialize the form with react-hook-form
-  const form = useForm({
+
+  // Khởi tạo form với react-hook-form và zod resolver
+  const form = useForm<PrescriptionForm>({
     resolver: zodResolver(prescriptionSchema),
     defaultValues: {
+      bookingID: "", // Set initial value for bookingID if needed
       diseaseName: "",
       symptoms: "",
       medication: "",
@@ -81,7 +77,7 @@ export default function AppointmentList() {
     },
   });
 
-  // Fetch appointments from the server
+  // Fetch appointments từ server
   const fetchAppointments = async () => {
     try {
       const response = await api.get("/booking/view-booking-process", {
@@ -99,7 +95,7 @@ export default function AppointmentList() {
     fetchAppointments();
   }, []);
 
-  // Update the status of an appointment
+  // Cập nhật trạng thái cuộc hẹn
   const updateStatus = async (bookingID: string, newStatus: string) => {
     try {
       await api.put(
@@ -111,13 +107,13 @@ export default function AppointmentList() {
           },
         }
       );
-      fetchAppointments(); // Refresh the appointments list
+      fetchAppointments(); // Refresh danh sách cuộc hẹn
     } catch (error) {
       console.error("Failed to update status:", error);
     }
   };
 
-  // Determine if the button should be enabled based on date and time
+  // Kiểm tra nếu nút có thể bật
   const isButtonEnabled = (appointment: Booking) => {
     const now = dayjs();
     const appointmentDate = dayjs(appointment.bookingDate);
@@ -131,7 +127,7 @@ export default function AppointmentList() {
     );
   };
 
-  // Get the next status based on the current status
+  // Lấy trạng thái tiếp theo dựa trên trạng thái hiện tại
   const getNextStatus = (status: string) => {
     if (status === "Pending") return "On Going";
     if (status === "On Going") return "Completed";
@@ -139,29 +135,24 @@ export default function AppointmentList() {
     return status;
   };
 
-  // Filter appointments based on search term
+  // Lọc danh sách cuộc hẹn theo từ khóa
   const filteredAppointments = appointments.filter((appointment) =>
     appointment.customerName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Handle form submission
-  const handleAddPrescription = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Prescription data:", prescriptionData);
-    setOpen(false);
-    // Implement the actual prescription creation logic here
-  };
-
-  // Handle input changes for the form
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setPrescriptionData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
-  const handleSelectChange = (field: string) => (value: string) => {
-    setPrescriptionData((prevData) => ({ ...prevData, [field]: value }));
+  // Xử lý khi submit form
+  const handleAddPrescription = async (values: PrescriptionForm) => {
+    try {
+      await api.post("/pres-rec/create-presRec", {
+        ...values, // Cần thay đổi nếu bạn có giá trị bookingID cụ thể
+      });
+      setOpen(false);
+      form.reset();
+      toast.success("Add prescription successfully!");
+    } catch (error) {
+      console.error("Failed to create prescription:", error);
+      toast.error("Failed to create prescription.");
+    }
   };
 
   return (
@@ -266,6 +257,22 @@ export default function AppointmentList() {
                           onSubmit={form.handleSubmit(handleAddPrescription)}
                         >
                           <div className="grid gap-4 py-4">
+                            <FormField
+                              control={form.control}
+                              name="bookingID"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Booking ID</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      placeholder="Booking ID"
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                             <FormField
                               control={form.control}
                               name="diseaseName"

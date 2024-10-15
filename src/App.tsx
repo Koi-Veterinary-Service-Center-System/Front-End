@@ -1,11 +1,10 @@
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
-import ScrollToTop from "./components/scrollToTop"; // Import ScrollToTop
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ScrollToTop from "./components/scrollToTop";
 import Home from "./pages/home/home";
 import Booking from "./pages/booking/Booking";
 import Register from "./pages/register/register";
 import Login from "./pages/login/login";
 import UpdateProfile from "./pages/updateProfile/updateProfile";
-
 import AdminDashbroad from "./pages/adminDashbroad/adminDashbroad";
 import OverviewPage from "./pages/OverviewPage/overView";
 import Service from "./pages/ServicePage/service";
@@ -20,65 +19,146 @@ import AnalyticsPage from "./pages/AnalyticsPage/AnalyticsPage";
 import SettingsPage from "./pages/settingpage/setting";
 import FishPrescription from "./pages/prescriptions/prescription";
 import { Toaster } from "sonner";
-import FishPrescriptionSystem from "./pages/prescriptions/prescription";
 import History from "./pages/History/history";
 import Process from "./pages/bookingProcess/bookingProcess";
 import AppointmentDetail from "./pages/Detail Appointment Page/detailAp";
-import ProfilePage from "./pages/profile/profile";
+import ProfilePage from "./pages/profile/profile"; // Import your PrivateRoute component
+import PrivateRoute from "./Routes/PrivateRoute";
 
 // Add your license key here
-registerLicense(
-  "Ngo9BigBOggjHTQxAR8/V1NDaF5cWWtCf1JpR3xbf1x0ZFRHalhYTnRWUiweQnxTdEFiWX9dcXVRT2NcVUxyXA=="
-);
+registerLicense("Your_License_Key_Here");
 
-// Main layout with ScrollToTop applied
-function MainLayout() {
+function App() {
+  const isAuthenticated = true; // Replace with your actual authentication logic
+
   return (
-    <>
+    <Router>
       <Toaster
         richColors
         closeButton
         position="top-right"
         toastOptions={{ className: "toasts" }}
       />
-      <ScrollToTop /> {/* This ensures scroll reset on every route change */}
-      <Outlet /> {/* Renders the selected route's component */}
-    </>
+      <ScrollToTop />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/allservice" element={<AllService />} />
+        <Route path="/service" element={<Service />} />
+
+        {/* Private Routes */}
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <ProfilePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/updateProfile"
+          element={
+            <PrivateRoute>
+              <UpdateProfile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <PrivateRoute requiredRoles={["Customer"]}>
+              <History />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/process"
+          element={
+            <PrivateRoute>
+              <Process />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/detail"
+          element={
+            <PrivateRoute requiredRoles={["Vet"]}>
+              <AppointmentDetail />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
+              <AdminDashbroad />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/overview"
+          element={
+            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
+              <OverviewPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
+              <AnalyticsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
+              <SettingsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/schedules"
+          element={
+            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
+              <SchedulesMPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/schedulesV"
+          element={
+            <PrivateRoute requiredRoles={["Vet"]}>
+              <SchedulesV />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/prescription"
+          element={
+            <PrivateRoute requiredRoles={["Vet"]}>
+              <FishPrescription />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
+              <UsersPage />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Catch-all Route for Errors */}
+        <Route path="*" element={<ErrorBoundary />} />
+      </Routes>
+    </Router>
   );
-}
-
-function App() {
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      element: <MainLayout />, // Use MainLayout as the root element
-      errorElement: <ErrorBoundary />,
-      children: [
-        { path: "/", element: <Home /> },
-        { path: "/allservice", element: <AllService /> },
-        { path: "/booking", element: <Booking /> },
-        { path: "/profile", element: <ProfilePage /> },
-        { path: "/updateProfile", element: <UpdateProfile /> },
-        { path: "/history", element: <History /> },
-        { path: "/process", element: <Process /> },
-        { path: "/detail", element: <AppointmentDetail /> },
-        { path: "/admin", element: <AdminDashbroad /> },
-        { path: "/overview", element: <OverviewPage /> },
-        { path: "/analytics", element: <AnalyticsPage /> },
-        { path: "/settings", element: <SettingsPage /> },
-        { path: "/schedules", element: <SchedulesMPage /> },
-        { path: "/schedulesV", element: <SchedulesV /> },
-        { path: "/prescription", element: <FishPrescriptionSystem /> },
-        { path: "/prescription", element: <FishPrescription /> },
-        { path: "/service", element: <Service /> },
-        { path: "/users", element: <UsersPage /> },
-        { path: "/register", element: <Register /> },
-        { path: "/login", element: <Login /> },
-      ],
-    },
-  ]);
-
-  return <RouterProvider router={router} />;
 }
 
 export default App;
