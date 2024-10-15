@@ -66,6 +66,14 @@ function App() {
           }
         />
         <Route
+          path="/booking"
+          element={
+            <PrivateRoute>
+              <Booking />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/history"
           element={
             <PrivateRoute requiredRoles={["Customer"]}>
