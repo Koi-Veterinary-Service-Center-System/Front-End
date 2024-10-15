@@ -24,13 +24,14 @@ import Process from "./pages/bookingProcess/bookingProcess";
 import AppointmentDetail from "./pages/Detail Appointment Page/detailAp";
 import ProfilePage from "./pages/profile/profile"; // Import your PrivateRoute component
 import PrivateRoute from "./Routes/PrivateRoute";
+import FeedbackForm from "./pages/FeedBack/feedBack";
+import AboutUs from "./pages/About Us/aboutUs";
+import ContactUs from "./pages/Contact Us/contactUs";
 
 // Add your license key here
 registerLicense("Your_License_Key_Here");
 
 function App() {
-  const isAuthenticated = true; // Replace with your actual authentication logic
-
   return (
     <Router>
       <Toaster
@@ -47,7 +48,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/allservice" element={<AllService />} />
         <Route path="/service" element={<Service />} />
-
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/contact" element={<ContactUs />} />
         {/* Private Routes */}
         <Route
           path="/profile"
@@ -86,6 +88,14 @@ function App() {
           element={
             <PrivateRoute>
               <Process />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/feedback"
+          element={
+            <PrivateRoute requiredRoles={["Customer"]}>
+              <FeedbackForm />
             </PrivateRoute>
           }
         />

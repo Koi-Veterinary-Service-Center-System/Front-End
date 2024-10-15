@@ -109,19 +109,6 @@ nav {
   color: #0071bc;
 }
 
-.icons a.heart-icon::after,
-.icons a.cart-icon::after {
-  content: attr(data-count);
-  position: absolute;
-  top: -5px;
-  right: -10px;
-  background: #0071bc;
-  color: white;
-  font-size: 12px;
-  border-radius: 50%;
-  padding: 2px 6px;
-}
-
 .user-icon {
   font-size: 24px;
 }

@@ -85,7 +85,23 @@ export default function AppointmentList() {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setAppointments(response.data);
+      const appointmentsWithPrescriptions = await Promise.all(
+        response.data.map(async (appointment: Booking) => {
+          console.log("Processing appointment:", appointment); // Log the entire appointment object
+          const bookingID = appointment.bookingID;
+          if (!bookingID) {
+            console.warn("No bookingID found for appointment:", appointment);
+            return { ...appointment, hasPrescription: false };
+          }
+          const prescription = await api.get(`/pres-rec/${bookingID}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          return { ...appointment, hasPrescription: !!prescription.data };
+        })
+      );
+      setAppointments(appointmentsWithPrescriptions);
     } catch (error) {
       console.error("Failed to fetch appointments:", error);
     }
@@ -97,6 +113,7 @@ export default function AppointmentList() {
 
   // Cập nhật trạng thái cuộc hẹn
   const updateStatus = async (bookingID: string, newStatus: string) => {
+    console.log(`Updating status for booking ID: ${bookingID} to ${newStatus}`);
     try {
       await api.put(
         `/booking/update-status`,
@@ -107,6 +124,7 @@ export default function AppointmentList() {
           },
         }
       );
+      console.log("Status updated successfully");
       fetchAppointments(); // Refresh danh sách cuộc hẹn
     } catch (error) {
       console.error("Failed to update status:", error);
@@ -370,7 +388,42 @@ export default function AppointmentList() {
                             />
                           </div>
                           <DialogFooter>
-                            <Button type="submit">Save Prescription</Button>
+                            <Dialog open={open} onOpenChange={setOpen}>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="default"
+                                  className="bg-green-500 hover:bg-green-600"
+                                >
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  {appointment.hasPrescription
+                                    ? "View Prescription"
+                                    : "Create Prescription"}
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                  <DialogTitle>
+                                    {appointment.hasPrescription
+                                      ? "View/Edit Prescription"
+                                      : "Create Prescription"}
+                                  </DialogTitle>
+                                  <DialogDescription>
+                                    {appointment.hasPrescription
+                                      ? "View or edit the existing prescription."
+                                      : "Enter the details for the new prescription. Click save when you're done."}
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <Form {...form}>
+                                  <form
+                                    onSubmit={form.handleSubmit(
+                                      handleAddPrescription
+                                    )}
+                                  >
+                                    {/* Form Fields */}
+                                  </form>
+                                </Form>
+                              </DialogContent>
+                            </Dialog>
                           </DialogFooter>
                         </form>
                       </Form>
