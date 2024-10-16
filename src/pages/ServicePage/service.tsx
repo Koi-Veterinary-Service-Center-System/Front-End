@@ -6,7 +6,7 @@ import CategoryDistributionChart from "../OverviewPage/CategoryDistributionChart
 import HeaderAd from "@/components/common/header";
 import ServicesTable from "@/components/services/ServicesTable";
 import SalesTrendChart from "@/components/services/SalesTrendChart";
-import { Toaster, toast } from "sonner"; // Use sonner for toast notifications
+import { toast } from "sonner"; // Use sonner for toast notifications
 
 const Service = () => {
   // Function to show delete success toast
@@ -77,7 +77,6 @@ const Service = () => {
         </main>
 
         {/* Toaster component to show toast notifications */}
-        <Toaster richColors position="top-right" />
       </div>
     </div>
   );

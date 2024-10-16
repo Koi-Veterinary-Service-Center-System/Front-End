@@ -1,10 +1,8 @@
-"use client";
-
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../../configs/axios";
-import { koiOrPool, profile } from "../../types/info";
+import { Booking, koiOrPool, profile } from "../../types/info";
 import {
   Fish,
   Pencil,
@@ -23,17 +21,18 @@ import {
   MessageSquare,
   Store,
   User,
+  CalendarClock,
 } from "lucide-react";
 import { Checkbox, Form, Input, Modal } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import ModalDelete from "@/components/ModalDelete/ModalDelete/ModalDelete";
 import { Button } from "@/components/ui/button";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const Process = () => {
+const History = () => {
   const [profile, setProfile] = useState<profile | null>(null);
   const [koiOrPool, setKoiOrPool] = useState<koiOrPool[] | null>(null);
   const [error, setError] = useState(null);
@@ -46,6 +45,30 @@ const Process = () => {
   );
   const [form] = Form.useForm();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [bookings, setBookings] = useState<Booking[]>([]); // Changed to array
+  const [totalFishKoi, setTotalFishKoi] = useState(0);
+  const [totalBookings, setTotalBookings] = useState(0);
+
+  // Fetch all booking and calculate totals
+  const fetchBooking = async (userId?: string) => {
+    try {
+      const response = await api.get(`/booking/view-booking-history`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        params: { userId },
+      });
+      const fetchedBookings = response.data;
+      setBookings(fetchedBookings);
+
+      setTotalBookings(fetchedBookings.length);
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch bookings data";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    }
+  };
 
   const fetchKoiOrPool = async (userId?: string) => {
     try {
@@ -55,9 +78,18 @@ const Process = () => {
         },
         params: { userId },
       });
-      setKoiOrPool(response.data);
+
+      const fetchedKoiOrPool = response.data;
+      setKoiOrPool(fetchedKoiOrPool);
+
+      // Calculate the total count of fish and pools
+      const totalFishKoiCount = fetchedKoiOrPool.length;
+      setTotalFishKoi(totalFishKoiCount);
     } catch (error: any) {
-      setError(error.message || "Failed to fetch koi or pool data");
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch koi or pool data";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -70,14 +102,27 @@ const Process = () => {
       });
       setProfile(response.data);
     } catch (error: any) {
-      setError(error.message || "Failed to fetch profile data");
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch profile data";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
+  // Call fetchBooking in useEffect
   useEffect(() => {
     fetchProfile();
     fetchKoiOrPool();
+    fetchBooking(); // Fetch bookings with user ID
   }, []);
+
+  // Memoize the booking totals to avoid recalculating them unnecessarily
+  const bookingSummary = useMemo(
+    () => ({
+      totalBookings,
+    }),
+    [totalBookings]
+  );
 
   const handleMenuItemClick = (menuItem: string) => {
     setActiveMenuItem(menuItem);
@@ -115,8 +160,10 @@ const Process = () => {
       form.resetFields();
       setIsModalOpen(false);
     } catch (error: any) {
-      console.error("Update failed: ", error.response || error);
-      setError(error.message || "Failed to update Koi or Pool");
+      const errorMessage =
+        error.response?.data?.message || "Failed to update Koi or Pool";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -152,7 +199,6 @@ const Process = () => {
 
   return (
     <div className={`min-h-screen bg-gray-100 ${isDarkMode ? "dark" : ""}`}>
-      <Toaster richColors position="top-right" />
       <div className="flex">
         <motion.aside
           className="w-64 bg-gray-100 dark:bg-gray-800 h-screen sticky top-0"
@@ -172,11 +218,11 @@ const Process = () => {
                 <Link
                   to="/profile"
                   className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "dashboard"
+                    activeMenuItem === "profile"
                       ? "bg-blue-400 text-primary-foreground"
                       : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
-                  onClick={() => handleMenuItemClick("dashboard")}
+                  onClick={() => handleMenuItemClick("profile")}
                 >
                   <User className="h-5 w-5" />
                   <span>Your Profile</span>
@@ -184,16 +230,30 @@ const Process = () => {
               </li>
               <li>
                 <Link
-                  to="/process"
+                  to="/history"
                   className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "my-store"
+                    activeMenuItem === "history"
                       ? "bg-blue-400 text-primary-foreground"
                       : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
-                  onClick={() => handleMenuItemClick("my-store")}
+                  onClick={() => handleMenuItemClick("history")}
                 >
                   <Store className="h-5 w-5" />
                   <span>Service History</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/process"
+                  className={`flex items-center space-x-2 p-2 ${
+                    activeMenuItem === "process"
+                      ? "bg-blue-400 text-primary-foreground"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
+                  }`}
+                  onClick={() => handleMenuItemClick("process")}
+                >
+                  <CalendarClock className="h-5 w-5" />
+                  <span>Service Process</span>
                 </Link>
               </li>
               <li>
@@ -269,7 +329,7 @@ const Process = () => {
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">1,020</div>
+                  <div className="text-2xl font-bold">{totalFishKoi}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -280,7 +340,9 @@ const Process = () => {
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">2,834</div>
+                  <div className="text-2xl font-bold">
+                    {bookingSummary.totalBookings}
+                  </div>
                 </CardContent>
               </Card>
               <Card>
@@ -315,28 +377,39 @@ const Process = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td className="py-2">
-                          <div className="flex items-center space-x-2">
-                            <Avatar>
-                              <AvatarImage src={profile?.imageURL} alt="User" />
-                              <AvatarFallback>
-                                {profile?.firstName?.[0]}
-                                {profile?.lastName?.[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span>
-                              {profile?.firstName} {profile?.lastName}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-2">01-10-2021</td>
-                        <td className="py-2">
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                            Completed
-                          </span>
-                        </td>
-                      </tr>
+                      {bookings.map((booking) => (
+                        <tr key={booking.bookingDate}>
+                          <td className="py-2">
+                            <div className="flex items-center space-x-2">
+                              <Avatar>
+                                <AvatarImage
+                                  src={profile?.imageURL}
+                                  alt="User"
+                                />
+                                <AvatarFallback>
+                                  {profile?.firstName?.[0]}
+                                  {profile?.lastName?.[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span>
+                                {profile?.firstName} {profile?.lastName}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-2">{booking.bookingDate}</td>
+                          <td className="py-2">
+                            {booking.bookingStatus === "Completed" ? (
+                              <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                                {booking.bookingStatus}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
+                                {booking.bookingStatus}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </CardContent>
@@ -475,4 +548,4 @@ const Process = () => {
   );
 };
 
-export default Process;
+export default History;

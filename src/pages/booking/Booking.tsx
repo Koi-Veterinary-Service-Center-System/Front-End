@@ -1,21 +1,29 @@
 import "./booking.scss";
 import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
-import { Input, Form, Button, Select, DatePicker, message } from "antd";
+import { Input, Form, Button, Select, DatePicker } from "antd";
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+
 import Banner from "../../components/banner";
 import api from "../../configs/axios";
-import moment from "moment";
-import { Slot, Service, Vet } from "../../types/info";
-import { Toaster, toast } from "sonner";
+
+import {
+  Slot,
+  Service,
+  Vet,
+  koiOrPool,
+  Payment,
+  Distance,
+} from "../../types/info";
+import { toast } from "sonner";
+import { Fish, Waves } from "lucide-react";
+import TextArea from "antd/es/input/TextArea";
 
 const { Option } = Select;
 
 function Booking() {
   const [total, setTotal] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("");
-  const location = useLocation();
   const bookingRef = useRef(null);
 
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -29,6 +37,12 @@ function Booking() {
   const [isLoadingSlots, setLoadingSlots] = useState(false);
   const [isLoadingServices, setLoadingServices] = useState(false);
   const [isLoadingVets, setLoadingVets] = useState(false);
+  const [isLoadingDistance, setLoadingDistance] = useState(false);
+  const [koiAndPools, setKoiAndPools] = useState<koiOrPool[]>([]);
+  const [isLoadingKoiAndPools, setLoadingKoiAndPools] = useState(false);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [distances, setDistances] = useState<Distance[]>([]);
+  const [isLoadingPayment, setLoadingPayment] = useState(false);
 
   // Ant Design form hook
   const [form] = Form.useForm();
@@ -89,6 +103,57 @@ function Booking() {
     fetchAllVets();
   }, []);
 
+  useEffect(() => {
+    const fetchDistance = async () => {
+      try {
+        setLoadingDistance(true);
+        const response = await api.get("/Distance/all-distance");
+        setDistances(response.data);
+      } catch (error) {
+        console.error("Error fetching payments: ", error);
+        toast.error("Failed to load payments.");
+      } finally {
+        setLoadingDistance(false);
+      }
+    };
+    fetchDistance();
+  }, []);
+
+  //Handle fetch fish or Pool
+  useEffect(() => {
+    const fetchKoiOrPools = async () => {
+      try {
+        setLoadingKoiAndPools(true);
+        const response = await api.get("/koi-or-pool/all-customer-koi-pool");
+        setKoiAndPools(response.data);
+      } catch (error) {
+        console.log("Error fetching koi and pools: ", error);
+        toast.error("Failed to load your koi and pools.");
+      } finally {
+        setLoadingKoiAndPools(false);
+      }
+    };
+    fetchKoiOrPools();
+  }, []);
+
+  //Fetch payment data
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        setLoadingPayment(true);
+        const response = await api.get("/payment/all-payment");
+        setPayments(response.data);
+      } catch (error) {
+        console.error("Error fetching payments: ", error);
+        toast.error("Failed to load payments.");
+      } finally {
+        setLoadingPayment(false);
+      }
+    };
+
+    fetchPayments();
+  }, []); // Empty dependency array means this effect runs once when component mounts
+
   // Fetch available Vets for a selected slot
   const fetchVetsBySlot = async (slotId: number) => {
     try {
@@ -117,20 +182,6 @@ function Booking() {
     });
   };
 
-  // Fetch available slots for a selected vet
-  const fetchSlotsByVet = async (vetId: number) => {
-    try {
-      setLoadingSlots(true);
-      const response = await api.get(`/vet/available-slot/${vetId}`);
-      setSlots(response.data); // Update the slot list based on the vet
-    } catch (error) {
-      console.error("Error fetching available slots:", error);
-      toast.error("Failed to load slot data.");
-    } finally {
-      setLoadingSlots(false);
-    }
-  };
-
   // Handle vet change to fetch slot
   const handleVetChange = (vetId: number) => {
     setSelectedVet(vetId);
@@ -144,71 +195,109 @@ function Booking() {
     console.log("Selected Vet Name:", selectedVetName); // Debugging
   };
 
-  // Handle payment method selection
-  const handlePaymentChange = (value) => {
-    setPaymentMethod(value);
-  };
-
   // Calculate total example logic
   const calculateTotal = () => {
-    const servicePrice = 100; // Mock service price
-    setTotal(servicePrice);
+    const selectedService = services.find(
+      (service) => service.serviceID === form.getFieldValue("serviceType")
+    );
+    if (selectedService) {
+      const totalAmount = selectedService.price; // Adjust based on requirements
+      setTotal(totalAmount);
+    }
   };
 
   const handleBooking = async (values: any) => {
     try {
-      // Format bookingDate as a string
-      const bookingDate = moment(values.pickupDate).format("YYYY-MM-DD");
+      // Format the date to YYYY-MM-DD according to the system's default timezone
+      const bookingDate = new Intl.DateTimeFormat("en-CA", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(values.pickupDate.toDate());
 
-      // Construct the booking data
+      // Retrieve selected district's information
+      const selectedDistrict = distances.find(
+        (distance) => distance.distanceID === values.district
+      );
+
+      // Combine user input location with selected district and area
+      const fullLocation = `${values.location}, ${selectedDistrict?.district}, ${selectedDistrict?.area}`;
+
       const bookingData = {
         note: values.note || "",
-        koiOrPoolId: values.fish || 0,
-        vetName: form.getFieldValue("vetName") || "", // Ensure vetName is retrieved correctly
+        koiOrPoolId: values.koiOrPoolId || null,
+        vetName: form.getFieldValue("vetName") || "",
         totalAmount: total,
-        location: values.location,
+        location: fullLocation, // Use the combined location here
         slotId: values.slot || 0,
         serviceId: values.serviceType || 0,
         paymentId: values.paymentMethod || 0,
         bookingDate: bookingDate,
       };
 
-      console.log("Booking Data:", bookingData); // Debug the data
+      console.log("Booking Data:", bookingData);
 
-      const requestPayload = {
-        createBookingDto: bookingData,
-      };
+      const response = await api.post("/booking/create-booking", bookingData);
 
-      // Send booking data to backend API
-      const response = await api.post(
-        "/booking/create-booking",
-        requestPayload
-      );
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Booking successful!");
+      }
+    } catch (error: any) {
+      console.error("Booking error:", error);
 
-      // Handle success response
-      toast.success("Booking successful!");
-    } catch (error) {
-      // Handle errors
-      toast.error("Booking failed: " + error.message);
+      if (error.response) {
+        const errorMessage =
+          error.response.data.message || error.response.data.error;
+
+        if (
+          errorMessage &&
+          errorMessage.includes("FK_Bookings_Payments_PaymentID")
+        ) {
+          toast.error(
+            "Invalid payment method selected. Please choose a valid payment option."
+          );
+        } else if (errorMessage && errorMessage.includes("foreign key")) {
+          toast.error(
+            "There was an issue with your selection. Please ensure all options are valid."
+          );
+        } else {
+          toast.error(
+            `Booking failed: ${errorMessage || "An unexpected error occurred"}`
+          );
+        }
+      } else if (error.request) {
+        toast.error(
+          "Unable to connect to the server. Please check your connection and try again."
+        );
+      } else {
+        toast.error(`An error occurred: ${error.message}`);
+      }
     }
   };
 
-  // Scroll to section based on hash
-  useEffect(() => {
-    if (location.hash === "#section") {
-      setTimeout(() => {
-        if (bookingRef.current) {
-          bookingRef.current.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 100);
+  const calculateTota = () => {
+    const selectedService = services.find(
+      (service) => service.serviceID === form.getFieldValue("serviceType")
+    );
+    const selectedDistance = distances.find(
+      (distance) => distance.distanceID === form.getFieldValue("district")
+    );
+
+    if (selectedService && selectedDistance) {
+      const totalAmount = selectedService.price + selectedDistance.price; // Adjust based on requirements
+      setTotal(totalAmount);
+    } else if (selectedService) {
+      setTotal(selectedService.price);
+    } else {
+      setTotal(0);
     }
-  }, [location.hash]);
+  };
 
   return (
     <div>
       <Header />
       <Banner />
-      <Toaster richColors position="top-right" />
+
       <div ref={bookingRef} id="booking" className="section">
         <div className="section-center">
           <div className="container">
@@ -218,14 +307,12 @@ function Booking() {
                   <h1>Book a Service</h1>
                 </div>
 
-                {/* Ant Design Form */}
                 <Form
                   form={form}
                   name="bookingForm"
                   layout="vertical"
                   onFinish={handleBooking}
                 >
-                  {/* Pickup Date */}
                   <div className="row">
                     <div className="col-sm-5">
                       <Form.Item
@@ -242,7 +329,6 @@ function Booking() {
                       </Form.Item>
                     </div>
                   </div>
-
                   {/* Service, Slot, and Vet */}
                   <div className="row">
                     <div className="col-sm-4">
@@ -259,6 +345,7 @@ function Booking() {
                         <Select
                           className="form-control"
                           loading={isLoadingServices}
+                          onChange={() => calculateTota()} // Trigger calculation on service change
                         >
                           {services.map((service) => (
                             <Option
@@ -274,17 +361,11 @@ function Booking() {
                     </div>
 
                     <div className="col-sm-4">
-                      <Form.Item
-                        label="Slot"
-                        name="slot"
-                        // rules={[
-                        //   { required: true, message: "Please select a slot" },
-                        // ]}
-                      >
+                      <Form.Item label="Slot" name="slot">
                         <Select
                           className="form-control"
                           loading={isLoadingSlots}
-                          onChange={handleSlotChange} // Handle slot change
+                          onChange={handleSlotChange}
                           value={selectedSlot}
                         >
                           {slots.map((slot) => (
@@ -307,7 +388,7 @@ function Booking() {
                         <Select
                           className="form-control"
                           loading={isLoadingVets}
-                          onChange={handleVetChange} // Handle vet change
+                          onChange={handleVetChange}
                           value={selectedVet}
                         >
                           {vets.map((vet) => (
@@ -320,66 +401,71 @@ function Booking() {
                     </div>
                   </div>
 
-                  <div className="row">
-                    <div className="col-sm-6">
-                      <Form.Item
-                        label="Location"
-                        name="location"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please enter your location",
-                          },
-                          {
-                            pattern: /^[^\s].+$/,
-                            message:
-                              "Location cannot start with a space or contain special characters",
-                          },
-                        ]}
-                      >
-                        <Input
-                          className="form-control"
-                          placeholder="Enter your location"
-                        />
-                      </Form.Item>
-                    </div>
-                  </div>
-
                   <Form.Item
-                    label="Phone"
-                    name="phone"
+                    label="Location"
+                    name="location"
                     rules={[
                       {
                         required: true,
-                        message: "Please enter your phone number",
+                        message: "Please enter your location",
                       },
                       {
-                        pattern: /^[0-9]{10}$/,
-                        message: "Phone number must be 10 digits",
+                        pattern: /^[^\s].+$/,
+                        message:
+                          "Location cannot start with a space or contain special characters",
                       },
                     ]}
                   >
                     <Input
                       className="form-control"
-                      placeholder="Enter your phone number"
+                      placeholder="Enter your location"
                     />
                   </Form.Item>
 
-                  <Form.Item
-                    label="Choose Fish or Pool"
-                    name="fish"
-                    rules={[
-                      { required: true, message: "Please select an option" },
-                    ]}
-                  >
-                    <Select className="form-control">
-                      <Option value={1}>Fish 1</Option>
-                      <Option value={2}>Fish 2</Option>
-                      <Option value={3}>Pool 1</Option>
+                  <Form.Item label="Choose District" name="district">
+                    <Select
+                      className="form-control"
+                      loading={isLoadingDistance}
+                      placeholder="Select a district"
+                      onChange={() => calculateTota()} // Trigger calculation on district change
+                    >
+                      {distances.map((distance) => (
+                        <Option
+                          key={distance.distanceID}
+                          value={distance.distanceID}
+                        >
+                          {distance.district} - {distance.area} ($
+                          {distance.price})
+                        </Option>
+                      ))}
                     </Select>
                   </Form.Item>
 
-                  {/* Payment Method Section */}
+                  <Form.Item label="Choose Fish or Pool" name="koiOrPoolId">
+                    <Select
+                      className="form-control"
+                      loading={isLoadingKoiAndPools}
+                      placeholder="Select a fish or pool"
+                    >
+                      {koiAndPools.map((item) => (
+                        <Option key={item.koiOrPoolID} value={item.koiOrPoolID}>
+                          <div className="flex items-center gap-2">
+                            <span>{item.name}</span>
+                            {item.isPool ? (
+                              <Waves className="text-cyan-400" />
+                            ) : (
+                              <Fish className="text-orange-500" />
+                            )}
+                          </div>
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+
+                  <Form.Item label="Note" name="note">
+                    <TextArea className="form-control"></TextArea>
+                  </Form.Item>
+
                   <Form.Item
                     label="Payment Method"
                     name="paymentMethod"
@@ -390,21 +476,22 @@ function Booking() {
                       },
                     ]}
                   >
-                    <Select onChange={handlePaymentChange}>
-                      <Option value={1}>VNPay</Option>
-                      <Option value={2}>Cash on Delivery</Option>
+                    <Select
+                      className="form-control"
+                      loading={isLoadingPayment}
+                      placeholder="Select payment method"
+                    >
+                      {payments.map((item) => (
+                        <Option key={item.paymentID} value={item.paymentID}>
+                          <div className="flex items-center gap-2">
+                            <span>{item.type}</span>
+                          </div>
+                        </Option>
+                      ))}
                     </Select>
                   </Form.Item>
 
-                  {/* Total Amount Section */}
                   <h3>Total: {total} $</h3>
-                  <Button
-                    onClick={calculateTotal}
-                    className="calculate-total-btn"
-                  >
-                    Calculate Total
-                  </Button>
-
                   <div className="form-btn">
                     <Button
                       type="primary"

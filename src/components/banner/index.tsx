@@ -5,7 +5,8 @@ import TextArea from "antd/es/input/TextArea";
 import "./index.scss";
 import api from "@/configs/axios";
 import { koiOrPool } from "@/types/info";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
+import ShimmerButton from "../ui/shimmer-button";
 
 function Banner() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -51,20 +52,21 @@ function Banner() {
   return (
     <div className="banner-section">
       <div className="right">
-        <h1>Pet Shop</h1>
+        <h1>Koi Shop</h1>
         <h3>If animals could talk, they'd talk about us!</h3>
         <p>
           At a vehicula est proin turpis pellentesque sinulla a aliquam amet
           rhoncus quisque eget sit
         </p>
-        <Button className="fakeButton">
-          <Link to="/booking#section">Booking Service</Link>
-        </Button>
-        <Button className="fakeButton" onClick={handleOpenModal}>
-          Create Koi Or Pool
-        </Button>
+        <div className="flex gap-3">
+          <ShimmerButton href="/booking" className="shadow-2xl">
+            Booking Service
+          </ShimmerButton>
+          <ShimmerButton className="fakeButton" onClick={handleOpenModal}>
+            Create Koi Or Pool
+          </ShimmerButton>
+        </div>
       </div>
-      <Toaster richColors position="top-right" />
 
       <div className="koi-banner">
         <img src="src/assets/images/bannerHome.png" alt="Koi Banner" />

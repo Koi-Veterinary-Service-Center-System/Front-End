@@ -1,14 +1,13 @@
-"use client";
-
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import api from "../../configs/axios";
 import { Button, Input } from "antd";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
+  CalendarClock,
   ChevronLeft,
   MessageSquare,
   Moon,
@@ -18,20 +17,9 @@ import {
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Profile } from "@/types/info";
 
-interface Profile {
-  imageURL: string;
-  userName: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  gender: string;
-  address: string;
-  email: string;
-  phoneNumber: string;
-}
-
-function Profile() {
+function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeMenuItem, setActiveMenuItem] = useState("dashboard");
@@ -41,7 +29,7 @@ function Profile() {
   useEffect(() => {
     if (location.state && location.state.updateProfileSuccess) {
       toast.success("Profile updated successfully!");
-      window.history.replaceState({}, document.title);
+      // window.history.replaceState({}, document.title);
     }
   }, [location.state]);
 
@@ -55,7 +43,12 @@ function Profile() {
 
       const genderProfile = {
         ...response.data,
-        gender: response.data.gender ? "Male" : "Female",
+        gender:
+          response.data.gender === undefined
+            ? "None"
+            : response.data.gender
+            ? "Male"
+            : "Female",
       };
 
       setProfile(genderProfile);
@@ -116,11 +109,11 @@ function Profile() {
                 <Link
                   to="/profile"
                   className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "dashboard"
+                    activeMenuItem === "profile"
                       ? "bg-blue-400 text-primary-foreground"
                       : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
-                  onClick={() => handleMenuItemClick("dashboard")}
+                  onClick={() => handleMenuItemClick("profile")}
                 >
                   <User className="h-5 w-5" />
                   <span>Your Profile</span>
@@ -128,16 +121,30 @@ function Profile() {
               </li>
               <li>
                 <Link
-                  to="/process"
+                  to="/history"
                   className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "my-store"
+                    activeMenuItem === "history"
                       ? "bg-blue-400 text-primary-foreground"
                       : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
-                  onClick={() => handleMenuItemClick("my-store")}
+                  onClick={() => handleMenuItemClick("history")}
                 >
                   <Store className="h-5 w-5" />
                   <span>Service History</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/process"
+                  className={`flex items-center space-x-2 p-2 ${
+                    activeMenuItem === "process"
+                      ? "bg-blue-400 text-primary-foreground"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
+                  }`}
+                  onClick={() => handleMenuItemClick("process")}
+                >
+                  <CalendarClock className="h-5 w-5" />
+                  <span>Service Process</span>
                 </Link>
               </li>
               <li>
@@ -189,7 +196,10 @@ function Profile() {
                 </div>
                 <Avatar>
                   <AvatarImage src={profile.imageURL} alt="Profile" />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarFallback>
+                    {profile?.firstName?.[0]}
+                    {profile?.lastName?.[0]}
+                  </AvatarFallback>
                 </Avatar>
               </div>
             </div>
@@ -249,9 +259,8 @@ function Profile() {
           </div>
         </motion.main>
       </div>
-      <Toaster />
     </div>
   );
 }
 
-export default Profile;
+export default ProfilePage;

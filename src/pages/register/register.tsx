@@ -12,7 +12,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer/footer";
 import { useEffect, useRef } from "react";
 import api from "../../configs/axios";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 
 function Register() {
   const location = useLocation();
@@ -61,7 +61,6 @@ function Register() {
   return (
     <div className="body-register">
       <Header />
-      <Toaster richColors position="top-right" />
       <div ref={registerRef} className="register-container">
         <div className="register-left">
           <h3 className="register-left-title">Register</h3>

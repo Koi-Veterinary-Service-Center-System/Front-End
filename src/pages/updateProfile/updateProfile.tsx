@@ -1,5 +1,3 @@
-"use client";
-
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -7,8 +5,8 @@ import api from "../../configs/axios";
 import {
   Button,
   Form,
-  Image,
   Input,
+  Select,
   Upload,
   UploadFile,
   UploadProps,
@@ -24,8 +22,9 @@ import {
 import { profile as ProfileType } from "../../types/info";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "../../configs/firebase";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import {
+  CalendarClock,
   ChevronLeft,
   MessageSquare,
   Moon,
@@ -197,11 +196,11 @@ function UpdateProfile() {
                 <Link
                   to="/profile"
                   className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "dashboard"
+                    activeMenuItem === "profile"
                       ? "bg-blue-400 text-primary-foreground"
                       : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
-                  onClick={() => handleMenuItemClick("dashboard")}
+                  onClick={() => handleMenuItemClick("profile")}
                 >
                   <User className="h-5 w-5" />
                   <span>Your Profile</span>
@@ -209,13 +208,13 @@ function UpdateProfile() {
               </li>
               <li>
                 <Link
-                  to="/process"
+                  to="/history"
                   className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "my-store"
-                      ? "bg-primary text-primary-foreground"
+                    activeMenuItem === "history"
+                      ? "bg-blue-400 text-primary-foreground"
                       : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
-                  onClick={() => handleMenuItemClick("my-store")}
+                  onClick={() => handleMenuItemClick("history")}
                 >
                   <Store className="h-5 w-5" />
                   <span>Service History</span>
@@ -223,10 +222,24 @@ function UpdateProfile() {
               </li>
               <li>
                 <Link
+                  to="/process"
+                  className={`flex items-center space-x-2 p-2 ${
+                    activeMenuItem === "process"
+                      ? "bg-blue-400 text-primary-foreground"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
+                  }`}
+                  onClick={() => handleMenuItemClick("process")}
+                >
+                  <CalendarClock className="h-5 w-5" />
+                  <span>Service Process</span>
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/message"
                   className={`flex items-center space-x-2 p-2 ${
                     activeMenuItem === "message"
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-blue-400 text-primary-foreground"
                       : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
                   }`}
                   onClick={() => handleMenuItemClick("message")}
@@ -365,10 +378,12 @@ function UpdateProfile() {
                       </motion.div>
                       <motion.div variants={formItemVariants}>
                         <Form.Item label="Gender" name="gender">
-                          <Input
-                            placeholder={profile?.gender || "Enter gender"}
-                            className="rounded-md"
-                          />
+                          <Select
+                          // placeholder={profile?.gender || "Enter gender"}
+                          >
+                            <Select.Option value="Male">Male</Select.Option>
+                            <Select.Option value="Female">Female</Select.Option>
+                          </Select>
                         </Form.Item>
                       </motion.div>
                     </div>
@@ -390,7 +405,6 @@ function UpdateProfile() {
           </div>
         </motion.section>
       </div>
-      <Toaster />
     </div>
   );
 }

@@ -1,30 +1,76 @@
 import api from "@/configs/axios";
 import { services } from "@/types/info";
-import { Form, Modal } from "antd";
 import { motion } from "framer-motion";
-import { Edit, Search, Trash2, Plus } from "lucide-react";
+import { Edit, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Input } from "../ui/input";
+import {
+  PlusCircle,
+  Briefcase,
+  FileText,
+  DollarSign,
+  Clock,
+} from "lucide-react";
 import { Button } from "../ui/button";
 
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "../ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+import { Textarea } from "../ui/textarea";
+import { toast } from "sonner";
+import ShimmerButton from "../ui/shimmer-button";
+
 interface ServicesTableProps {
-  onDeleteSuccess: () => void; // Add prop for delete success callback
+  onDeleteSuccess: () => void;
   onAddSuccess: () => void;
 }
 
-const ServicesTable: React.FC<ServicesTableProps> = ({
-  onDeleteSuccess,
-  onAddSuccess,
-}) => {
+// Zod schema for form validation
+const serviceSchema = z.object({
+  serviceName: z.string().min(1, "Please input the service name!"),
+  description: z.string().min(1, "Please input the description!"),
+  price: z.preprocess(
+    (val) => (typeof val === "string" ? parseFloat(val) : val),
+    z.number().min(0, "Please input a valid price!")
+  ),
+  estimatedDuration: z.preprocess(
+    (val) => (typeof val === "string" ? parseFloat(val) : val),
+    z.number().min(1, "Please input a valid estimated duration!")
+  ),
+});
+
+type ServiceFormData = z.infer<typeof serviceSchema>;
+
+const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [services, setServices] = useState<services[]>([]);
   const [filteredServices, setFilteredServices] = useState<services[]>([]);
   const [currentService, setCurrentService] = useState<services | null>(null);
-  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // State for Add Service modal
-  const [error, setError] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false); // Để xác định chế độ
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteServiceID, setDeleteServiceID] = useState<number | null>(null);
+
+  // Setup react-hook-form with Zod schema validation
+  const form = useForm<ServiceFormData>({
+    resolver: zodResolver(serviceSchema),
+    defaultValues: {
+      serviceName: "",
+      description: "",
+      price: 0,
+      estimatedDuration: 1,
+    },
+  });
 
   // Search function
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,43 +99,76 @@ const ServicesTable: React.FC<ServicesTableProps> = ({
     fetchServices();
   }, []);
 
+  // Handle add service
+  const handleAdd = () => {
+    setIsEditMode(false); // Chế độ thêm mới
+    form.reset({
+      // Reset form về giá trị mặc định
+      serviceName: "",
+      description: "",
+      price: 0,
+      estimatedDuration: 1,
+    });
+    setIsDialogOpen(true);
+  };
+
   // Handle edit service
   const handleEdit = (service: services) => {
     setCurrentService(service);
-    form.setFieldsValue(service);
-    setIsModalOpen(true);
+    form.reset(service);
+    setIsEditMode(true); // Chế độ chỉnh sửa
+    setIsDialogOpen(true);
   };
 
-  // Handle update service
-  const handleUpdateService = async (values: services) => {
+  // Handle update/add service based on mode
+  const handleSubmit = async (data: ServiceFormData) => {
     setLoading(true);
     try {
-      await api.put(
-        `/service/update-service/${currentService?.serviceID}`,
-        values,
-        {
+      if (isEditMode) {
+        await api.put(
+          `/service/update-service/${currentService?.serviceID}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        toast.success("Service updated successfully!");
+      } else {
+        await api.post(`/service/add-service`, data, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
+        });
+        toast.success("Service added successfully!");
+      }
       fetchServices();
-      setIsModalOpen(false);
-      form.resetFields();
+      setIsDialogOpen(false);
+      form.reset();
     } catch (error: any) {
-      console.error("Update failed:", error.response?.data || error.message);
+      console.error("Operation failed:", error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle delete confirmation
+  const confirmDelete = (serviceID: number) => {
+    setDeleteServiceID(serviceID);
+    setIsDeleteDialogOpen(true);
+  };
+
   // Handle delete service
-  const handleDelete = async (serviceID: number) => {
+  const handleDelete = async () => {
+    if (deleteServiceID === null) return;
     setLoading(true);
     try {
-      await api.delete(`/service/delete-service/${serviceID}`, {
+      await api.delete(`/service/delete-service/${deleteServiceID}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      onDeleteSuccess(); // Call the delete success function passed from parent
-      fetchServices(); // Refresh the list after deletion
+      fetchServices();
+      setIsDeleteDialogOpen(false);
+      setDeleteServiceID(null);
+      toast.success("Service deleted successfully!");
     } catch (error: any) {
       console.error("Delete failed:", error.response?.data || error.message);
     } finally {
@@ -97,34 +176,8 @@ const ServicesTable: React.FC<ServicesTableProps> = ({
     }
   };
 
-  // Handle adding a new service
-  const handleAddService = async (values: services) => {
-    setLoading(true);
-    try {
-      await api.post(`/service/add-service`, values, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      onAddSuccess();
-      fetchServices(); // Refresh the list after adding a new service
-      setIsAddModalOpen(false);
-      form.resetFields();
-    } catch (error: any) {
-      console.error(
-        "Add service failed:",
-        error.response?.data || error.message
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <motion.div
-      className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700 mb-8"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-    >
+    <motion.div className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700 mb-8">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-100">Service List</h2>
         <div className="relative">
@@ -137,11 +190,10 @@ const ServicesTable: React.FC<ServicesTableProps> = ({
           />
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
         </div>
-        {/* Add Service button */}
-        <Button onClick={() => setIsAddModalOpen(true)}>
-          <Plus className="mr-2" />
+        <ShimmerButton onClick={handleAdd}>
+          <PlusCircle className="mr-2" />
           Add Service
-        </Button>
+        </ShimmerButton>
       </div>
 
       <div className="overflow-x-auto">
@@ -202,7 +254,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({
                     </button>
                     <button
                       className="text-red-400 hover:text-red-300"
-                      onClick={() => handleDelete(service.serviceID)} // Ensure correct ID is passed here
+                      onClick={() => confirmDelete(service.serviceID)}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -223,130 +275,175 @@ const ServicesTable: React.FC<ServicesTableProps> = ({
         </table>
       </div>
 
-      {error && <div className="text-red-400 mt-4">{error}</div>}
+      {/* Unified Add/Edit Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center">
+              {isEditMode ? (
+                <>
+                  <Edit className="mr-2 h-6 w-6 text-primary" />
+                  Edit Service
+                </>
+              ) : (
+                <>
+                  <Briefcase className="mr-2 h-6 w-6 text-primary" />
+                  Add New Service
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-6"
+            >
+              <FormField
+                control={form.control}
+                name="serviceName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Service Name</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                        <Input
+                          placeholder="Enter service name"
+                          {...field}
+                          className="pl-10"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <FileText className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                        <Textarea
+                          placeholder="Enter service description"
+                          {...field}
+                          className="pl-10 min-h-[100px]"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                          <Input
+                            type="number"
+                            placeholder="Enter price"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(parseFloat(e.target.value))
+                            }
+                            className="pl-10"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="estimatedDuration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estimated Duration (hours)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                          <Input
+                            type="number"
+                            placeholder="Enter duration"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(parseFloat(e.target.value))
+                            }
+                            className="pl-10"
+                            step="0.1"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex justify-end space-x-4 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  {loading ? (
+                    <>
+                      <PlusCircle className="mr-2 h-4 w-4 animate-spin" />
+                      {isEditMode ? "Saving..." : "Adding..."}
+                    </>
+                  ) : (
+                    <>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      {isEditMode ? "Save" : "Add"}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
-      {/* Modal for editing service */}
-      <Modal
-        title="Edit Service"
-        visible={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        footer={null}
-      >
-        <Form form={form} onFinish={handleUpdateService}>
-          <Form.Item
-            name="serviceName"
-            label="Service Name"
-            rules={[
-              { required: true, message: "Please input the service name!" },
-            ]}
-          >
-            <Input
-              placeholder={currentService?.serviceName || "Enter service name"}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="description"
-            label="Description"
-            rules={[
-              { required: true, message: "Please input the description!" },
-            ]}
-          >
-            <Input
-              placeholder={currentService?.description || "Enter description"}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="price"
-            label="Price"
-            rules={[{ required: true, message: "Please input the price!" }]}
-          >
-            <Input
-              type="number"
-              placeholder={currentService?.price?.toString() || "Enter price"}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="estimatedDuration"
-            label="Estimated Duration (in hour)"
-            rules={[
-              {
-                required: true,
-                message: "Please input the estimated duration!",
-              },
-            ]}
-          >
-            <Input
-              type="number"
-              placeholder={
-                currentService?.estimatedDuration?.toString() ||
-                "Enter estimated duration"
-              }
-            />
-          </Form.Item>
-
-          <Button variant="secondary" htmlType="submit" loading={loading}>
-            Update Service
-          </Button>
-        </Form>
-      </Modal>
-
-      {/* Modal for adding a new service */}
-      <Modal
-        title="Add Service"
-        visible={isAddModalOpen}
-        onCancel={() => setIsAddModalOpen(false)}
-        footer={null}
-      >
-        <Form form={form} onFinish={handleAddService}>
-          <Form.Item
-            name="serviceName"
-            label="Service Name"
-            rules={[
-              { required: true, message: "Please input the service name!" },
-            ]}
-          >
-            <Input placeholder="Enter service name" />
-          </Form.Item>
-
-          <Form.Item
-            name="description"
-            label="Description"
-            rules={[
-              { required: true, message: "Please input the description!" },
-            ]}
-          >
-            <Input placeholder="Enter description" />
-          </Form.Item>
-
-          <Form.Item
-            name="price"
-            label="Price"
-            rules={[{ required: true, message: "Please input the price!" }]}
-          >
-            <Input type="number" placeholder="Enter price" />
-          </Form.Item>
-
-          <Form.Item
-            name="estimatedDuration"
-            label="Estimated Duration (in hour)"
-            rules={[
-              {
-                required: true,
-                message: "Please input the estimated duration!",
-              },
-            ]}
-          >
-            <Input type="number" placeholder="Enter estimated duration" />
-          </Form.Item>
-
-          <Button variant="secondary" htmlType="submit" loading={loading}>
-            Add Service
-          </Button>
-        </Form>
-      </Modal>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+          </DialogHeader>
+          <p>Are you sure you want to delete this service?</p>
+          <div className="flex justify-end space-x-4 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={loading}
+            >
+              {loading ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
