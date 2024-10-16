@@ -8,7 +8,8 @@ import {
   Fish,
   Search,
   FileText,
-  PhoneCallIcon,
+  PhoneCall,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -65,6 +66,7 @@ export default function Component() {
   const [selectedBookingID, setSelectedBookingID] = useState<string | null>(
     null
   );
+  const [loading, setLoading] = useState(true);
 
   const form = useForm<PrescriptionForm>({
     resolver: zodResolver(prescriptionSchema),
@@ -79,6 +81,7 @@ export default function Component() {
   });
 
   const fetchAppointments = async () => {
+    setLoading(true);
     try {
       const response = await api.get("/booking/view-booking-process", {
         headers: {
@@ -99,7 +102,6 @@ export default function Component() {
             });
             return { ...appointment, hasPrescription: !!prescription.data };
           } catch (error) {
-            // If prescription fetch fails (e.g., 404 not found), set hasPrescription to false
             return { ...appointment, hasPrescription: false };
           }
         })
@@ -107,6 +109,9 @@ export default function Component() {
       setAppointments(appointmentsWithPrescriptions);
     } catch (error) {
       console.error("Failed to fetch appointments:", error);
+      toast.error("Failed to load appointments. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -118,14 +123,7 @@ export default function Component() {
         },
       });
       const prescriptionData = response.data;
-
-      // Populate form with existing prescription data
-      form.setValue("bookingID", bookingID);
-      form.setValue("diseaseName", prescriptionData.diseaseName);
-      form.setValue("symptoms", prescriptionData.symptoms);
-      form.setValue("medication", prescriptionData.medication);
-      form.setValue("frequency", prescriptionData.frequency);
-      form.setValue("note", prescriptionData.note);
+      form.reset(prescriptionData);
     } catch (error) {
       console.error("Failed to fetch prescription:", error);
       toast.error("Failed to load prescription data.");
@@ -136,28 +134,31 @@ export default function Component() {
     fetchAppointments();
   }, []);
 
-  const updateStatus = async (bookingID: string, newStatus: string) => {
+  const handleStatusChange = async (bookingID: string, newStatus: string) => {
+    let endpoint = "";
+
+    if (newStatus === "On Going") {
+      endpoint = `/booking/complete/${bookingID}`;
+    } else if (newStatus === "Completed") {
+      endpoint = `/booking/receive-money/${bookingID}`;
+    } else {
+      console.error("Invalid status:", newStatus);
+      toast.error("Invalid status update.");
+      return;
+    }
+
     try {
-      await api.put(
-        `/booking/update-status`,
-        { id: bookingID, status: newStatus },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      await api.patch(endpoint, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       fetchAppointments();
+      toast.success(`Appointment status updated successfully to ${newStatus}`);
     } catch (error) {
       console.error("Failed to update status:", error);
+      toast.error("Failed to update appointment status.");
     }
-  };
-
-  const getNextStatus = (status: string) => {
-    if (status === "Pending") return "On Going";
-    if (status === "On Going") return "Completed";
-    if (status === "Completed") return "Received Money";
-    return status;
   };
 
   const handleAddPrescription = async (values: PrescriptionForm) => {
@@ -180,10 +181,20 @@ export default function Component() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-teal-100 to-green-100 p-8">
       <div className="container mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-4xl font-bold mb-8 text-center text-gray-800"
+        >
           Veterinarian Appointments
-        </h1>
-        <div className="mb-6 flex justify-center">
+        </motion.h1>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-8 flex justify-center"
+        >
           <div className="relative w-full max-w-md">
             <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
             <Input
@@ -191,259 +202,351 @@ export default function Component() {
               placeholder="Search by customer name"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 pr-4 py-2 w-full"
+              className="pl-8 pr-4 py-2 w-full rounded-full shadow-md focus:ring-2 focus:ring-blue-300 transition-all duration-300"
             />
           </div>
-        </div>
-        <AnimatePresence>
-          {filteredAppointments.map((appointment, index) => (
-            <motion.div
-              key={appointment.bookingID}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-            >
-              <Card className="bg-white/80 backdrop-blur-sm mb-6">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-gray-800">
-                    Appointment Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {/* Appointment details */}
-                    <div className="flex items-center">
-                      <User className="mr-2 h-5 w-5 text-primary" />
-                      <span className="font-semibold mr-2">Customer:</span>
-                      {appointment.customerName}
-                    </div>
-                    <div className="flex items-center">
-                      <Fish className="mr-2 h-5 w-5 text-primary" />
-                      <span className="font-semibold mr-2">Koi/Pool:</span>
-                      {appointment.koiOrPoolName}
-                    </div>
-                    <div className="flex items-center">
-                      <Calendar className="mr-2 h-5 w-5 text-primary" />
-                      <span className="font-semibold mr-2">Date:</span>
-                      {appointment.bookingDate}
-                    </div>
-                    <div className="flex items-center">
-                      <Clock className="mr-2 h-5 w-5 text-primary" />
-                      <span className="font-semibold mr-2">Time:</span>
-                      {appointment.slotStartTime} - {appointment.slotEndTime}
-                    </div>
-                    <div className="flex items-center">
-                      <MapPin className="mr-2 h-5 w-5 text-primary" />
-                      <span className="font-semibold mr-2">Location:</span>
-                      {appointment.location}
-                    </div>
-                    <div className="flex items-center">
-                      <User className="mr-2 h-5 w-5 text-primary" />
-                      <span className="font-semibold mr-2">Veterinarian:</span>
-                      {appointment.vetName}
-                    </div>
-                    <div className="flex items-center">
-                      <PhoneCallIcon className="mr-2 h-5 w-5 text-primary" />
-                      <span className="font-semibold mr-2">Phone:</span>
-                      {appointment.phoneNumber}
-                    </div>
-                    <div className="flex items-center">
-                      <span className="font-semibold mr-2">Service:</span>
-                      <Badge variant="secondary">
-                        {appointment.serviceName}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="font-semibold mr-2">Status:</span>
-                      <Badge variant="outline">
-                        {appointment.bookingStatus}
-                      </Badge>
-                    </div>
-                    {/* Other fields can go here */}
-                  </div>
-                  <div className="flex justify-end space-x-4 mt-6">
-                    <Dialog
-                      open={open && selectedBookingID === appointment.bookingID}
-                      onOpenChange={(isOpen) => {
-                        setOpen(isOpen);
-                        if (isOpen && appointment.hasPrescription) {
-                          setSelectedBookingID(appointment.bookingID);
-                          fetchPrescription(appointment.bookingID);
-                        } else {
-                          form.reset();
-                        }
-                      }}
-                    >
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="default"
-                          className="bg-green-500 hover:bg-green-600"
+        </motion.div>
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          </div>
+        ) : (
+          <AnimatePresence>
+            {filteredAppointments.map((appointment, index) => (
+              <motion.div
+                key={appointment.bookingID}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <Card className="bg-white/90 backdrop-blur-sm mb-6 overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                  <CardHeader className="bg-gradient-to-r from-blue-500 to-teal-500 text-white">
+                    <CardTitle className="text-2xl font-bold">
+                      Appointment Details
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center bg-blue-50 p-3 rounded-lg"
+                      >
+                        <User className="mr-3 h-6 w-6 text-blue-500" />
+                        <div>
+                          <span className="font-semibold text-gray-700">
+                            Customer:
+                          </span>
+                          <p className="text-gray-900">
+                            {appointment.customerName}
+                          </p>
+                        </div>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center bg-green-50 p-3 rounded-lg"
+                      >
+                        <Fish className="mr-3 h-6 w-6 text-green-500" />
+                        <div>
+                          <span className="font-semibold text-gray-700">
+                            Koi/Pool:
+                          </span>
+                          <p className="text-gray-900">
+                            {appointment.koiOrPoolName}
+                          </p>
+                        </div>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center bg-yellow-50 p-3 rounded-lg"
+                      >
+                        <Calendar className="mr-3 h-6 w-6 text-yellow-500" />
+                        <div>
+                          <span className="font-semibold text-gray-700">
+                            Date:
+                          </span>
+                          <p className="text-gray-900">
+                            {appointment.bookingDate}
+                          </p>
+                        </div>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center bg-purple-50 p-3 rounded-lg"
+                      >
+                        <Clock className="mr-3 h-6 w-6 text-purple-500" />
+                        <div>
+                          <span className="font-semibold text-gray-700">
+                            Time:
+                          </span>
+                          <p className="text-gray-900">{`${appointment.slotStartTime} - ${appointment.slotEndTime}`}</p>
+                        </div>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center bg-red-50 p-3 rounded-lg"
+                      >
+                        <MapPin className="mr-3 h-6 w-6 text-red-500" />
+                        <div>
+                          <span className="font-semibold text-gray-700">
+                            Location:
+                          </span>
+                          <p className="text-gray-900">
+                            {appointment.location}
+                          </p>
+                        </div>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center bg-indigo-50 p-3 rounded-lg"
+                      >
+                        <User className="mr-3 h-6 w-6 text-indigo-500" />
+                        <div>
+                          <span className="font-semibold text-gray-700">
+                            Veterinarian:
+                          </span>
+                          <p className="text-gray-900">{appointment.vetName}</p>
+                        </div>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center bg-pink-50 p-3 rounded-lg"
+                      >
+                        <PhoneCall className="mr-3 h-6 w-6 text-pink-500" />
+                        <div>
+                          <span className="font-semibold text-gray-700">
+                            Phone:
+                          </span>
+                          <p className="text-gray-900">
+                            {appointment.phoneNumber}
+                          </p>
+                        </div>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center bg-orange-50 p-3 rounded-lg"
+                      >
+                        <span className="font-semibold text-gray-700 mr-2">
+                          Service:
+                        </span>
+                        <Badge
+                          variant="secondary"
+                          className="bg-orange-200 text-orange-700"
                         >
-                          <FileText className="mr-2 h-4 w-4" />
-                          {appointment.hasPrescription
-                            ? "View Prescription"
-                            : "Create Prescription"}
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                          <DialogTitle>
-                            {appointment.hasPrescription
-                              ? "View/Edit Prescription"
-                              : "Create Prescription"}
-                          </DialogTitle>
-                          <DialogDescription>
-                            {appointment.hasPrescription
-                              ? "View or edit the existing prescription."
-                              : "Enter the details for the new prescription. Click save when you're done."}
-                          </DialogDescription>
-                        </DialogHeader>
-                        <Form {...form}>
-                          <form
-                            onSubmit={form.handleSubmit(handleAddPrescription)}
+                          {appointment.serviceName}
+                        </Badge>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center bg-teal-50 p-3 rounded-lg"
+                      >
+                        <span className="font-semibold text-gray-700 mr-2">
+                          Status:
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className="bg-teal-200 text-teal-700"
+                        >
+                          {appointment.bookingStatus}
+                        </Badge>
+                      </motion.div>
+                    </div>
+                    <div className="flex justify-end space-x-4 mt-6">
+                      <Dialog
+                        open={
+                          open && selectedBookingID === appointment.bookingID
+                        }
+                        onOpenChange={(isOpen) => {
+                          setOpen(isOpen);
+                          setSelectedBookingID(
+                            isOpen ? appointment.bookingID : null
+                          );
+                          if (isOpen && appointment.hasPrescription) {
+                            fetchPrescription(appointment.bookingID);
+                          } else {
+                            form.reset(); // Reset form cho trường hợp không có đơn thuốc
+                          }
+                        }}
+                      >
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="default"
+                            className="bg-green-500 hover:bg-green-600 transition-colors duration-300"
                           >
-                            <div className="grid gap-4 py-4">
-                              <FormField
-                                control={form.control}
-                                name="bookingID"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Booking ID</FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        {...field}
-                                        placeholder="Booking ID"
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="diseaseName"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Disease Name</FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        {...field}
-                                        placeholder="Disease Name"
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="symptoms"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Symptoms</FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        {...field}
-                                        placeholder="Symptoms"
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="medication"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Medication</FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        {...field}
-                                        placeholder="Medication"
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="frequency"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Frequency</FormLabel>
-                                    <Select
-                                      onValueChange={field.onChange}
-                                      defaultValue={field.value}
-                                    >
+                            <FileText className="mr-2 h-4 w-4" />
+                            {appointment.hasPrescription
+                              ? "View Prescription"
+                              : "Create Prescription"}
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                          <DialogHeader>
+                            <DialogTitle>
+                              {appointment.hasPrescription
+                                ? "View/Edit Prescription"
+                                : "Create Prescription"}
+                            </DialogTitle>
+                            <DialogDescription>
+                              {appointment.hasPrescription
+                                ? "View or edit the existing prescription."
+                                : "Enter the details for the new prescription. Click save when you're done."}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <Form {...form}>
+                            <form
+                              onSubmit={form.handleSubmit(
+                                handleAddPrescription
+                              )}
+                            >
+                              <div className="grid gap-4 py-4">
+                                <FormField
+                                  control={form.control}
+                                  name="bookingID"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Booking ID</FormLabel>
                                       <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Select frequency" />
-                                        </SelectTrigger>
+                                        <Input
+                                          {...field}
+                                          placeholder="Booking ID"
+                                        />
                                       </FormControl>
-                                      <SelectContent>
-                                        <SelectItem value="once">
-                                          Once daily
-                                        </SelectItem>
-                                        <SelectItem value="twice">
-                                          Twice daily
-                                        </SelectItem>
-                                        <SelectItem value="thrice">
-                                          Three times daily
-                                        </SelectItem>
-                                        <SelectItem value="asNeeded">
-                                          As needed
-                                        </SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name="note"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Note</FormLabel>
-                                    <FormControl>
-                                      <Textarea
-                                        {...field}
-                                        placeholder="Special Instructions"
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-                            <DialogFooter>
-                              <Button type="submit">Save Prescription</Button>
-                            </DialogFooter>
-                          </form>
-                        </Form>
-                      </DialogContent>
-                    </Dialog>
-                    <Button
-                      className="bg-blue-500 hover:bg-blue-600"
-                      variant="default"
-                      onClick={() =>
-                        updateStatus(
-                          appointment.bookingID,
-                          getNextStatus(appointment.bookingStatus)
-                        )
-                      }
-                    >
-                      {getNextStatus(appointment.bookingStatus)}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name="diseaseName"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Disease Name</FormLabel>
+                                      <FormControl>
+                                        <Input
+                                          {...field}
+                                          placeholder="Disease Name"
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name="symptoms"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Symptoms</FormLabel>
+                                      <FormControl>
+                                        <Input
+                                          {...field}
+                                          placeholder="Symptoms"
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name="medication"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Medication</FormLabel>
+                                      <FormControl>
+                                        <Input
+                                          {...field}
+                                          placeholder="Medication"
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name="frequency"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Frequency</FormLabel>
+                                      <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Select frequency" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="once">
+                                            Once daily
+                                          </SelectItem>
+                                          <SelectItem value="twice">
+                                            Twice daily
+                                          </SelectItem>
+                                          <SelectItem value="thrice">
+                                            Three times daily
+                                          </SelectItem>
+                                          <SelectItem value="asNeeded">
+                                            As needed
+                                          </SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name="note"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Note</FormLabel>
+                                      <FormControl>
+                                        <Textarea
+                                          {...field}
+                                          placeholder="Special Instructions"
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                              <DialogFooter>
+                                <Button type="submit">Save Prescription</Button>
+                              </DialogFooter>
+                            </form>
+                          </Form>
+                        </DialogContent>
+                      </Dialog>
+                      <div className="flex justify-end space-x-4 mt-0">
+                        <Select
+                          onValueChange={(value) =>
+                            handleStatusChange(appointment.bookingID, value)
+                          }
+                          defaultValue={appointment.bookingStatus}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Update Status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="On Going">On Going</SelectItem>
+                            <SelectItem value="Completed">Completed</SelectItem>
+                            <SelectItem value="Receive Money">
+                              Receive Money
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
       </div>
     </div>
   );

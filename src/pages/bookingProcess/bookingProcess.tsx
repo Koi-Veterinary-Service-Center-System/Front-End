@@ -152,7 +152,7 @@ const Process = () => {
   ) => {
     try {
       // Make a PATCH request to the API endpoint
-      const response = await api.patch(`/booking/schedule/${bookingID}`, null, {
+      const response = await api.patch(`/booking/success/${bookingID}`, null, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -213,10 +213,14 @@ const Process = () => {
     switch (status.toLowerCase()) {
       case "confirmed":
         return "bg-green-100 text-green-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
       case "pending":
         return "bg-yellow-100 text-yellow-800";
       case "cancelled":
         return "bg-red-100 text-red-800";
+      case "scheduled":
+        return "bg-blue-100 text-blue-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -422,14 +426,32 @@ const Process = () => {
                             </Button>
                           </>
                         ) : (
-                          // Buttons for customer to pay or cancel
+                          // Conditional buttons for customers
                           <>
-                            <Button
-                              variant="outline"
-                              onClick={() => handlePayOnline(booking.bookingID)}
-                            >
-                              Pay Online
-                            </Button>
+                            {["Scheduled", "Completed"].includes(
+                              booking.bookingStatus
+                            ) ? (
+                              <Button
+                                variant="outline"
+                                onClick={() =>
+                                  handleUpdateStatus(
+                                    booking.bookingID,
+                                    "Success"
+                                  )
+                                }
+                              >
+                                Change Status to Success
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                onClick={() =>
+                                  handlePayOnline(booking.bookingID)
+                                }
+                              >
+                                Pay Online
+                              </Button>
+                            )}
                             <Dialog
                               open={isCancelDialogOpen}
                               onOpenChange={setIsCancelDialogOpen}
