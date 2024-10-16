@@ -150,7 +150,7 @@ function App() {
         <Route
           path="/schedulesV"
           element={
-            <PrivateRoute requiredRoles={["Vet"]}>
+            <PrivateRoute requiredRoles={["Vet", "Customer"]}>
               <SchedulesV />
             </PrivateRoute>
           }
