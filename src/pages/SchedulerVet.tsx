@@ -29,7 +29,7 @@ export default function VetCalendar() {
   useEffect(() => {
     const fetchVet = async () => {
       try {
-        const response = await api.get(`/vetslot`, {
+        const response = await api.get(`/vetslot/vet-schedule`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

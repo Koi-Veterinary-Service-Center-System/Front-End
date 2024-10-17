@@ -92,7 +92,7 @@ function App() {
           }
         />
         <Route
-          path="/feedback"
+          path="/feedback/:bookingID"
           element={
             <PrivateRoute requiredRoles={["Customer"]}>
               <FeedbackForm />
