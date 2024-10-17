@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { HomeIcon, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,9 +12,41 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import api from "@/configs/axios";
-import { Link } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import confetti from "canvas-confetti";
+
+// Confetti Effect Function
+function launchConfetti() {
+  const end = Date.now() + 3 * 1000; // 3 seconds
+  const colors = ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1"];
+
+  (function frame() {
+    if (Date.now() > end) return;
+
+    confetti({
+      particleCount: 2,
+      angle: 60,
+      spread: 55,
+      startVelocity: 60,
+      origin: { x: 0, y: 0.5 },
+      colors: colors,
+    });
+    confetti({
+      particleCount: 2,
+      angle: 120,
+      spread: 55,
+      startVelocity: 60,
+      origin: { x: 1, y: 0.5 },
+      colors: colors,
+    });
+
+    requestAnimationFrame(frame);
+  })();
+}
 
 export default function FeedbackForm() {
+  const { bookingID } = useParams();
+  const navigate = useNavigate();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -30,34 +62,45 @@ export default function FeedbackForm() {
     tap: { scale: 0.9 },
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Prepare the data in the format expected by the API
+    if (!bookingID) {
+      console.error("Booking ID is missing. Cannot submit feedback.");
+      return;
+    }
+
     const feedbackData = {
-      bookingID: 0, // Replace with actual booking ID if available
       rate: rating,
       comments: comment,
     };
 
     try {
-      // Send the feedback data to the backend API
       const response = await api.post(
-        "/Feedback/create-feedback",
+        `/Feedback/create-feedback/${bookingID}`,
         feedbackData
       );
-
       if (response.status === 200 || response.status === 201) {
-        // Successfully submitted
         setSubmitted(true);
+        launchConfetti();
       } else {
-        // Handle errors if needed
         console.error("Failed to submit feedback");
       }
     } catch (error) {
       console.error("An error occurred:", error);
     }
   };
+
+  // Trigger confetti effect when submitted state changes to true
+  useEffect(() => {
+    if (submitted) {
+      const timer = setTimeout(() => {
+        navigate("/"); // Redirect to home page after 10 seconds
+      }, 5000);
+
+      return () => clearTimeout(timer); // Clear the timer if the component unmounts
+    }
+  }, [submitted, navigate]);
 
   if (submitted) {
     return (
@@ -73,14 +116,23 @@ export default function FeedbackForm() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              className="flex justify-center space-x-1"
             >
-              <Star className="w-16 h-16 mx-auto text-yellow-400 fill-current" />
+              {[...Array(rating)].map((_, index) => (
+                <Star
+                  key={index}
+                  className="w-8 h-8 text-yellow-400 fill-current"
+                />
+              ))}
             </motion.div>
             <h2 className="mt-4 text-2xl font-bold text-green-700">
               Thank You for Your Feedback!
             </h2>
             <p className="mt-2 text-gray-600">
               Your input helps us improve our services.
+            </p>
+            <p className="mt-4 text-sm text-gray-500">
+              Redirecting to the homepage in 10 seconds...
             </p>
           </CardContent>
         </Card>

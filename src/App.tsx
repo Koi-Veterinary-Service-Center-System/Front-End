@@ -27,6 +27,8 @@ import PrivateRoute from "./Routes/PrivateRoute";
 import FeedbackForm from "./pages/FeedBack/feedBack";
 import AboutUs from "./pages/About Us/aboutUs";
 import ContactUs from "./pages/Contact Us/contactUs";
+import PaymentSuccessful from "./pages/SuccessPayment/paymentSuccess";
+import PaymentFailed from "./pages/FailedPayment/failedPayment";
 
 // Add your license key here
 registerLicense("Your_License_Key_Here");
@@ -84,6 +86,22 @@ function App() {
           }
         />
         <Route
+          path="/paymentsuccess/:bookingID"
+          element={
+            <PrivateRoute requiredRoles={["Customer"]}>
+              <PaymentSuccessful />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/paymentfailed"
+          element={
+            <PrivateRoute requiredRoles={["Customer"]}>
+              <PaymentFailed />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/process"
           element={
             <PrivateRoute>
@@ -92,7 +110,7 @@ function App() {
           }
         />
         <Route
-          path="/feedback"
+          path="/feedback/:bookingID"
           element={
             <PrivateRoute requiredRoles={["Customer"]}>
               <FeedbackForm />
@@ -150,7 +168,7 @@ function App() {
         <Route
           path="/schedulesV"
           element={
-            <PrivateRoute requiredRoles={["Vet"]}>
+            <PrivateRoute requiredRoles={["Vet", "Customer"]}>
               <SchedulesV />
             </PrivateRoute>
           }
