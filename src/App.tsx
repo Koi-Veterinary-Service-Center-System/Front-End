@@ -27,6 +27,8 @@ import PrivateRoute from "./Routes/PrivateRoute";
 import FeedbackForm from "./pages/FeedBack/feedBack";
 import AboutUs from "./pages/About Us/aboutUs";
 import ContactUs from "./pages/Contact Us/contactUs";
+import PaymentSuccessful from "./pages/SuccessPayment/paymentSuccess";
+import PaymentFailed from "./pages/FailedPayment/failedPayment";
 
 // Add your license key here
 registerLicense("Your_License_Key_Here");
@@ -80,6 +82,22 @@ function App() {
           element={
             <PrivateRoute requiredRoles={["Customer"]}>
               <History />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/paymentsuccess/:bookingID"
+          element={
+            <PrivateRoute requiredRoles={["Customer"]}>
+              <PaymentSuccessful />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/paymentfailed"
+          element={
+            <PrivateRoute requiredRoles={["Customer"]}>
+              <PaymentFailed />
             </PrivateRoute>
           }
         />
