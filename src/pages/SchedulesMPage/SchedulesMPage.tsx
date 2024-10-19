@@ -68,13 +68,14 @@ export default function SchedulePage() {
     formState: { errors },
     control,
     setValue,
+    reset, // <-- Thêm reset để reset form sau khi thêm
   } = useForm<SlotFormValues>({
     resolver: zodResolver(slotSchema),
     defaultValues: {
-      vetId: currentSlot?.vetId || "",
-      slotId: currentSlot?.id || "",
-      startTime: currentSlot?.startTime || "09:00",
-      endTime: currentSlot?.endTime || "10:00",
+      vetId: currentSlot?.vetId || "", // Nếu slot mới thì giá trị này phải rỗng
+      slotId: currentSlot?.id || "", // Nếu là slot mới thì giá trị này phải rỗng
+      startTime: currentSlot?.startTime || "09:00", // Thời gian mặc định
+      endTime: currentSlot?.endTime || "10:00", // Thời gian mặc định
     },
   });
 
@@ -143,44 +144,41 @@ export default function SchedulePage() {
   }, []);
 
   // Function to handle adding a new slot
-  const handleAddSlot = async () => {
-    if (!currentSlot?.vetId || !currentSlot?.id) {
-      toast.error("Please select a Vet and a Slot ID.");
-      return;
-    }
-
+  const handleAddSlot = async (data: SlotFormValues) => {
     const newSlotData = {
-      vetID: currentSlot.vetId,
-      slotID: parseInt(currentSlot.id),
-      slotStartTime: currentSlot.startTime,
-      slotEndTime: currentSlot.endTime,
+      vetID: data.vetId, // Lấy vetID từ form
+      slotID: parseInt(data.slotId), // Lấy slotID từ form
+      slotStartTime: data.startTime, // Lấy thời gian bắt đầu từ form
+      slotEndTime: data.endTime, // Lấy thời gian kết thúc từ form
     };
 
-    // Gửi dữ liệu lên server và xử lý tiếp
     try {
       const response = await api.post("/vetslot/add-vetslot", newSlotData, {
         headers: { "Content-Type": "application/json" },
       });
       console.log("New Slot Added:", response.data);
 
-      setSlots([
-        ...slots,
-        { ...currentSlot, id: newSlotData.slotID.toString() },
-      ]);
+      // Thêm slot mới vào danh sách
+      setSlots([...slots, { ...data, id: data.slotId }]);
+
+      // Reset form sau khi thêm
+      reset();
+
+      // Đóng dialog sau khi thêm thành công
       setIsOpen(false);
+      toast.success("New slot added successfully!");
     } catch (error: any) {
-      console.error(
-        "Error adding new vet slot:",
-        error.response ? error.response.data : error.message
-      );
+      console.error("Error adding new vet slot:", error.message);
+      toast.error("Failed to add slot. Please try again.");
     }
   };
 
   const onSubmit = (data: SlotFormValues) => {
+    // Xác định là đang thêm mới hay chỉnh sửa
     if (currentSlot?.id) {
       handleUpdateSlot({ ...currentSlot, ...data });
     } else {
-      handleAddSlot({ ...data, id: data.slotId });
+      handleAddSlot(data); // Chuyển dữ liệu form vào hàm thêm slot
     }
     setIsOpen(false);
   };

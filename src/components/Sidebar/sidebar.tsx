@@ -49,7 +49,15 @@ const Sidebar = () => {
           <Menu size={24} />
         </motion.button>
 
-        <motion.div>
+        <motion.div
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{
+            ease: "linear",
+            duration: 2,
+            x: { duration: 1 },
+          }}
+        >
           <img
             src="src/assets/images/logo.png"
             alt="Logo"
