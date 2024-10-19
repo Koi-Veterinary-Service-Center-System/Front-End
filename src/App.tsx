@@ -48,10 +48,10 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/allservice" element={<AllService />} />
+        <Route path="/services" element={<AllService />} />
         <Route path="/service" element={<Service />} />
-        <Route path="/about" element={<AboutUs />} />
-        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/contact-us" element={<ContactUs />} />
         {/* Private Routes */}
         <Route
           path="/profile"
@@ -142,7 +142,7 @@ function App() {
           }
         />
         <Route
-          path="/analytics"
+          path="/feedbackmanager"
           element={
             <PrivateRoute requiredRoles={["Manager", "Staff"]}>
               <AnalyticsPage />

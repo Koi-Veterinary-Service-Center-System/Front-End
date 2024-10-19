@@ -17,7 +17,15 @@ import {
 } from "../../types/info";
 import { toast } from "sonner";
 import { Fish, Waves } from "lucide-react";
+import { MdOutlineMedicalServices } from "react-icons/md";
+import { FaLocationArrow } from "react-icons/fa";
+import { FaUserDoctor } from "react-icons/fa6";
+import { MdNoteAlt } from "react-icons/md";
+import { RiSecurePaymentFill } from "react-icons/ri";
+import { LuFish } from "react-icons/lu";
+import { motion } from "framer-motion";
 import TextArea from "antd/es/input/TextArea";
+import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -43,6 +51,7 @@ function Booking() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [distances, setDistances] = useState<Distance[]>([]);
   const [isLoadingPayment, setLoadingPayment] = useState(false);
+  const navigate = useNavigate();
 
   // Ant Design form hook
   const [form] = Form.useForm();
@@ -128,7 +137,13 @@ function Booking() {
         setKoiAndPools(response.data);
       } catch (error) {
         console.log("Error fetching koi and pools: ", error);
-        toast.error("Failed to load your koi and pools.");
+
+        // Kiểm tra nếu lỗi có chứa response và lấy message từ response body
+        if (error.response && error.response.data) {
+          toast.info(error.response.data); // Hiển thị message từ response body
+        } else {
+          toast.error("Failed to fetch Koi or Pools data"); // Hiển thị message mặc định nếu không có message từ API
+        }
       } finally {
         setLoadingKoiAndPools(false);
       }
@@ -242,35 +257,13 @@ function Booking() {
       if (response.status === 200 || response.status === 201) {
         toast.success("Booking successful!");
       }
+      navigate("/process");
     } catch (error: any) {
       console.error("Booking error:", error);
-
-      if (error.response) {
-        const errorMessage =
-          error.response.data.message || error.response.data.error;
-
-        if (
-          errorMessage &&
-          errorMessage.includes("FK_Bookings_Payments_PaymentID")
-        ) {
-          toast.error(
-            "Invalid payment method selected. Please choose a valid payment option."
-          );
-        } else if (errorMessage && errorMessage.includes("foreign key")) {
-          toast.error(
-            "There was an issue with your selection. Please ensure all options are valid."
-          );
-        } else {
-          toast.error(
-            `Booking failed: ${errorMessage || "An unexpected error occurred"}`
-          );
-        }
-      } else if (error.request) {
-        toast.error(
-          "Unable to connect to the server. Please check your connection and try again."
-        );
+      if (error.response && error.response.data) {
+        toast.info(error.response.data); // Hiển thị message từ response body
       } else {
-        toast.error(`An error occurred: ${error.message}`);
+        toast.error("Failed to booking"); // Hiển thị message mặc định nếu không có message từ API
       }
     }
   };
@@ -294,219 +287,330 @@ function Booking() {
   };
 
   return (
-    <div>
+    <div className="mt-5">
       <Header />
-      <Banner />
+      <div ref={bookingRef} id="booking" className="bg-white py-12 px-6">
+        <motion.div
+          className="max-w-4xl mx-auto bg-gray-50 shadow-lg rounded-lg p-8"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+        >
+          <motion.div
+            className="text-center mb-8"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-3xl font-bold text-gray-800">Book a Service</h1>
+          </motion.div>
 
-      <div ref={bookingRef} id="booking" className="section">
-        <div className="section-center">
-          <div className="container">
-            <div className="row">
-              <div className="booking-form">
-                <div className="form-header">
-                  <h1>Book a Service</h1>
-                </div>
-
-                <Form
-                  form={form}
-                  name="bookingForm"
-                  layout="vertical"
-                  onFinish={handleBooking}
+          <Form
+            form={form}
+            name="bookingForm"
+            layout="vertical"
+            onFinish={handleBooking}
+          >
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Form.Item
+                  label="Pickup Date"
+                  name="pickupDate"
+                  rules={[{ required: true, message: "Please select a date" }]}
                 >
-                  <div className="row">
-                    <div className="col-sm-5">
-                      <Form.Item
-                        label="Pickup Date"
-                        name="pickupDate"
-                        rules={[
-                          { required: true, message: "Please select a date" },
-                        ]}
-                      >
-                        <DatePicker
-                          className="form-control"
-                          style={{ width: "100%" }}
-                        />
-                      </Form.Item>
-                    </div>
-                  </div>
-                  {/* Service, Slot, and Vet */}
-                  <div className="row">
-                    <div className="col-sm-4">
-                      <Form.Item
-                        label="Type of Services"
-                        name="serviceType"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please select a service",
-                          },
-                        ]}
-                      >
-                        <Select
-                          className="form-control"
-                          loading={isLoadingServices}
-                          onChange={() => calculateTota()} // Trigger calculation on service change
-                        >
-                          {services.map((service) => (
-                            <Option
-                              key={service.serviceID}
-                              value={service.serviceID}
-                            >
-                              {service.serviceName} - ${service.price}{" "}
-                              (Duration: {service.estimatedDuration} hours)
-                            </Option>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                    </div>
+                  <DatePicker className="w-full p-2 shadow-sm" />
+                </Form.Item>
+              </motion.div>
 
-                    <div className="col-sm-4">
-                      <Form.Item label="Slot" name="slot">
-                        <Select
-                          className="form-control"
-                          loading={isLoadingSlots}
-                          onChange={handleSlotChange}
-                          value={selectedSlot}
-                        >
-                          {slots.map((slot) => (
-                            <Option key={slot.slotID} value={slot.slotID}>
-                              {slot.weekDate} ({slot.startTime} -{slot.endTime})
-                            </Option>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                    </div>
-
-                    <div className="col-sm-4">
-                      <Form.Item
-                        label="Veterinarian"
-                        name="vet"
-                        rules={[
-                          { required: true, message: "Please select a vet" },
-                        ]}
-                      >
-                        <Select
-                          className="form-control"
-                          loading={isLoadingVets}
-                          onChange={handleVetChange}
-                          value={selectedVet}
-                        >
-                          {vets.map((vet) => (
-                            <Option key={vet.id} value={vet.id}>
-                              {vet.vetName}
-                            </Option>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                    </div>
-                  </div>
-
-                  <Form.Item
-                    label="Location"
-                    name="location"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please enter your location",
-                      },
-                      {
-                        pattern: /^[^\s].+$/,
-                        message:
-                          "Location cannot start with a space or contain special characters",
-                      },
-                    ]}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Form.Item
+                  label={
+                    <span className="flex items-center gap-2">
+                      <MdOutlineMedicalServices />
+                      Type of Services
+                    </span>
+                  }
+                  name="serviceType"
+                  rules={[
+                    { required: true, message: "Please select a service" },
+                  ]}
+                >
+                  <Select
+                    className="w-full p-0"
+                    style={{ height: "40px" }}
+                    loading={isLoadingServices}
+                    onChange={() => calculateTota()}
                   >
-                    <Input
-                      className="form-control"
-                      placeholder="Enter your location"
-                    />
-                  </Form.Item>
+                    {services.map((service) => (
+                      <Option key={service.serviceID} value={service.serviceID}>
+                        {service.serviceName} - ${service.price} (Duration:{" "}
+                        {service.estimatedDuration} hours)
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </motion.div>
 
-                  <Form.Item label="Choose District" name="district">
-                    <Select
-                      className="form-control"
-                      loading={isLoadingDistance}
-                      placeholder="Select a district"
-                      onChange={() => calculateTota()} // Trigger calculation on district change
-                    >
-                      {distances.map((distance) => (
-                        <Option
-                          key={distance.distanceID}
-                          value={distance.distanceID}
-                        >
-                          {distance.district} - {distance.area} ($
-                          {distance.price})
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-
-                  <Form.Item label="Choose Fish or Pool" name="koiOrPoolId">
-                    <Select
-                      className="form-control"
-                      loading={isLoadingKoiAndPools}
-                      placeholder="Select a fish or pool"
-                    >
-                      {koiAndPools.map((item) => (
-                        <Option key={item.koiOrPoolID} value={item.koiOrPoolID}>
-                          <div className="flex items-center gap-2">
-                            <span>{item.name}</span>
-                            {item.isPool ? (
-                              <Waves className="text-cyan-400" />
-                            ) : (
-                              <Fish className="text-orange-500" />
-                            )}
-                          </div>
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-
-                  <Form.Item label="Note" name="note">
-                    <TextArea className="form-control"></TextArea>
-                  </Form.Item>
-
-                  <Form.Item
-                    label="Payment Method"
-                    name="paymentMethod"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please select a payment method",
-                      },
-                    ]}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Form.Item label="Slot" name="slot">
+                  <Select
+                    className="w-full p-0"
+                    style={{ height: "50px" }}
+                    loading={isLoadingSlots}
+                    onChange={handleSlotChange}
+                    value={selectedSlot}
                   >
-                    <Select
-                      className="form-control"
-                      loading={isLoadingPayment}
-                      placeholder="Select payment method"
-                    >
-                      {payments.map((item) => (
-                        <Option key={item.paymentID} value={item.paymentID}>
-                          <div className="flex items-center gap-2">
-                            <span>{item.type}</span>
-                          </div>
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
+                    {slots.map((slot) => (
+                      <Option key={slot.slotID} value={slot.slotID}>
+                        {slot.weekDate} ({slot.startTime} - {slot.endTime})
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </motion.div>
 
-                  <h3>Total: {total} $</h3>
-                  <div className="form-btn">
-                    <Button
-                      type="primary"
-                      htmlType="submit"
-                      className="submit-btn"
-                    >
-                      Book Now
-                    </Button>
-                  </div>
-                </Form>
-              </div>
-            </div>
-          </div>
-        </div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Form.Item
+                  label={
+                    <span className="flex items-center gap-2">
+                      <FaUserDoctor />
+                      Veterinarian
+                    </span>
+                  }
+                  name="vet"
+                >
+                  <Select
+                    className="w-full p-0"
+                    style={{ height: "50px" }}
+                    loading={isLoadingVets}
+                    onChange={handleVetChange}
+                    value={selectedVet}
+                  >
+                    <Option key="none" value={null}>
+                      <div className="flex items-center gap-2">
+                        <span>None</span> {/* Hiển thị văn bản 'None' */}
+                      </div>
+                    </Option>
+                    {vets.map((vet) => (
+                      <Option key={vet.id} value={vet.id}>
+                        {vet.vetName}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </motion.div>
+            </motion.div>
+
+            <motion.div
+              className="mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <Form.Item
+                label="Location"
+                name="location"
+                rules={[
+                  { required: true, message: "Please enter your location" },
+                  {
+                    pattern: /^[^\s].+$/,
+                    message:
+                      "Location cannot start with a space or contain special characters",
+                  },
+                ]}
+              >
+                <Input
+                  className="w-full p-0"
+                  style={{ height: "50px" }}
+                  placeholder="Enter your location"
+                />
+              </Form.Item>
+            </motion.div>
+
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Form.Item
+                  label={
+                    <span className="flex items-center gap-2">
+                      <FaLocationArrow />
+                      Select a district
+                    </span>
+                  }
+                  name="district"
+                >
+                  <Select
+                    className="w-full p-0"
+                    style={{ height: "50px" }}
+                    loading={isLoadingDistance}
+                    placeholder="Select a district"
+                    onChange={() => calculateTota()}
+                  >
+                    {distances.map((distance) => (
+                      <Option
+                        key={distance.distanceID}
+                        value={distance.distanceID}
+                      >
+                        {distance.district} - {distance.area} (${distance.price}
+                        )
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Form.Item
+                  label={
+                    <span className="flex items-center gap-2">
+                      <LuFish />
+                      Choose Fish Or Pool
+                    </span>
+                  }
+                  name="koiOrPoolId"
+                >
+                  <Select
+                    className="w-full p-0"
+                    style={{ height: "50px" }}
+                    loading={isLoadingKoiAndPools}
+                    placeholder="Select a fish or pool"
+                  >
+                    {/* Tùy chọn 'None' */}
+                    <Option key="none" value={null}>
+                      <div className="flex items-center gap-2">
+                        <span>None</span> {/* Hiển thị văn bản 'None' */}
+                      </div>
+                    </Option>
+
+                    {/* Các tùy chọn từ API */}
+                    {koiAndPools.map((item) => (
+                      <Option key={item.koiOrPoolID} value={item.koiOrPoolID}>
+                        <div className="flex items-center gap-2">
+                          <span>{item.name}</span>
+                          {item.isPool ? (
+                            <Waves className="text-cyan-400" />
+                          ) : (
+                            <Fish className="text-orange-500" />
+                          )}
+                        </div>
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </motion.div>
+            </motion.div>
+
+            <motion.div
+              className="mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <Form.Item
+                label={
+                  <span className="flex items-center gap-2">
+                    <MdNoteAlt />
+                    Note
+                  </span>
+                }
+                name="note"
+              >
+                <TextArea className="w-full p-2 shadow-sm"></TextArea>
+              </Form.Item>
+            </motion.div>
+
+            <motion.div
+              className="mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <Form.Item
+                label={
+                  <span className="flex items-center gap-2">
+                    <RiSecurePaymentFill />
+                    Payment Method
+                  </span>
+                }
+                name="paymentMethod"
+                rules={[
+                  { required: true, message: "Please select a payment method" },
+                ]}
+              >
+                <Select
+                  className="w-full p-0"
+                  style={{ height: "50px" }}
+                  loading={isLoadingPayment}
+                  placeholder="Select payment method"
+                >
+                  {payments.map((item) => (
+                    <Option key={item.paymentID} value={item.paymentID}>
+                      <div className="flex items-center gap-2">
+                        <span>{item.type}</span>
+                      </div>
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </motion.div>
+
+            <motion.div
+              className="text-xl font-semibold text-gray-700 mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h3>Total: {total.toLocaleString("vi-VN")} $</h3>{" "}
+              {/* Định dạng số với dấu chấm phân tách hàng nghìn */}
+            </motion.div>
+
+            <motion.div
+              className="text-center"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="bg-blue-600 text-white py-2 px-6 rounded-lg shadow-md hover:bg-blue-500"
+              >
+                Book Now
+              </Button>
+            </motion.div>
+          </Form>
+        </motion.div>
       </div>
+
       <Footer />
     </div>
   );

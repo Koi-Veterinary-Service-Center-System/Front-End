@@ -37,7 +37,7 @@ const userSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   userName: z.string().min(1, "Username is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(0, "Password must be at least 6 characters"),
   email: z.string().email("Invalid email address"),
   gender: z.enum(["male", "female"]).optional(),
   role: z.string().min(1, "Role is required"),
@@ -123,27 +123,33 @@ const UsersTable = () => {
   const handleSubmit = async (data: UserFormData) => {
     setLoading(true);
     try {
-      // Construct the payload based on API requirements
-      const payload = {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        userName: data.userName,
-        password: data.password,
-        email: data.email,
-        gender: data.gender === "male", // true if male, false if female
-        role: data.role,
-      };
-
       if (isEditMode && currentUser) {
-        await api.put(`/User/update-user/${currentUser.userID}`, payload, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        toast.success("User updated successfully!");
+        // Chỉ gửi role và userID cho API theo định dạng đường dẫn
+        await api.patch(
+          `/User/update-role-user/${currentUser.userID}/${data.role}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        toast.success("User role updated successfully!");
       } else {
+        // Logic cho việc tạo mới user vẫn giữ nguyên
+        const payload = {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          userName: data.userName,
+          password: data.password,
+          email: data.email,
+          gender: data.gender === "male", // true nếu là male, false nếu là female
+          role: data.role,
+        };
+
         await api.post(`/User/create-user`, payload, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        console.log(payload);
         toast.success("User created successfully!");
       }
 
@@ -163,7 +169,7 @@ const UsersTable = () => {
     setLoading(true);
     setError(null);
     try {
-      await api.delete(`/User/delete-user?userID=${userToDelete.userID}`, {
+      await api.delete(`/User/delete-user/${userToDelete.userID}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       toast.success("Deleted user successfully");
@@ -226,7 +232,11 @@ const UsersTable = () => {
                     <FormItem>
                       <FormLabel>First Name</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="First Name" />
+                        <Input
+                          {...field}
+                          placeholder="First Name"
+                          disabled={isEditMode}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -239,7 +249,11 @@ const UsersTable = () => {
                     <FormItem>
                       <FormLabel>Last Name</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Last Name" />
+                        <Input
+                          {...field}
+                          placeholder="Last Name"
+                          disabled={isEditMode}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -252,7 +266,11 @@ const UsersTable = () => {
                     <FormItem>
                       <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Username" />
+                        <Input
+                          {...field}
+                          placeholder="Username"
+                          disabled={isEditMode}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -269,6 +287,7 @@ const UsersTable = () => {
                           {...field}
                           type="password"
                           placeholder="Password"
+                          disabled={isEditMode}
                         />
                       </FormControl>
                       <FormMessage />
@@ -282,7 +301,11 @@ const UsersTable = () => {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Email" />
+                        <Input
+                          {...field}
+                          placeholder="Email"
+                          disabled={isEditMode}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -297,6 +320,7 @@ const UsersTable = () => {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={isEditMode}
                       >
                         <FormControl>
                           <SelectTrigger>

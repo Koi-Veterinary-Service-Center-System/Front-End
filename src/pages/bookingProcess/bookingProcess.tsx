@@ -15,6 +15,10 @@ import {
   ClockIcon,
   MapPinIcon,
   CreditCardIcon,
+  CheckCircle2,
+  DollarSign,
+  Loader2,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -36,6 +40,91 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+
+const statusSteps = [
+  {
+    label: "Pending",
+    icon: <Loader2 className="h-4 w-4" />,
+    color: "bg-yellow-400",
+  },
+  {
+    label: "Scheduled",
+    icon: <CalendarIcon className="h-4 w-4" />,
+    color: "bg-blue-400",
+  },
+  {
+    label: "On-going",
+    icon: <Activity className="h-4 w-4" />,
+    color: "bg-purple-400",
+  },
+  {
+    label: "Completed",
+    icon: <CheckCircle2 className="h-4 w-4" />,
+    color: "bg-green-400",
+  },
+  {
+    label: "Received Money",
+    icon: <DollarSign className="h-4 w-4" />,
+    color: "bg-emerald-400",
+  },
+];
+
+const StatusComponent = ({ currentStatus }: { currentStatus?: string }) => {
+  const currentIndex = statusSteps.findIndex(
+    (step) => step.label === currentStatus
+  );
+
+  // Tính toán chiều dài của đường chạy
+  const progressPercentage = (currentIndex / (statusSteps.length - 1)) * 100;
+
+  return (
+    <div className="w-full max-w-3xl mx-auto">
+      <div className="relative">
+        {/* Đường phía sau các icon */}
+        <div className="absolute top-5 w-full h-1 bg-gray-200"></div>
+
+        {/* Đường di chuyển theo trạng thái */}
+        <motion.div
+          className="absolute top-5 h-1 bg-blue-500"
+          initial={{ width: 0 }}
+          animate={{ width: `${progressPercentage}%` }} // Điều chỉnh độ dài dựa trên trạng thái
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+        ></motion.div>
+
+        <div className="relative flex justify-between">
+          {statusSteps.map((step, index) => (
+            <div key={step.label} className="text-center">
+              <div
+                className={`w-10 h-10 mx-auto rounded-full flex items-center justify-center border-2 ${
+                  index <= currentIndex
+                    ? step.color
+                    : "bg-white border-gray-300"
+                }`}
+              >
+                {/* Nếu là trạng thái "Pending", thêm hiệu ứng quay cho Loader2 */}
+                {step.label === "Pending" && index <= currentIndex ? (
+                  <motion.div
+                    animate={{ rotate: 360 }} // Hiệu ứng quay 360 độ
+                    transition={{
+                      repeat: Infinity,
+                      duration: 1,
+                      ease: "linear",
+                    }} // Lặp lại vô hạn
+                  >
+                    {step.icon}
+                  </motion.div>
+                ) : (
+                  step.icon // Các biểu tượng khác hiển thị tĩnh
+                )}
+              </div>
+              <div className="mt-2 text-xs font-medium">{step.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Process = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -228,7 +317,7 @@ const Process = () => {
 
   return (
     <div className={`min-h-screen bg-gray-100 ${isDarkMode ? "dark" : ""}`}>
-      <div className="flex">
+      <div className="flex ">
         <motion.aside
           className="w-64 bg-gray-100 dark:bg-gray-800 h-screen sticky top-0"
           initial="hidden"
@@ -397,6 +486,9 @@ const Process = () => {
                             <span>${booking.totalAmount.toFixed(2)}</span>
                           </div>
                         </div>
+                        <StatusComponent
+                          currentStatus={booking.bookingStatus}
+                        />
                       </CardContent>
                       <CardFooter className="flex justify-between">
                         {profile?.role === "Staff" ? (
@@ -432,6 +524,7 @@ const Process = () => {
                               booking.bookingStatus
                             ) ? (
                               <Button
+                                className="bg-blue-400"
                                 variant="outline"
                                 onClick={() =>
                                   handleUpdateStatus(
@@ -440,7 +533,7 @@ const Process = () => {
                                   )
                                 }
                               >
-                                Change Status to Success
+                                Confirm to Success
                               </Button>
                             ) : (
                               <Button

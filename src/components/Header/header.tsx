@@ -1,21 +1,33 @@
-import "./header.scss";
 import { Button, Form, Input } from "antd";
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react"; // Import useState and useEffect
+import { useState, useEffect } from "react";
 import { profile } from "../../types/info";
+import { motion } from "framer-motion";
 import api from "../../configs/axios";
 import {
   Bell,
   CalendarCheck2,
   Check,
+  ChevronDown,
   Gauge,
   Heart,
   Pill,
   RefreshCw,
+  User,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { TbLogout } from "react-icons/tb";
+import { TbLogin } from "react-icons/tb";
+import { TbRegistered } from "react-icons/tb";
+import { ImProfile } from "react-icons/im";
 import { ScrollArea } from "../ui/scroll-area";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 type Notification = {
   id: number;
@@ -24,12 +36,11 @@ type Notification = {
 };
 
 function Header() {
-  const { Search } = Input;
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
   const [profile, setProfile] = useState<profile | null>(null);
   const [isLoading, setLoading] = useState(false);
-  // Check if the user is logged in
+
   useEffect(() => {
     const token = localStorage.getItem("token"); // Get the token from localStorage
     if (token) {
@@ -38,8 +49,8 @@ function Header() {
   }, []);
 
   useEffect(() => {
-    const fetchSlots = async () => {
-      const token = localStorage.getItem("token"); // Get token from localStorage
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
 
       try {
         setLoading(true);
@@ -50,24 +61,21 @@ function Header() {
         });
         setProfile(response.data);
       } catch (error) {
+        console.log(error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSlots();
+    fetchProfile();
   }, []);
 
   // Handle logout function
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Remove token from localStorage
-    localStorage.removeItem("user"); // Optionally remove user info
-    setIsLoggedIn(false); // Set logged-in state to false
-    navigate("/login"); // Redirect to login page
-  };
-
-  const onSearch = (value: string) => {
-    console.log("Searching for:", value);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+    navigate("/login");
   };
 
   const [notifications, setNotifications] = useState<Notification[]>([
@@ -90,60 +98,77 @@ function Header() {
   };
 
   return (
-    <>
-      <header className="header_hd">
-        <Link to="/">
-          <img src="src/assets/images/logo.png" alt="Koine logo" />
+    <motion.header
+      initial={{ opacity: 0, y: -50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-white shadow-md py-4"
+    >
+      <div className="container mx-auto px-4 flex items-center justify-between">
+        <Link to="/" className="flex items-center space-x-2">
+          <img
+            src="src\assets\images\logo.png"
+            alt="Koine logo"
+            className="h-20 w-auto"
+          />
+          <span className="text-xl font-bold">Koine</span>
         </Link>
 
-        <nav>
-          <ul className="nav__links">
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/allservice">Serivces</Link>
-            </li>
-            <li>
-              <Link to="/about">About Us</Link>
-            </li>
-            <li>
-              <Link to="/contact">Contact Us</Link>
-            </li>
-          </ul>
+        <nav className="hidden md:flex space-x-6">
+          {" "}
+          {/* Adjust space-x for horizontal gap */}
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link to="/" className="text-gray-600 hover:text-gray-900">
+              Home
+            </Link>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link to="/services" className="text-gray-600 hover:text-gray-900">
+              Services
+            </Link>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link to="/about-us" className="text-gray-600 hover:text-gray-900">
+              About Us
+            </Link>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link
+              to="/contact-us"
+              className="text-gray-600 hover:text-gray-900"
+            >
+              Contact Us
+            </Link>
+          </motion.div>
         </nav>
 
-        <Form className="search-bar-hd" onFinish={onSearch}>
-          <Form.Item>
-            <input type="text" placeholder="Search products..." />
-          </Form.Item>
-          <button>
-            <i className="bx bx-search-alt"></i>
-          </button>
-        </Form>
-
-        <div className="icons">
+        <div className="flex items-center space-x-2">
           {["Manager", "Staff"].includes(profile?.role) && (
-            <Link to="/admin" className="absolute text-xs">
-              <Gauge />
+            <Link to="/overview">
+              <Button variant="ghost" size="icon">
+                <Gauge className="h-5 w-5" />
+              </Button>
             </Link>
           )}
           {profile?.role === "Vet" && (
-            <Link to="/prescription" className="heart-icon">
-              <Pill />
+            <Link to="/prescription">
+              <Button variant="ghost" size="icon">
+                <Pill className="h-5 w-5" />
+              </Button>
             </Link>
           )}
-          <Link to="/favorites" className="heart-icon">
-            <Heart />
+          <Link to="/favorites">
+            <Button variant="ghost" size="icon">
+              <Heart className="h-5 w-5" />
+            </Button>
           </Link>
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
-                <Bell />
+                <Bell className="h-5 w-5" />
                 {notifications.length > 0 && (
                   <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500" />
                 )}
-                <span className="sr-only">Toggle notifications</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80">
@@ -161,8 +186,11 @@ function Header() {
                 <ScrollArea className="h-[300px]">
                   <div className="space-y-4">
                     {notifications.map((notification) => (
-                      <div
+                      <motion.div
                         key={notification.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
                         className="flex items-start space-x-4 rounded-md bg-muted p-3"
                       >
                         <div
@@ -186,7 +214,7 @@ function Header() {
                             Just now
                           </p>
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </ScrollArea>
@@ -194,63 +222,66 @@ function Header() {
             </PopoverContent>
           </Popover>
           {["Vet", "Customer"].includes(profile?.role) && (
-            <Link to="/schedulesV" className="cart-icon" data-count="2">
-              <CalendarCheck2 />
+            <Link to="/schedules">
+              <Button variant="ghost" size="icon">
+                <CalendarCheck2 className="h-5 w-5" />
+              </Button>
             </Link>
           )}
-
-          <div>
-            {isLoggedIn ? (
-              <div className="user-profile-dropdown">
-                <div className="user-icon">
-                  <Avatar className="bg-gray-500">
+          {isLoggedIn ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-2">
+                  <Avatar className="h-8 w-8">
                     <AvatarImage src={profile?.imageURL} alt="Profile" />
                     <AvatarFallback>
                       {profile?.firstName?.[0]}
                       {profile?.lastName?.[0]}
                     </AvatarFallback>
                   </Avatar>
-                  <i className="ion-chevron-down"></i>
-                  <ul className="dropdown-menu">
-                    <li>
-                      <Link to="/profile">
-                        <Button className="btn-view">
-                          <i className="bx bx-user-circle"></i>View Profile
-                        </Button>
-                      </Link>
-                    </li>
-                    <li>
-                      <Button className="btn-logout" onClick={handleLogout}>
-                        <i className="bx bxs-log-out-circle"></i>Logout
-                      </Button>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            ) : (
-              <div className="user-profile-dropdown">
-                <div className="user-icon">
-                  <i className="bx bx-user"></i>
-                  <i className="ion-chevron-down"></i>
-                  <ul className="dropdown-menu">
-                    <li>
-                      <Link to="/login">
-                        <Button>Login</Button>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/register#register-container">
-                        <Button>Register</Button>
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            )}
-          </div>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="w-full">
+                    <ImProfile className="text-blue-500" />
+                    View Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <TbLogout className="text-red-600" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-2">
+                  <User className="h-5 w-5" />
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/login" className="w-full">
+                    <TbLogin className="text-blue-500" />
+                    Login
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/register" className="w-full">
+                    <TbRegistered className="text-blue-500" />
+                    Register
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
-      </header>
-    </>
+      </div>
+    </motion.header>
   );
 }
 
