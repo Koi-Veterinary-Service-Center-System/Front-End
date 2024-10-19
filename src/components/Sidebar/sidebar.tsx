@@ -6,9 +6,9 @@ import {
   Settings,
   ShoppingBag,
   ShoppingCart,
-  TrendingUp,
   Users,
 } from "lucide-react";
+import { VscFeedback } from "react-icons/vsc";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -19,7 +19,12 @@ const SIDEBAR_ITEMS = [
   { name: "Users", icon: Users, color: "#EC4899", path: "/users" },
   { name: "Schedules", icon: Calendar, color: "#10B981", path: "/schedules" },
   { name: "Orders", icon: ShoppingCart, color: "#F59E0B", path: "/orders" },
-  { name: "Analytics", icon: TrendingUp, color: "#3B82F6", path: "/analytics" },
+  {
+    name: "FeedBack",
+    icon: VscFeedback,
+    color: "#3B82F6",
+    path: "/feedbackmanager",
+  },
   { name: "HomePage", icon: House, color: "#3B82F6", path: "/" },
   { name: "Settings", icon: Settings, color: "#6EE7B7", path: "/settings" },
 ];
@@ -43,6 +48,14 @@ const Sidebar = () => {
         >
           <Menu size={24} />
         </motion.button>
+
+        <motion.div>
+          <img
+            src="src/assets/images/logo.png"
+            alt="Logo"
+            className="w-full h-48"
+          />
+        </motion.div>
 
         {/* Navigation starts */}
         <nav className="mt-8 flex flex-col items-center flex-grow">

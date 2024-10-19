@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   AreaChart,
@@ -10,19 +10,39 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import api from "@/configs/axios";
 
-const revenueData = [
-  { month: "Jan", revenue: 4000, target: 3800 },
-  { month: "Feb", revenue: 3000, target: 3200 },
-  { month: "Mar", revenue: 5000, target: 4500 },
-  { month: "Apr", revenue: 4500, target: 4200 },
-  { month: "May", revenue: 6000, target: 5500 },
-  { month: "Jun", revenue: 5500, target: 5800 },
-  { month: "Jul", revenue: 7000, target: 6500 },
-];
-
-const RevenueChart = () => {
+const FeedbackChart = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState("This Month");
+  const [feedbackData, setFeedbackData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchFeedbackData = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get("/Feedback/all-feedback", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+
+      // Chuyển đổi dữ liệu từ API thành dạng dùng cho biểu đồ
+      const transformedData = response.data.map((item: any) => ({
+        name: item.customerName, // Giả sử dùng 'customerName' làm trục X
+        rate: item.rate, // 'rate' làm dữ liệu hiển thị
+        comments: item.comments, // Thêm vào cho phần tooltip nếu cần
+      }));
+
+      setFeedbackData(transformedData);
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFeedbackData();
+  }, []);
 
   return (
     <motion.div
@@ -33,7 +53,7 @@ const RevenueChart = () => {
     >
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-100">
-          Revenue vs Target
+          Feedback vs Service
         </h2>
         <select
           className="bg-gray-700 text-white rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -47,38 +67,39 @@ const RevenueChart = () => {
         </select>
       </div>
 
-      <div style={{ width: "100%", height: 400 }}>
-        <ResponsiveContainer>
-          <AreaChart data={revenueData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey="month" stroke="#9CA3AF" />
-            <YAxis stroke="#9CA3AF" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "rgba(31, 41, 55, 0.8)",
-                borderColor: "#4B5563",
-              }}
-              itemStyle={{ color: "#E5E7EB" }}
-            />
-            <Legend />
-            <Area
-              type="monotone"
-              dataKey="revenue"
-              stroke="#8B5CF6"
-              fill="#8B5CF6"
-              fillOpacity={0.3}
-            />
-            <Area
-              type="monotone"
-              dataKey="target"
-              stroke="#10B981"
-              fill="#10B981"
-              fillOpacity={0.3}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      {loading ? (
+        <p className="text-gray-100">Loading...</p>
+      ) : error ? (
+        <p className="text-red-500">Error: {error}</p>
+      ) : (
+        <div style={{ width: "100%", height: 400 }}>
+          <ResponsiveContainer>
+            <AreaChart data={feedbackData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis dataKey="name" stroke="#9CA3AF" />
+              <YAxis stroke="#9CA3AF" domain={[0, 5]} />{" "}
+              {/* Giới hạn từ 0-5 cho rate */}
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "rgba(31, 41, 55, 0.8)",
+                  borderColor: "#4B5563",
+                }}
+                itemStyle={{ color: "#E5E7EB" }}
+              />
+              <Legend />
+              <Area
+                type="monotone"
+                dataKey="rate"
+                stroke="#8B5CF6"
+                fill="#8B5CF6"
+                fillOpacity={0.3}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </motion.div>
   );
 };
-export default RevenueChart;
+
+export default FeedbackChart;

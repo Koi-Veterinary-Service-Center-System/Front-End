@@ -142,7 +142,7 @@ function App() {
           }
         />
         <Route
-          path="/analytics"
+          path="/feedbackmanager"
           element={
             <PrivateRoute requiredRoles={["Manager", "Staff"]}>
               <AnalyticsPage />
