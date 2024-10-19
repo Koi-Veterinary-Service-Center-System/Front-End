@@ -20,7 +20,7 @@ const fadeIn = {
 
 export default function AboutUs() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-green-100 mt-16">
+    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-green-100">
       <Header />
 
       <main className="container mx-auto px-4">
