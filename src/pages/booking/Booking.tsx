@@ -26,6 +26,7 @@ import { LuFish } from "react-icons/lu";
 import { motion } from "framer-motion";
 import TextArea from "antd/es/input/TextArea";
 import { useNavigate } from "react-router-dom";
+import { ReactComponent as MedicineIcon } from "../../assets/images/undraw_medicine_b-1-ol.svg";
 
 const { Option } = Select;
 
@@ -290,6 +291,19 @@ function Booking() {
     <div className="mt-5">
       <Header />
       <div ref={bookingRef} id="booking" className="bg-white py-12 px-6">
+        <motion.div
+          initial={{ opacity: 0, x: -100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1 }}
+          className="flex-1 mb-8 sm:mb-0"
+        >
+          <img
+            src="src/assets/images/undraw_medicine_b-1-ol.svg"
+            alt="Medicine Icon"
+            className="w-32 h-32 mx-auto"
+          />
+        </motion.div>
+
         <motion.div
           className="max-w-4xl mx-auto bg-gray-50 shadow-lg rounded-lg p-8"
           initial={{ opacity: 0, scale: 0.8 }}

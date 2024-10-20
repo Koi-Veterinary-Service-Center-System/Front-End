@@ -19,6 +19,7 @@ import {
   DollarSign,
   Loader2,
   Activity,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -136,6 +137,12 @@ const Process = () => {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
     null
   );
+  const backgroundStyle = {
+    backgroundImage: "url('src/assets/images/subtle-prism.png')", // Add the path to your image here
+    backgroundSize: "cover", // Makes the background cover the entire area
+    backgroundPosition: "center", // Centers the background
+    backgroundRepeat: "no-repeat", // Ensures the image doesn't repeat
+  };
 
   // Fetch all booking and calculate totals
   // Fetch all booking and calculate totals based on the user's role
@@ -390,19 +397,22 @@ const Process = () => {
               </li>
             </ul>
           </nav>
-          <div className="absolute bottom-4 left-4">
+          <div className="absolute bottom-6 left-6">
             <Button
-              variant="outline"
-              className="w-full"
+              variant="default"
+              size="lg"
+              className="w-full shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center"
               onClick={() => window.history.back()}
+              aria-label="Go back to previous page"
             >
-              <ChevronLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Back
             </Button>
           </div>
         </motion.aside>
 
-        <main className="flex-1">
-          <header className="bg-white dark:bg-gray-800 shadow">
+        <main className="flex-1" style={backgroundStyle}>
+          <header className=" dark:bg-gray-800 shadow bg-gradient-to-br from-blue-50 to-blue-400">
             <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Services

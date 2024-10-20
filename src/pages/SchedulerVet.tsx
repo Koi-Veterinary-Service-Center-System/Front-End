@@ -8,6 +8,7 @@ import {
 import { motion } from "framer-motion";
 import api from "@/configs/axios";
 import { Link } from "react-router-dom";
+import { vetSlots } from "@/types/info"; // Ensure vetSlots type is correctly defined
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const timeSlots = [
@@ -23,9 +24,8 @@ const timeSlots = [
 
 export default function VetCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 10)); // January 10, 2024
-  const [events, setEvents] = useState([]); // Store data from API
+  const [events, setEvents] = useState<vetSlots[]>([]); // Ensure proper typing
 
-  // Fetch data from the API
   useEffect(() => {
     const fetchVet = async () => {
       try {
@@ -35,27 +35,25 @@ export default function VetCalendar() {
           },
         });
 
-        const data = response.data
-          .map((item) => {
-            const dayOfWeekMap = {
-              Sunday: 0,
-              Monday: 1,
-              Tuesday: 2,
-              Wednesday: 3,
-              Thursday: 4,
-              Friday: 5,
-              Saturday: 6,
-            };
+        const dayOfWeekMap: Record<string, number> = {
+          Sunday: 0,
+          Monday: 1,
+          Tuesday: 2,
+          Wednesday: 3,
+          Thursday: 4,
+          Friday: 5,
+          Saturday: 6,
+        };
 
-            // Validate slotStartTime and slotEndTime
+        const data = response.data
+          .map((item: vetSlots) => {
             if (!item.slotStartTime || !item.slotEndTime) {
               console.warn(
                 `Missing slot times for item with ID: ${item.slotID}`
               );
-              return null; // Skip this item
+              return null; // Skip this item if missing times
             }
 
-            // Determine the event date based on `weekDate`
             const eventDate = new Date(currentDate);
             eventDate.setDate(
               eventDate.getDate() -
@@ -63,7 +61,6 @@ export default function VetCalendar() {
                 dayOfWeekMap[item.weekDate]
             );
 
-            // Set hours and minutes for start and end times
             const [startHour, startMinute] = item.slotStartTime.split(":");
             const [endHour, endMinute] = item.slotEndTime.split(":");
 
@@ -82,18 +79,18 @@ export default function VetCalendar() {
               slotEndTime: item.slotEndTime,
             };
           })
-          .filter(Boolean); // Remove any null values from skipped items
+          .filter(Boolean); // Filter out null values
 
-        setEvents(data); // Update events state
+        setEvents(data as vetSlots[]); // Use type assertion
       } catch (error) {
         console.error("Error fetching schedule data:", error);
       }
     };
 
     fetchVet();
-  }, [currentDate]); // Reload when `currentDate` changes to update data for the new week
+  }, [currentDate]);
 
-  const getStartOfWeek = (date) => {
+  const getStartOfWeek = (date: Date): Date => {
     const start = new Date(date);
     start.setDate(date.getDate() - date.getDay());
     return start;
@@ -101,7 +98,7 @@ export default function VetCalendar() {
 
   const startOfWeek = getStartOfWeek(currentDate);
 
-  const formatDate = (date) => {
+  const formatDate = (date: Date): string => {
     return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   };
 
@@ -127,8 +124,7 @@ export default function VetCalendar() {
     setCurrentDate(nextWeek);
   };
 
-  // Check if there’s an event for a given day and time slot
-  const getEventForSlot = (day, time) => {
+  const getEventForSlot = (day: Date, time: string) => {
     const [timeHour] = time.split(" ");
     const hour = parseInt(timeHour);
     const event = events.find(

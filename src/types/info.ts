@@ -48,7 +48,7 @@ export type Distance = {
 
 export type vetSlots = {
   isBook: boolean;
-  slotID: string;
+  slotID: number;
   slotStartTime: string; // Set as string for any valid time format
   slotEndTime: string; // Similarly set as string
   weekDate: string; // Set as string to allow various days

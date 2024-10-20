@@ -14,6 +14,7 @@ import {
   Pill,
   RefreshCw,
   User,
+  User2Icon,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -222,7 +223,7 @@ function Header() {
             </PopoverContent>
           </Popover>
           {["Vet", "Customer"].includes(profile?.role) && (
-            <Link to="/schedules">
+            <Link to="/scheduleV">
               <Button variant="ghost" size="icon">
                 <CalendarCheck2 className="h-5 w-5" />
               </Button>
@@ -232,26 +233,43 @@ function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2">
-                  <Avatar className="h-8 w-8">
+                  <Avatar className="h-12 w-12">
+                    {" "}
+                    {/* Increased size */}
                     <AvatarImage src={profile?.imageURL} alt="Profile" />
-                    <AvatarFallback>
+                    <AvatarFallback className="text-lg">
+                      {" "}
+                      {/* Larger fallback text */}
                       {profile?.firstName?.[0]}
                       {profile?.lastName?.[0]}
                     </AvatarFallback>
                   </Avatar>
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-6 w-6" /> {/* Increased size */}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent
+                align="end"
+                className="p-4 space-y-2 text-lg"
+              >
+                {" "}
+                {/* Increased padding and text size */}
                 <DropdownMenuItem asChild>
-                  <Link to="/profile" className="w-full">
-                    <ImProfile className="text-blue-500" />
-                    View Profile
+                  <Link
+                    to="/profile"
+                    className="flex items-center space-x-2 w-full"
+                  >
+                    <ImProfile className="text-blue-500 h-6 w-6" />{" "}
+                    {/* Increased icon size */}
+                    <span>View Profile</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>
-                  <TbLogout className="text-red-600" />
-                  Logout
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2 hover:bg-red-100 hover:text-red-600"
+                >
+                  <TbLogout className="text-red-600 h-6 w-6" />{" "}
+                  {/* Increased icon size */}
+                  <span>Logout</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -259,21 +277,34 @@ function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2">
-                  <User className="h-5 w-5" />
-                  <ChevronDown className="h-4 w-4" />
+                  <User2Icon className="h-6 w-6" /> {/* Increased size */}
+                  <ChevronDown className="h-6 w-6" /> {/* Increased size */}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent
+                align="end"
+                className="p-4 space-y-2 text-lg"
+              >
+                {" "}
+                {/* Increased padding and text size */}
                 <DropdownMenuItem asChild>
-                  <Link to="/login" className="w-full">
-                    <TbLogin className="text-blue-500" />
-                    Login
+                  <Link
+                    to="/login"
+                    className="flex items-center space-x-2 w-full"
+                  >
+                    <TbLogin className="text-blue-500 h-6 w-6" />{" "}
+                    {/* Increased icon size */}
+                    <span>Login</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/register" className="w-full">
-                    <TbRegistered className="text-blue-500" />
-                    Register
+                  <Link
+                    to="/register"
+                    className="flex items-center space-x-2 w-full"
+                  >
+                    <TbRegistered className="text-blue-500 h-6 w-6" />{" "}
+                    {/* Increased icon size */}
+                    <span>Register</span>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
