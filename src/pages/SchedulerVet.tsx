@@ -8,7 +8,18 @@ import {
 import { motion } from "framer-motion";
 import api from "@/configs/axios";
 import { Link } from "react-router-dom";
-import { vetSlots } from "@/types/info"; // Ensure vetSlots type is correctly defined
+
+// Cấu trúc dữ liệu 'vetSlots' dựa trên dữ liệu API trả về
+interface VetSlot {
+  slotID: number;
+  slotStartTime: string;
+  slotEndTime: string;
+  weekDate: string;
+  vetID: string;
+  vetName: string;
+  vetFirstName: string;
+  vetLastName: string;
+}
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const timeSlots = [
@@ -24,7 +35,7 @@ const timeSlots = [
 
 export default function VetCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 10)); // January 10, 2024
-  const [events, setEvents] = useState<vetSlots[]>([]); // Ensure proper typing
+  const [events, setEvents] = useState<VetSlot[]>([]);
 
   useEffect(() => {
     const fetchVet = async () => {
@@ -34,6 +45,8 @@ export default function VetCalendar() {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
+
+        console.log("API Response:", response.data); // Ghi log để kiểm tra dữ liệu
 
         const dayOfWeekMap: Record<string, number> = {
           Sunday: 0,
@@ -46,12 +59,12 @@ export default function VetCalendar() {
         };
 
         const data = response.data
-          .map((item: vetSlots) => {
+          .map((item: VetSlot) => {
             if (!item.slotStartTime || !item.slotEndTime) {
               console.warn(
                 `Missing slot times for item with ID: ${item.slotID}`
               );
-              return null; // Skip this item if missing times
+              return null; // Bỏ qua nếu thiếu dữ liệu thời gian
             }
 
             const eventDate = new Date(currentDate);
@@ -79,9 +92,10 @@ export default function VetCalendar() {
               slotEndTime: item.slotEndTime,
             };
           })
-          .filter(Boolean); // Filter out null values
+          .filter(Boolean); // Bỏ qua các giá trị null
 
-        setEvents(data as vetSlots[]); // Use type assertion
+        setEvents(data as VetSlot[]); // Kiểu xác định cho dữ liệu
+        console.log(data);
       } catch (error) {
         console.error("Error fetching schedule data:", error);
       }

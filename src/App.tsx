@@ -10,7 +10,6 @@ import OverviewPage from "./pages/OverviewPage/overView";
 import Service from "./pages/ServicePage/service";
 import UsersPage from "./pages/UsersManagePage/Users";
 import SchedulesMPage from "./pages/SchedulesMPage/SchedulesMPage";
-import SchedulesV from "./pages/SchedulerVet";
 import AllService from "./pages/AllService/allService";
 import ErrorBoundary from "./errorBoudary";
 import { registerLicense } from "@syncfusion/ej2-base";
@@ -29,6 +28,7 @@ import AboutUs from "./pages/About Us/aboutUs";
 import ContactUs from "./pages/Contact Us/contactUs";
 import PaymentSuccessful from "./pages/SuccessPayment/paymentSuccess";
 import PaymentFailed from "./pages/FailedPayment/failedPayment";
+import VetCalendar from "./pages/SchedulerVet";
 
 // Add your license key here
 registerLicense("Your_License_Key_Here");
@@ -169,7 +169,7 @@ function App() {
           path="/schedulesV"
           element={
             <PrivateRoute requiredRoles={["Vet", "Customer"]}>
-              <SchedulesV />
+              <VetCalendar />
             </PrivateRoute>
           }
         />

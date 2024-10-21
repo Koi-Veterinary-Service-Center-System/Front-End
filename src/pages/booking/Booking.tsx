@@ -217,8 +217,8 @@ function Booking() {
       (service) => service.serviceID === form.getFieldValue("serviceType")
     );
     if (selectedService) {
-      const totalAmount = selectedService.price; // Adjust based on requirements
-      setTotal(totalAmount);
+      const initAmount = selectedService.price; // Adjust based on requirements
+      setTotal(initAmount);
     }
   };
 
@@ -243,7 +243,7 @@ function Booking() {
         note: values.note || "",
         koiOrPoolId: values.koiOrPoolId || null,
         vetName: form.getFieldValue("vetName") || "",
-        totalAmount: total,
+        initAmount: total,
         location: fullLocation, // Use the combined location here
         slotId: values.slot || 0,
         serviceId: values.serviceType || 0,
@@ -278,8 +278,8 @@ function Booking() {
     );
 
     if (selectedService && selectedDistance) {
-      const totalAmount = selectedService.price + selectedDistance.price; // Adjust based on requirements
-      setTotal(totalAmount);
+      const initAmount = selectedService.price + selectedDistance.price; // Adjust based on requirements
+      setTotal(initAmount);
     } else if (selectedService) {
       setTotal(selectedService.price);
     } else {

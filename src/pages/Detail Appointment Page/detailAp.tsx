@@ -3,7 +3,6 @@ import {
   Calendar,
   Clock,
   MapPin,
-  Phone,
   User,
   Fish,
   Search,
@@ -49,7 +48,6 @@ import api from "@/configs/axios";
 import { Booking } from "@/types/info";
 
 const prescriptionSchema = z.object({
-  bookingID: z.string().optional(),
   diseaseName: z.string().min(1, "Disease name is required"),
   symptoms: z.string().min(1, "Symptoms are required"),
   medication: z.string().min(1, "Medication is required"),
@@ -66,12 +64,14 @@ export default function Component() {
   const [selectedBookingID, setSelectedBookingID] = useState<string | null>(
     null
   );
+  const [selectedPresRecID, setSelectedPresRecID] = useState<number | null>(
+    null
+  ); // Lưu presRecID để update đơn thuốc
   const [loading, setLoading] = useState(true);
 
   const form = useForm<PrescriptionForm>({
     resolver: zodResolver(prescriptionSchema),
     defaultValues: {
-      bookingID: "",
       diseaseName: "",
       symptoms: "",
       medication: "",
@@ -100,7 +100,11 @@ export default function Component() {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
             });
-            return { ...appointment, hasPrescription: !!prescription.data };
+            return {
+              ...appointment,
+              hasPrescription: !!prescription.data,
+              presRecID: prescription.data.id, // Lưu presRecID để sử dụng khi cần update
+            };
           } catch (error) {
             return { ...appointment, hasPrescription: false };
           }
@@ -115,7 +119,7 @@ export default function Component() {
     }
   };
 
-  const fetchPrescription = async (bookingID: string) => {
+  const fetchPrescription = async (bookingID: string, presRecID: number) => {
     try {
       const response = await api.get(`/pres-rec/${bookingID}`, {
         headers: {
@@ -124,6 +128,7 @@ export default function Component() {
       });
       const prescriptionData = response.data;
       form.reset(prescriptionData);
+      setSelectedPresRecID(presRecID); // Lưu presRecID khi load đơn thuốc
     } catch (error) {
       console.error("Failed to fetch prescription:", error);
       toast.error("Failed to load prescription data.");
@@ -134,12 +139,29 @@ export default function Component() {
     fetchAppointments();
   }, []);
 
-  const handleStatusChange = async (bookingID: string, newStatus: string) => {
+  const statusOrder = ["On Going", "Completed", "Received_Money"]; // Thứ tự các trạng thái
+
+  const handleStatusChange = async (
+    bookingID: string,
+    newStatus: string,
+    currentStatus: string
+  ) => {
+    const currentStatusIndex = statusOrder.indexOf(currentStatus);
+    const newStatusIndex = statusOrder.indexOf(newStatus);
+
+    // Kiểm tra nếu trạng thái mới nằm trước trạng thái hiện tại (không cho phép)
+    if (newStatusIndex <= currentStatusIndex) {
+      toast.error("You cannot move to a previous status.");
+      return;
+    }
+
     let endpoint = "";
 
     if (newStatus === "On Going") {
-      endpoint = `/booking/complete/${bookingID}`;
+      endpoint = `/booking/ongoing/${bookingID}`;
     } else if (newStatus === "Completed") {
+      endpoint = `/booking/complete/${bookingID}`;
+    } else if (newStatus === "Received_Money") {
       endpoint = `/booking/receive-money/${bookingID}`;
     } else {
       console.error("Invalid status:", newStatus);
@@ -157,20 +179,33 @@ export default function Component() {
       toast.success(`Appointment status updated successfully to ${newStatus}`);
     } catch (error) {
       console.error("Failed to update status:", error);
-      toast.error("Failed to update appointment status.");
+      toast.error(error.response.data);
     }
   };
 
-  const handleAddPrescription = async (values: PrescriptionForm) => {
+  const handleUpdatePrescription = async (values: PrescriptionForm) => {
     try {
-      await api.post("/pres-rec/create-presRec", values);
+      if (selectedPresRecID) {
+        // Cập nhật đơn thuốc
+        await api.put(`/pres-rec/update-presRec/${selectedPresRecID}`, {
+          ...values,
+        });
+        toast.success("Prescription updated successfully!");
+      } else {
+        // Tạo mới đơn thuốc
+        await api.post("/pres-rec/create-presRec", {
+          ...values,
+          bookingID: selectedBookingID,
+        });
+        toast.success("Prescription added successfully!");
+      }
+
       setOpen(false);
       form.reset();
-      toast.success("Prescription added successfully!");
       fetchAppointments();
     } catch (error) {
-      console.error("Failed to create prescription:", error);
-      toast.error("Failed to create prescription.");
+      console.error("Failed to update or create prescription:", error);
+      toast.error("Failed to update or create prescription.");
     }
   };
 
@@ -362,7 +397,10 @@ export default function Component() {
                             isOpen ? appointment.bookingID : null
                           );
                           if (isOpen && appointment.hasPrescription) {
-                            fetchPrescription(appointment.bookingID);
+                            fetchPrescription(
+                              appointment.bookingID,
+                              appointment.presRecID
+                            );
                           } else {
                             form.reset(); // Reset form cho trường hợp không có đơn thuốc
                           }
@@ -395,26 +433,10 @@ export default function Component() {
                           <Form {...form}>
                             <form
                               onSubmit={form.handleSubmit(
-                                handleAddPrescription
+                                handleUpdatePrescription
                               )}
                             >
                               <div className="grid gap-4 py-4">
-                                <FormField
-                                  control={form.control}
-                                  name="bookingID"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Booking ID</FormLabel>
-                                      <FormControl>
-                                        <Input
-                                          {...field}
-                                          placeholder="Booking ID"
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
                                 <FormField
                                   control={form.control}
                                   name="diseaseName"
@@ -515,7 +537,11 @@ export default function Component() {
                                 />
                               </div>
                               <DialogFooter>
-                                <Button type="submit">Save Prescription</Button>
+                                <Button type="submit">
+                                  {selectedPresRecID
+                                    ? "Update Prescription"
+                                    : "Save Prescription"}
+                                </Button>
                               </DialogFooter>
                             </form>
                           </Form>
@@ -524,8 +550,12 @@ export default function Component() {
                       <div className="flex justify-end space-x-4 mt-0">
                         <Select
                           onValueChange={(value) =>
-                            handleStatusChange(appointment.bookingID, value)
-                          }
+                            handleStatusChange(
+                              appointment.bookingID,
+                              value,
+                              appointment.bookingStatus
+                            )
+                          } // Thêm trạng thái hiện tại
                           defaultValue={appointment.bookingStatus}
                         >
                           <SelectTrigger>
@@ -534,7 +564,7 @@ export default function Component() {
                           <SelectContent>
                             <SelectItem value="On Going">On Going</SelectItem>
                             <SelectItem value="Completed">Completed</SelectItem>
-                            <SelectItem value="Receive Money">
+                            <SelectItem value="Received_Money">
                               Receive Money
                             </SelectItem>
                           </SelectContent>

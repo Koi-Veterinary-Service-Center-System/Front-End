@@ -8,12 +8,10 @@ import {
   Bell,
   CalendarCheck2,
   Check,
-  ChevronDown,
   Gauge,
   Heart,
   Pill,
   RefreshCw,
-  User,
   User2Icon,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -41,6 +39,10 @@ function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
   const [profile, setProfile] = useState<profile | null>(null);
   const [isLoading, setLoading] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const handleMouseEnter = () => setIsMenuOpen(true);
+  const handleMouseLeave = () => setIsMenuOpen(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token"); // Get the token from localStorage
@@ -223,43 +225,44 @@ function Header() {
             </PopoverContent>
           </Popover>
           {["Vet", "Customer"].includes(profile?.role) && (
-            <Link to="/scheduleV">
+            <Link to="/schedulesV">
               <Button variant="ghost" size="icon">
                 <CalendarCheck2 className="h-5 w-5" />
               </Button>
             </Link>
           )}
           {isLoggedIn ? (
-            <DropdownMenu>
+            <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  className="flex items-center space-x-2"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
                   <Avatar className="h-12 w-12">
-                    {" "}
-                    {/* Increased size */}
                     <AvatarImage src={profile?.imageURL} alt="Profile" />
                     <AvatarFallback className="text-lg">
-                      {" "}
-                      {/* Larger fallback text */}
                       {profile?.firstName?.[0]}
                       {profile?.lastName?.[0]}
                     </AvatarFallback>
                   </Avatar>
-                  <ChevronDown className="h-6 w-6" /> {/* Increased size */}
+                  {/* Removed Chevron Icon */}
                 </Button>
               </DropdownMenuTrigger>
+
               <DropdownMenuContent
                 align="end"
                 className="p-4 space-y-2 text-lg"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
               >
-                {" "}
-                {/* Increased padding and text size */}
                 <DropdownMenuItem asChild>
                   <Link
                     to="/profile"
                     className="flex items-center space-x-2 w-full"
                   >
-                    <ImProfile className="text-blue-500 h-6 w-6" />{" "}
-                    {/* Increased icon size */}
+                    <ImProfile className="text-blue-500 h-6 w-6" />
                     <span>View Profile</span>
                   </Link>
                 </DropdownMenuItem>
@@ -267,33 +270,37 @@ function Header() {
                   onClick={handleLogout}
                   className="flex items-center space-x-2 hover:bg-red-100 hover:text-red-600"
                 >
-                  <TbLogout className="text-red-600 h-6 w-6" />{" "}
-                  {/* Increased icon size */}
+                  <TbLogout className="text-red-600 h-6 w-6" />
                   <span>Logout</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <DropdownMenu>
+            <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2">
-                  <User2Icon className="h-6 w-6" /> {/* Increased size */}
-                  <ChevronDown className="h-6 w-6" /> {/* Increased size */}
+                <Button
+                  variant="ghost"
+                  className="flex items-center space-x-2"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  <User2Icon className="h-6 w-6" />
+                  {/* Removed Chevron Icon */}
                 </Button>
               </DropdownMenuTrigger>
+
               <DropdownMenuContent
                 align="end"
                 className="p-4 space-y-2 text-lg"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
               >
-                {" "}
-                {/* Increased padding and text size */}
                 <DropdownMenuItem asChild>
                   <Link
                     to="/login"
                     className="flex items-center space-x-2 w-full"
                   >
-                    <TbLogin className="text-blue-500 h-6 w-6" />{" "}
-                    {/* Increased icon size */}
+                    <TbLogin className="text-blue-500 h-6 w-6" />
                     <span>Login</span>
                   </Link>
                 </DropdownMenuItem>
@@ -302,8 +309,7 @@ function Header() {
                     to="/register"
                     className="flex items-center space-x-2 w-full"
                   >
-                    <TbRegistered className="text-blue-500 h-6 w-6" />{" "}
-                    {/* Increased icon size */}
+                    <TbRegistered className="text-blue-500 h-6 w-6" />
                     <span>Register</span>
                   </Link>
                 </DropdownMenuItem>

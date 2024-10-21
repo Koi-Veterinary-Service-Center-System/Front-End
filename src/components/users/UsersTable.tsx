@@ -56,6 +56,18 @@ const UsersTable = () => {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const getRoleBadgeClass = (role: string) => {
+    switch (role) {
+      case "Staff":
+        return "bg-red-800 text-red-100";
+      case "Manager":
+        return "bg-yellow-800 text-yellow-100";
+      case "Customer":
+        return "bg-green-800 text-green-100";
+      case "Vet":
+        return "bg-blue-800 text-blue-100";
+    }
+  };
 
   const form = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
@@ -439,7 +451,11 @@ const UsersTable = () => {
                       <div className="text-sm text-gray-300">{user.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-800 text-blue-100">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleBadgeClass(
+                          user.role
+                        )}`}
+                      >
                         {user.role}
                       </span>
                     </td>

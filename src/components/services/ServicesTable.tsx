@@ -60,6 +60,25 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
   const [isEditMode, setIsEditMode] = useState(false); // Để xác định chế độ
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteServiceID, setDeleteServiceID] = useState<number | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+
+      try {
+        const response = await api.get("/User/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to request headers
+          },
+        });
+        setProfile(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   // Setup react-hook-form with Zod schema validation
   const form = useForm<ServiceFormData>({
@@ -190,10 +209,12 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
           />
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
         </div>
-        <ShimmerButton onClick={handleAdd}>
-          <PlusCircle className="mr-2" />
-          Add Service
-        </ShimmerButton>
+        {profile?.role === "Staff" && (
+          <ShimmerButton onClick={handleAdd}>
+            <PlusCircle className="mr-2" />
+            Add Service
+          </ShimmerButton>
+        )}
       </div>
 
       <div className="overflow-x-auto">

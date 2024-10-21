@@ -50,6 +50,7 @@ export default function FeedbackForm() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [countdown, setCountdown] = useState(5); // Đếm ngược từ 5 giây
 
   const containerVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -94,11 +95,18 @@ export default function FeedbackForm() {
   // Trigger confetti effect when submitted state changes to true
   useEffect(() => {
     if (submitted) {
-      const timer = setTimeout(() => {
-        navigate("/"); // Redirect to home page after 10 seconds
+      const timerInterval = setInterval(() => {
+        setCountdown((prev) => prev - 1); // Giảm bộ đếm mỗi giây
+      }, 1000);
+
+      const redirectTimer = setTimeout(() => {
+        navigate("/"); // Chuyển về trang chủ sau khi đếm ngược kết thúc
       }, 5000);
 
-      return () => clearTimeout(timer); // Clear the timer if the component unmounts
+      return () => {
+        clearInterval(timerInterval); // Xóa interval khi unmount
+        clearTimeout(redirectTimer); // Xóa timeout khi unmount
+      };
     }
   }, [submitted, navigate]);
 
@@ -132,7 +140,7 @@ export default function FeedbackForm() {
               Your input helps us improve our services.
             </p>
             <p className="mt-4 text-sm text-gray-500">
-              Redirecting to the homepage in 10 seconds...
+              Redirecting to the homepage in {countdown} seconds...
             </p>
           </CardContent>
         </Card>

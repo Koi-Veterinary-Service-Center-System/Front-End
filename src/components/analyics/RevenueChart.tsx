@@ -34,7 +34,7 @@ const FeedbackChart = () => {
 
       setFeedbackData(transformedData);
     } catch (error: any) {
-      setError(error.message);
+      setError(error.response.data);
     } finally {
       setLoading(false);
     }
@@ -70,7 +70,7 @@ const FeedbackChart = () => {
       {loading ? (
         <p className="text-gray-100">Loading...</p>
       ) : error ? (
-        <p className="text-red-500">Error: {error}</p>
+        <p className="text-blue-500">{error}</p>
       ) : (
         <div style={{ width: "100%", height: 400 }}>
           <ResponsiveContainer>

@@ -17,8 +17,8 @@ export default function PaymentSuccessful() {
   console.log("Booking ID from URL:", bookingID);
 
   const bookingDetails = {
-    service: "Annual Check-up",
-    date: "April 15, 2024",
+    service: "An Check-up",
+    date: "April 21, 2024",
     time: "2:30 PM",
     petName: "Goldie",
   };
@@ -99,26 +99,6 @@ export default function PaymentSuccessful() {
             <motion.p className="text-lg mb-6" variants={itemVariants}>
               Thank you for booking with Koi Veterinary Services
             </motion.p>
-            <div className="space-y-4">
-              {[
-                { icon: Calendar, label: "Date", value: bookingDetails.date },
-                { icon: Clock, label: "Time", value: bookingDetails.time },
-                { icon: FishIcon, label: "Koi", value: bookingDetails.petName },
-                { icon: null, label: "Service", value: bookingDetails.service },
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="flex items-center justify-between"
-                  variants={itemVariants}
-                >
-                  <span className="flex items-center text-gray-600">
-                    {item.icon && <item.icon className="mr-2 h-5 w-5" />}
-                    {item.label}:
-                  </span>
-                  <span className="font-semibold">{item.value}</span>
-                </motion.div>
-              ))}
-            </div>
           </CardContent>
           <CardFooter className="flex justify-center">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

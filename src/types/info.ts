@@ -69,7 +69,7 @@ export type Booking = {
   bookingDate: string;
   location: string;
   note: string;
-  totalAmount: number;
+  initAmount: number;
   bookingStatus: string;
   meetURL: string | null;
   paymentID: number;
