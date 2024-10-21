@@ -4,15 +4,65 @@ import HeaderAd from "@/components/common/header";
 import StatCard from "@/components/common/StatCard";
 import OrdersTable from "@/components/BookingManager/BookingTable";
 import Sidebar from "@/components/Sidebar/sidebar";
-
-const orderStats = {
-  totalOrders: "1,234",
-  pendingOrders: "56",
-  completedOrders: "1,178",
-  totalRevenue: "$98,765",
-};
+import { useEffect, useState } from "react";
+import api from "../../configs/axios";
+import { Booking } from "@/types/info";
 
 const BookMPage = () => {
+  const [orderStats, setOrderStats] = useState({
+    totalOrders: "0",
+    pendingOrders: "0",
+    completedOrders: "0",
+    ongoingOrders: "0",
+    cancelledOrders: "0",
+    totalRevenue: "$0",
+  });
+
+  const fetchBookingData = async () => {
+    try {
+      const response = await api.get<Booking[]>(
+        "http://localhost:5155/api/booking/all-booking"
+      );
+      const bookings = response.data;
+
+      // Tính toán tổng số booking theo trạng thái
+      const totalOrders = bookings.length;
+      const pendingOrders = bookings.filter(
+        (b: Booking) => b.bookingStatus === "Pending"
+      ).length;
+      const completedOrders = bookings.filter(
+        (b: Booking) => b.bookingStatus === "Completed"
+      ).length;
+      const ongoingOrders = bookings.filter(
+        (b: Booking) => b.bookingStatus === "Ongoing"
+      ).length;
+      const cancelledOrders = bookings.filter(
+        (b: Booking) => b.bookingStatus === "Cancelled"
+      ).length;
+
+      // Tính tổng doanh thu
+      const totalRevenue = bookings.reduce(
+        (acc: number, b: Booking) => acc + b.initAmount,
+        0
+      );
+
+      setOrderStats({
+        totalOrders,
+        pendingOrders,
+        completedOrders,
+        ongoingOrders,
+        cancelledOrders,
+        totalRevenue: `$${totalRevenue.toLocaleString()}`,
+      });
+    } catch (error) {
+      console.error("Failed to fetch booking data", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookingData();
+  }, []);
+
   return (
     <div className="flex h-screen bg-gray-900 text-gray-100 overflow-hidden">
       <div className="fixed inset-0 z-0">
@@ -58,7 +108,7 @@ const BookMPage = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             {/* <DailyOrders />
-          <OrderDistribution /> */}
+            <OrderDistribution /> */}
           </div>
 
           <OrdersTable />
@@ -67,4 +117,5 @@ const BookMPage = () => {
     </div>
   );
 };
+
 export default BookMPage;

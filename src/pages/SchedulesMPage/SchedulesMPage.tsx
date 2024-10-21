@@ -1,48 +1,40 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Edit, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Button, Modal, Form, Input, Select, TimePicker } from "antd";
 import { format, addDays, startOfWeek, subWeeks, addWeeks } from "date-fns";
 import api from "@/configs/axios";
 import Sidebar from "@/components/Sidebar/sidebar";
 import HeaderAd from "@/components/common/header";
 import { toast } from "sonner";
 import { Vet } from "@/types/info";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css"; // Import CSS cho date-picker
+import dayjs from "dayjs";
 
 interface Slot {
   id: string;
   day: string;
   task: string;
   vetId: string;
-  startTime: Date; // Thay đổi kiểu dữ liệu startTime thành Date
-  endTime: Date; // Thay đổi kiểu dữ liệu endTime thành Date
+  startTime: Date;
+  endTime: Date;
   weekDate: string;
 }
 
 export default function SchedulePage() {
   const [slots, setSlots] = useState<Slot[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [vets, setVets] = useState<Vet[]>([]);
   const [currentSlot, setCurrentSlot] = useState<Slot | null>(null);
   const [currentWeekStart, setCurrentWeekStart] = useState(
     startOfWeek(new Date())
   );
+  const [form] = Form.useForm();
 
   const weekDays = Array.from({ length: 7 }, (_, i) =>
     addDays(currentWeekStart, i)
   );
 
+  // Fetch vets and slots when component mounts
   const fetchVet = async () => {
     try {
       const response = await api.get(`/vet/all-vet`, {
@@ -57,14 +49,24 @@ export default function SchedulePage() {
     }
   };
 
-  const fetchSlot = async () => {
+  const fetchSlots = async () => {
     try {
-      const response = await api.get(`slot/all-slot`, {
+      const response = await api.get(`/vetslot/vetslot-list`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setSlots(response.data);
+
+      const formattedSlots = response.data.map((slot: any) => ({
+        id: slot.slotID.toString(),
+        day: slot.weekDate,
+        task: `${slot.vetFirstName} ${slot.vetLastName}`,
+        vetId: slot.vetId,
+        startTime: new Date(`1970-01-01T${slot.slotStartTime}`), // Chuyển đổi thành Date
+        endTime: new Date(`1970-01-01T${slot.slotEndTime}`), // Chuyển đổi thành Date
+      }));
+
+      setSlots(formattedSlots);
     } catch (error) {
       console.error("Error fetching slots:", error);
       toast.error("Failed to fetch slots. Please try again.");
@@ -73,42 +75,15 @@ export default function SchedulePage() {
 
   useEffect(() => {
     fetchVet();
-    fetchSlot();
+    fetchSlots();
   }, []);
 
-  useEffect(() => {
-    async function fetchVetslots() {
-      try {
-        const response = await api.get("/vetslot/vetslot-list");
-        const data = response.data;
-
-        const formattedSlots = data.map((slot: any) => ({
-          id: slot.slotID.toString(),
-          day: slot.weekDate,
-          task: `${slot.vetFirstName} ${slot.vetLastName}`,
-          vetId: slot.vetID,
-          startTime: slot.slotStartTime ? new Date(slot.slotStartTime) : null,
-          endTime: slot.slotEndTime ? new Date(slot.slotEndTime) : null, // Chuyển thành Date object
-        }));
-        setSlots(formattedSlots);
-      } catch (error) {
-        console.error("Error fetching vet slots:", error);
-      }
-    }
-    fetchVetslots();
-  }, []);
-
-  const handleAddSlot = async () => {
-    if (!currentSlot?.vetId || !currentSlot?.id) {
-      toast.error("Please select a Vet and a Slot ID.");
-      return;
-    }
-
+  const handleAddSlot = async (values: any) => {
     const newSlotData = {
-      vetID: currentSlot.vetId,
-      slotID: parseInt(currentSlot.id),
-      slotStartTime: format(currentSlot.startTime, "HH:mm"), // Format lại cho đúng
-      slotEndTime: format(currentSlot.endTime, "HH:mm"), // Format lại cho đúng
+      vetID: values.vetId,
+      slotID: parseInt(values.slotId),
+      slotStartTime: format(values.startTime.toDate(), "HH:mm"),
+      slotEndTime: format(values.endTime.toDate(), "HH:mm"),
     };
 
     try {
@@ -117,61 +92,71 @@ export default function SchedulePage() {
       });
       setSlots([
         ...slots,
-        { ...currentSlot, id: newSlotData.slotID.toString() },
+        {
+          ...currentSlot,
+          id: newSlotData.slotID.toString(),
+        } as Slot,
       ]);
-      setIsOpen(false);
+      setIsModalOpen(false);
+      toast.success("Slot added successfully!");
+      fetchSlots();
     } catch (error: any) {
       console.error(
         "Error adding new vet slot:",
-        error.response ? error.response.data : error.message
+        error.response?.data || error.message
       );
+      toast.error("Failed to add slot. Please try again.");
     }
   };
 
   const handleDeleteSlot = async (vetId: string, slotId: string) => {
     try {
-      const response = await api.delete(
-        `/vetslot/delete-vetslot/${vetId}/${slotId}`,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      await api.delete(`/vetslot/delete-vetslot/${vetId}/${slotId}`, {
+        headers: { "Content-Type": "application/json" },
+      });
 
-      toast.success("Deleted slot successful!");
+      toast.success("Deleted slot successfully!");
+      fetchSlots();
       setSlots(slots.filter((slot) => slot.id !== slotId));
     } catch (error: any) {
       console.error(
         "Error deleting vet slot:",
-        error.response ? error.response.data : error.message
+        error.response?.data || error.message
       );
+      toast.error("Failed to delete slot. Please try again.");
     }
   };
 
-  const handleUpdateSlot = async (updatedSlot: Slot) => {
-    try {
-      const requestBody = {
-        vetID: updatedSlot.vetId,
-        slotID: parseInt(updatedSlot.id),
-        isBook: true,
-      };
+  const handleUpdateSlot = async (values: any) => {
+    const updatedSlot = {
+      vetID: values.vetId,
+      slotID: parseInt(values.slotId),
+      slotStartTime: format(values.startTime.toDate(), "HH:mm"),
+      slotEndTime: format(values.endTime.toDate(), "HH:mm"),
+    };
 
-      const response = await api.put("/vetslot/update-vetslot", requestBody, {
+    try {
+      await api.put("/vetslot/update-vetslot", updatedSlot, {
         headers: { "Content-Type": "application/json" },
       });
 
-      toast.success("Updated slot successful!");
+      toast.success("Updated slot successfully!");
+      fetchSlots();
       setSlots((prevSlots) =>
         prevSlots.map((slot) =>
-          slot.id === updatedSlot.id ? updatedSlot : slot
+          slot.id === updatedSlot.slotID.toString()
+            ? { ...slot, ...updatedSlot }
+            : slot
         )
       );
 
-      setIsOpen(false);
+      setIsModalOpen(false);
     } catch (error: any) {
       console.error(
         "Error updating vet slot:",
-        error.response ? error.response.data : error.message
+        error.response?.data || error.message
       );
+      toast.error("Failed to update slot. Please try again.");
     }
   };
 
@@ -183,20 +168,31 @@ export default function SchedulePage() {
     setCurrentWeekStart(addWeeks(currentWeekStart, 1));
   };
 
-  const onFinish = (values: any) => {
+  const handleFormSubmit = (values: any) => {
     if (currentSlot?.id) {
-      handleUpdateSlot({ ...currentSlot, ...values });
+      handleUpdateSlot(values);
     } else {
-      handleAddSlot({ ...values, id: values.slotId });
+      handleAddSlot(values);
     }
+  };
+
+  const openModal = (slot?: Slot) => {
+    setCurrentSlot(slot || null);
+    if (slot) {
+      form.setFieldsValue({
+        vetId: slot.vetId,
+        slotId: slot.id,
+        startTime: dayjs(slot.startTime),
+        endTime: dayjs(slot.endTime),
+      });
+    } else {
+      form.resetFields();
+    }
+    setIsModalOpen(true);
   };
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 overflow-hidden">
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 opacity-80" />
-        <div className="absolute inset-0 backdrop-blur-sm" />
-      </div>
       <Sidebar />
       <div className="flex-1 overflow-auto relative z-10">
         <HeaderAd title="Schedules Assigned for Vets" />
@@ -211,10 +207,10 @@ export default function SchedulePage() {
               Weekly Schedule
             </h2>
             <div className="flex items-center space-x-4">
-              <Button variant="secondary" onClick={handlePreviousWeek}>
+              <Button onClick={handlePreviousWeek}>
                 <ChevronLeft className="h-4 w-4 mr-2" /> Previous Week
               </Button>
-              <Button variant="secondary" onClick={handleNextWeek}>
+              <Button onClick={handleNextWeek}>
                 Next Week <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
@@ -226,19 +222,19 @@ export default function SchedulePage() {
             transition={{ delay: 0.2 }}
           >
             {weekDays.map((day) => (
-              <Card
+              <div
                 key={day.toISOString()}
                 className="col-span-1 bg-gray-800 border-gray-700 shadow-lg hover:shadow-xl transition-shadow duration-300"
               >
-                <CardHeader className="bg-gray-700 rounded-t-lg">
-                  <CardTitle className="text-center text-xl font-bold">
+                <div className="bg-gray-700 rounded-t-lg p-4">
+                  <h3 className="text-center text-xl font-bold">
                     {format(day, "EEEE")}
-                  </CardTitle>
+                  </h3>
                   <p className="text-center text-sm text-gray-300">
                     {format(day, "MMM d")}
                   </p>
-                </CardHeader>
-                <CardContent className="pt-4">
+                </div>
+                <div className="p-4">
                   {slots
                     .filter((slot) => slot.day === format(day, "EEEE"))
                     .map((slot) => (
@@ -252,25 +248,15 @@ export default function SchedulePage() {
                             {format(slot.endTime, "HH:mm")}
                           </span>
                           <div className="flex space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                setCurrentSlot(slot);
-                                setIsOpen(true);
-                              }}
-                              className="text-gray-300 hover:text-black-400"
-                            >
+                            <Button type="link" onClick={() => openModal(slot)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-
                             <Button
-                              variant="ghost"
-                              size="icon"
+                              type="link"
+                              danger
                               onClick={() =>
                                 handleDeleteSlot(slot.vetId, slot.id)
                               }
-                              className="text-gray-300 hover:text-red-400"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -279,133 +265,78 @@ export default function SchedulePage() {
                       </div>
                     ))}
                   <Button
-                    variant="outline"
-                    className="w-full mt-2 bg-gray-700 hover:bg-gray-600 text-gray-100"
-                    onClick={() => {
-                      setCurrentSlot({
+                    type="dashed"
+                    className="w-full mt-2"
+                    onClick={() =>
+                      openModal({
                         id: "",
                         day: format(day, "EEEE"),
                         task: "",
                         vetId: "",
-                        startTime: new Date(), // Khởi tạo thời gian mặc định
-                        endTime: new Date(), // Khởi tạo thời gian mặc định
-                      });
-                      setIsOpen(true);
-                    }}
+                        startTime: new Date(),
+                        endTime: new Date(),
+                      })
+                    }
                   >
                     <Plus className="h-4 w-4 mr-2" /> Add Slot
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </motion.div>
         </div>
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogContent className="bg-gray-800 text-gray-100">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">
-                {currentSlot?.id ? "Edit Slot" : "Add New Slot"}
-              </DialogTitle>
-              <DialogDescription className="text-gray-400">
-                {currentSlot?.id
-                  ? "Edit the details of the slot."
-                  : "Add a new slot to the schedule."}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={onFinish} className="space-y-4">
-              <div>
-                <label>Vet</label>
-                <select
-                  className="bg-gray-700 border-gray-600 text-gray-100 w-full p-2"
-                  value={currentSlot?.vetId || ""}
-                  onChange={(e) =>
-                    setCurrentSlot({ ...currentSlot, vetId: e.target.value })
-                  }
-                >
-                  <option value="" disabled>
-                    Select Vet
-                  </option>
-                  {vets.map((vet) => (
-                    <option key={vet.id} value={vet.id}>
-                      {vet.firstName} {vet.lastName}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
-              <div>
-                <label>Available Slots</label>
-                <select
-                  className="bg-gray-700 border-gray-600 text-gray-100 w-full p-2"
-                  value={currentSlot?.id || ""}
-                  onChange={(e) =>
-                    setCurrentSlot({
-                      ...currentSlot,
-                      id: e.target.value,
-                      startTime:
-                        slots.find((slot) => slot.id === e.target.value)
-                          ?.startTime || new Date(),
-                      endTime:
-                        slots.find((slot) => slot.id === e.target.value)
-                          ?.endTime || new Date(),
-                    })
-                  }
-                >
-                  <option value="" disabled>
-                    Select Slot
-                  </option>
-                  {slots.map((slot) => (
-                    <option key={slot.id} value={slot.id}>
-                      {format(slot.startTime, "HH:mm")} -{" "}
-                      {format(slot.endTime, "HH:mm")}
-                    </option>
-                  ))}
-                </select>
-              </div>
+        <Modal
+          title={currentSlot?.id ? "Edit Slot" : "Add Slot"}
+          visible={isModalOpen}
+          onCancel={() => setIsModalOpen(false)}
+          onOk={() => form.submit()}
+        >
+          <Form form={form} onFinish={handleFormSubmit} layout="vertical">
+            <Form.Item
+              label="Vet"
+              name="vetId"
+              rules={[{ required: true, message: "Please select a vet" }]}
+            >
+              <Select placeholder="Select Vet">
+                {vets.map((vet) => (
+                  <Select.Option key={vet.id} value={vet.id}>
+                    {vet.firstName} {vet.lastName}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              label="Available Slots"
+              name="slotId"
+              rules={[{ required: true, message: "Please select a slot" }]}
+            >
+              <Select placeholder="Select Slot">
+                {slots.map((slot) => (
+                  <Select.Option key={slot.id} value={slot.id}>
+                    {slot.weekDate} - {format(slot.startTime, "HH:mm")} to{" "}
+                    {format(slot.endTime, "HH:mm")}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-              <div>
-                <label>Start Time</label>
-                <DatePicker
-                  selected={currentSlot?.startTime}
-                  onChange={(date) =>
-                    setCurrentSlot({ ...currentSlot, startTime: date! })
-                  }
-                  showTimeSelect
-                  showTimeSelectOnly
-                  timeIntervals={15}
-                  timeCaption="Start Time"
-                  dateFormat="h:mm aa"
-                  className="bg-gray-700 border-gray-600 text-gray-100 w-full p-2"
-                />
-              </div>
-
-              <div>
-                <label>End Time</label>
-                <DatePicker
-                  selected={currentSlot?.endTime}
-                  onChange={(date) =>
-                    setCurrentSlot({ ...currentSlot, endTime: date! })
-                  }
-                  showTimeSelect
-                  showTimeSelectOnly
-                  timeIntervals={15}
-                  timeCaption="End Time"
-                  dateFormat="h:mm aa"
-                  className="bg-gray-700 border-gray-600 text-gray-100 w-full p-2"
-                />
-              </div>
-
-              <DialogFooter>
-                <Button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  {currentSlot?.id ? "Save Changes" : "Add Slot"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+            <Form.Item
+              label="Start Time"
+              name="startTime"
+              rules={[{ required: true, message: "Please select start time" }]}
+            >
+              <TimePicker use12Hours format="h:mm a" />
+            </Form.Item>
+            <Form.Item
+              label="End Time"
+              name="endTime"
+              rules={[{ required: true, message: "Please select end time" }]}
+            >
+              <TimePicker use12Hours format="h:mm a" />
+            </Form.Item>
+          </Form>
+        </Modal>
       </div>
     </div>
   );

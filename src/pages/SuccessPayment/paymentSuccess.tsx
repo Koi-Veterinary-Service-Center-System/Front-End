@@ -134,7 +134,7 @@ export default function PaymentSuccessful() {
                     size="sm"
                   >
                     <SiProcesswire className="mr-2 h-4 w-4 transition-transform group-hover:rotate-180" />
-                    <Link href="/process" className="flex items-center text-sm">
+                    <Link to="/process" className="flex items-center text-sm">
                       Return to Booking
                     </Link>
                   </Button>

@@ -135,6 +135,7 @@ const UsersTable = () => {
   const handleSubmit = async (data: UserFormData) => {
     setLoading(true);
     try {
+      let response;
       if (isEditMode && currentUser) {
         // Chỉ gửi role và userID cho API theo định dạng đường dẫn
         await api.patch(
@@ -146,7 +147,7 @@ const UsersTable = () => {
             },
           }
         );
-        toast.success("User role updated successfully!");
+        toast.success("User role updated successfully");
       } else {
         // Logic cho việc tạo mới user vẫn giữ nguyên
         const payload = {
@@ -159,10 +160,10 @@ const UsersTable = () => {
           role: data.role,
         };
 
-        await api.post(`/User/create-user`, payload, {
+        response = await api.post(`/User/create-user`, payload, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        toast.success("User created successfully!");
+        toast.success(response.data);
       }
 
       fetchUser();
@@ -170,7 +171,7 @@ const UsersTable = () => {
       form.reset();
     } catch (error: any) {
       console.error("Operation failed:", error.response?.data || error.message);
-      toast.error("Operation failed. Please try again.");
+      toast.error(error.response.data);
     } finally {
       setLoading(false);
     }

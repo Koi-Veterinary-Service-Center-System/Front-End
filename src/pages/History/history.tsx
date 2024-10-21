@@ -415,11 +415,13 @@ const History = () => {
                             )}
                           </td>
                           <td className="py-2">
-                            <Link to={`/feedback/${booking.bookingID}`}>
-                              <Button variant="outline" size="sm">
-                                Feedback
-                              </Button>
-                            </Link>
+                            {booking.bookingStatus !== "Cancelled" && ( // Check if the status is not "Cancelled"
+                              <Link to={`/feedback/${booking.bookingID}`}>
+                                <Button variant="outline" size="sm">
+                                  Feedback
+                                </Button>
+                              </Link>
+                            )}
                           </td>
                         </tr>
                       ))}

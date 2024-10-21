@@ -122,3 +122,12 @@ export type Prescription = {
   bookingID: string;
   createAt: string;
 };
+
+export type Feedback = {
+  feedbackID: number;
+  bookingID: number;
+  customerName: string;
+  rate: number; // Đánh giá (rate) dưới dạng số, ví dụ: 1 đến 5 sao
+  comments: string; // Bình luận của khách hàng
+  isVisible: boolean; // Trạng thái hiển thị của phản hồi
+};

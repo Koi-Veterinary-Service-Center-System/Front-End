@@ -74,8 +74,11 @@ const StatusComponent = ({ currentStatus }: { currentStatus?: string }) => {
     (step) => step.label === currentStatus
   );
 
-  // Tính toán chiều dài của đường chạy
-  const progressPercentage = (currentIndex / (statusSteps.length - 1)) * 100;
+  // Tính toán chiều dài của đường chạy, ngừng ở "Received_Money"
+  const progressPercentage =
+    currentIndex === statusSteps.length - 1
+      ? 100
+      : (currentIndex / (statusSteps.length - 1)) * 100;
 
   return (
     <div className="w-full max-w-3xl mx-auto">
