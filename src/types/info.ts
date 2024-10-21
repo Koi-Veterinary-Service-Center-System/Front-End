@@ -87,6 +87,7 @@ export type Booking = {
   vetName: string;
   koiOrPoolID: number;
   koiOrPoolName: string;
+  imageUrl: string;
 };
 
 export type User = {

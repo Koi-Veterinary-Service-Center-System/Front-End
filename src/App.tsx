@@ -29,6 +29,7 @@ import ContactUs from "./pages/Contact Us/contactUs";
 import PaymentSuccessful from "./pages/SuccessPayment/paymentSuccess";
 import PaymentFailed from "./pages/FailedPayment/failedPayment";
 import VetCalendar from "./pages/SchedulerVet";
+import BookMPage from "./pages/BookingManagement/bookingM";
 
 // Add your license key here
 registerLicense("Your_License_Key_Here");
@@ -162,6 +163,14 @@ function App() {
           element={
             <PrivateRoute requiredRoles={["Manager", "Staff"]}>
               <SchedulesMPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/bookings"
+          element={
+            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
+              <BookMPage />
             </PrivateRoute>
           }
         />

@@ -141,23 +141,39 @@ function UpdateProfile() {
     try {
       let imageURL = profile?.imageURL || "";
 
+      // Kiểm tra nếu có file ảnh mới được tải lên thì upload ảnh mới
       if (fileList.length > 0 && fileList[0].originFileObj) {
         const file = fileList[0].originFileObj;
         imageURL = await uploadFileToFirebase(file);
       }
 
+      // Gán lại các giá trị từ profile cũ nếu người dùng không nhập thông tin mới
       const updatedProfile = {
-        ...values,
-        gender: values.gender === "Male" ? true : false,
-        imageURL,
+        userName: values.userName || profile?.userName,
+        firstName: values.firstName || profile?.firstName,
+        lastName: values.lastName || profile?.lastName,
+        phoneNumber: values.phoneNumber || profile?.phoneNumber,
+        email: values.email || profile?.email, // Người dùng bắt buộc nhập email nếu muốn cập nhật
+        address: values.address || profile?.address,
+        gender:
+          values.gender === undefined
+            ? profile?.gender === "Male"
+              ? true
+              : false
+            : values.gender === "Male"
+            ? true
+            : false,
+        imageURL, // Dùng URL ảnh mới nếu có, nếu không lấy từ profile cũ
       };
 
+      // Gửi request cập nhật profile
       await api.put("User/update-profile", updatedProfile, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
+      // Lấy lại thông tin profile đã cập nhật và điều hướng về trang profile
       fetchProfile();
       navigate("/profile", { state: { updateProfileSuccess: true } });
     } catch (error) {

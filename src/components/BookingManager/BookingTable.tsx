@@ -1,46 +1,53 @@
-import "./booking.scss";
-import Header from "../../components/Header/header";
-import Footer from "../../components/Footer/footer";
-import { Input, Form, Button, Select, DatePicker } from "antd";
-import { useEffect, useRef, useState } from "react";
-
-import Banner from "../../components/banner";
-import api from "../../configs/axios";
-
-import {
-  Slot,
-  Service,
-  Vet,
-  koiOrPool,
-  Payment,
-  Distance,
-} from "../../types/info";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Search, Eye, UserPlus2, Waves, Fish } from "lucide-react";
+import api from "@/configs/axios";
 import { toast } from "sonner";
-import { Fish, Waves } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { MdAddBusiness } from "react-icons/md";
 import { MdOutlineMedicalServices } from "react-icons/md";
 import { FaLocationArrow } from "react-icons/fa";
 import { FaUserDoctor } from "react-icons/fa6";
 import { MdNoteAlt } from "react-icons/md";
 import { RiSecurePaymentFill } from "react-icons/ri";
 import { LuFish } from "react-icons/lu";
-import { motion } from "framer-motion";
+
+import {
+  Booking,
+  Distance,
+  koiOrPool,
+  Payment,
+  services,
+  Slot,
+  User,
+  Vet,
+} from "@/types/info";
+import { Button, DatePicker, Form, Input, Modal, Select } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { useNavigate } from "react-router-dom";
 
-const { Option } = Select;
-
-function Booking() {
-  const [total, setTotal] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const bookingRef = useRef(null);
-
+const OrdersTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredBookings, setFilteredBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<any | null>(null); // Lưu trữ booking đã chọn để hiển thị chi tiết
+  const [isModalOpen, setIsModalOpen] = useState(false); // Điều khiển trạng thái của dialog
+  const [users, setUsers] = useState<User[]>([]);
   const [slots, setSlots] = useState<Slot[]>([]);
-  const [allSlots, setAllSlots] = useState<Slot[]>([]); // To keep all slots
-  const [services, setServices] = useState<Service[]>([]);
+  const [services, setServices] = useState<services[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [vets, setVets] = useState<Vet[]>([]);
-  const [allVets, setAllVets] = useState<Vet[]>([]); // To keep all vets
+  const [total, setTotal] = useState(0);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [selectedVet, setSelectedVet] = useState<number | null>(null);
+  const [allSlots, setAllSlots] = useState<Slot[]>([]);
+  const [allVets, setAllVets] = useState<Vet[]>([]);
 
   const [isLoadingSlots, setLoadingSlots] = useState(false);
   const [isLoadingServices, setLoadingServices] = useState(false);
@@ -51,9 +58,7 @@ function Booking() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [distances, setDistances] = useState<Distance[]>([]);
   const [isLoadingPayment, setLoadingPayment] = useState(false);
-  const navigate = useNavigate();
 
-  // Ant Design form hook
   const [form] = Form.useForm();
 
   // Fetch Slots
@@ -210,6 +215,79 @@ function Booking() {
     console.log("Selected Vet Name:", selectedVetName); // Debugging
   };
 
+  const fetchUser = async () => {
+    try {
+      const response = await api.get("User/all-user", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      setUsers(response.data);
+      setError(null);
+    } catch (error: any) {
+      console.error("Failed to fetch user data:", error.message);
+      setError("Failed to fetch user data. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  // Hàm fetch booking từ API
+  const fetchBookings = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/booking/all-booking`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      setBookings(response.data);
+      setFilteredBookings(response.data); // Gán luôn danh sách booking ban đầu
+    } catch (error: any) {
+      console.error(error.message);
+      toast.error("Failed to fetch bookings.");
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Chạy khi component được mount
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  // Hàm tìm kiếm booking
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+    const filtered = bookings.filter(
+      (booking) =>
+        booking.bookingID.toString().toLowerCase().includes(term) ||
+        booking.customerName.toLowerCase().includes(term)
+    );
+    setFilteredBookings(filtered);
+  };
+
+  const handleSearchUser = (searchTerm: string) => {
+    const filtered = users.filter(
+      (user) =>
+        user.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredUsers(filtered); // Cập nhật danh sách người dùng được lọc
+  };
+
+  // Hàm mở dialog với chi tiết của booking đã chọn
+  const handleViewDetails = (booking: any) => {
+    setSelectedBooking(booking); // Lưu thông tin booking đã chọn
+    setIsDialogOpen(true); // Mở dialog
+  };
+
+  // Hàm đóng dialog
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedBooking(null);
+  };
+
   const handleBooking = async (values: any) => {
     try {
       // Format the date to YYYY-MM-DD according to the system's default timezone
@@ -227,7 +305,9 @@ function Booking() {
       // Combine user input location with selected district and area
       const fullLocation = `${values.location}, ${selectedDistrict?.district}, ${selectedDistrict?.area}`;
 
+      // Tạo dữ liệu booking
       const bookingData = {
+        customerId: values.customerId || "", // Thêm customerId từ form
         note: values.note || "",
         koiOrPoolId: values.koiOrPoolId || null,
         vetName: form.getFieldValue("vetName") || "",
@@ -245,8 +325,8 @@ function Booking() {
 
       if (response.status === 200 || response.status === 201) {
         toast.success("Booking successful!");
+        fetchBookings();
       }
-      navigate("/process");
     } catch (error: any) {
       console.error("Booking error:", error);
       if (error.response && error.response.data) {
@@ -275,38 +355,48 @@ function Booking() {
     }
   };
 
+  // Hàm xử lý mở modal
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    form.resetFields(); // Reset form sau khi đóng
+  };
   return (
-    <div className="mt-5">
-      <Header />
-      <div ref={bookingRef} id="booking" className="bg-white py-12 px-6">
-        <motion.div
-          initial={{ opacity: 0, x: -100 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1 }}
-          className="flex-1 mb-8 sm:mb-0"
-        >
-          <img
-            src="src/assets/images/undraw_medicine_b-1-ol.svg"
-            alt="Medicine Icon"
-            className="w-32 h-32 mx-auto"
+    <motion.div
+      className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4 }}
+    >
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold text-gray-100">Booking List</h2>
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search bookings..."
+            className="bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchTerm}
+            onChange={handleSearch}
           />
-        </motion.div>
-
-        <motion.div
-          className="max-w-4xl mx-auto bg-gray-50 shadow-lg rounded-lg p-8"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
+          <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+        </div>
+        <Button
+          type="primary"
+          icon={<MdAddBusiness />}
+          onClick={showModal}
+          className="bg-blue-600 text-white mb-4"
         >
-          <motion.div
-            className="text-center mb-8"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="text-3xl font-bold text-gray-800">Book a Service</h1>
-          </motion.div>
-
+          Add Booking
+        </Button>
+        <Modal
+          title="Add New Booking"
+          visible={isModalOpen}
+          onCancel={handleCancel}
+          footer={null} // Loại bỏ các nút mặc định của Modal
+        >
           <Form
             form={form}
             name="bookingForm"
@@ -319,6 +409,28 @@ function Booking() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
+              {/* Customer Name - Select user từ danh sách */}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Form.Item
+                  label="Customer Name"
+                  name="customerId"
+                  rules={[
+                    { required: true, message: "Please select a customer" },
+                  ]}
+                >
+                  <Select showSearch placeholder="Select a customer">
+                    {users.map((user) => (
+                      <Select.Option key={user.userID} value={user.userID}>
+                        {user.userName}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </motion.div>
+
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -355,10 +467,13 @@ function Booking() {
                     onChange={() => calculateTota()}
                   >
                     {services.map((service) => (
-                      <Option key={service.serviceID} value={service.serviceID}>
+                      <Select.Option
+                        key={service.serviceID}
+                        value={service.serviceID}
+                      >
                         {service.serviceName} - ${service.price} (Duration:{" "}
                         {service.estimatedDuration} hours)
-                      </Option>
+                      </Select.Option>
                     ))}
                   </Select>
                 </Form.Item>
@@ -377,9 +492,9 @@ function Booking() {
                     value={selectedSlot}
                   >
                     {slots.map((slot) => (
-                      <Option key={slot.slotID} value={slot.slotID}>
+                      <Select.Option key={slot.slotID} value={slot.slotID}>
                         {slot.weekDate} ({slot.startTime} - {slot.endTime})
-                      </Option>
+                      </Select.Option>
                     ))}
                   </Select>
                 </Form.Item>
@@ -396,24 +511,25 @@ function Booking() {
                       Veterinarian
                     </span>
                   }
-                  name="vet"
+                  name="vet" // Đảm bảo 'name' đúng
+                  rules={[{ required: true, message: "Please select a vet" }]}
                 >
                   <Select
                     className="w-full p-0"
                     style={{ height: "50px" }}
                     loading={isLoadingVets}
                     onChange={handleVetChange}
-                    value={selectedVet}
+                    placeholder="Select a veterinarian"
                   >
-                    <Option key="none" value={null}>
+                    <Select.Option key="none" value={null}>
                       <div className="flex items-center gap-2">
                         <span>None</span> {/* Hiển thị văn bản 'None' */}
                       </div>
-                    </Option>
+                    </Select.Option>
                     {vets.map((vet) => (
-                      <Option key={vet.id} value={vet.id}>
+                      <Select.Option key={vet.id} value={vet.id}>
                         {vet.vetName}
-                      </Option>
+                      </Select.Option>
                     ))}
                   </Select>
                 </Form.Item>
@@ -474,13 +590,13 @@ function Booking() {
                     onChange={() => calculateTota()}
                   >
                     {distances.map((distance) => (
-                      <Option
+                      <Select.Option
                         key={distance.distanceID}
                         value={distance.distanceID}
                       >
-                        {distance.district} - {distance.area} (${distance.price}
-                        )
-                      </Option>
+                        {distance.district} - {distance.area} ($
+                        {distance.price})
+                      </Select.Option>
                     ))}
                   </Select>
                 </Form.Item>
@@ -506,15 +622,18 @@ function Booking() {
                     placeholder="Select a fish or pool"
                   >
                     {/* Tùy chọn 'None' */}
-                    <Option key="none" value={null}>
+                    <Select.Option key="none" value={null}>
                       <div className="flex items-center gap-2">
                         <span>None</span> {/* Hiển thị văn bản 'None' */}
                       </div>
-                    </Option>
+                    </Select.Option>
 
                     {/* Các tùy chọn từ API */}
                     {koiAndPools.map((item) => (
-                      <Option key={item.koiOrPoolID} value={item.koiOrPoolID}>
+                      <Select.Option
+                        key={item.koiOrPoolID}
+                        value={item.koiOrPoolID}
+                      >
                         <div className="flex items-center gap-2">
                           <span>{item.name}</span>
                           {item.isPool ? (
@@ -523,7 +642,7 @@ function Booking() {
                             <Fish className="text-orange-500" />
                           )}
                         </div>
-                      </Option>
+                      </Select.Option>
                     ))}
                   </Select>
                 </Form.Item>
@@ -566,7 +685,10 @@ function Booking() {
                 }
                 name="paymentMethod"
                 rules={[
-                  { required: true, message: "Please select a payment method" },
+                  {
+                    required: true,
+                    message: "Please select a payment method",
+                  },
                 ]}
               >
                 <Select
@@ -576,11 +698,11 @@ function Booking() {
                   placeholder="Select payment method"
                 >
                   {payments.map((item) => (
-                    <Option key={item.paymentID} value={item.paymentID}>
+                    <Select.Option key={item.paymentID} value={item.paymentID}>
                       <div className="flex items-center gap-2">
                         <span>{item.type}</span>
                       </div>
-                    </Option>
+                    </Select.Option>
                   ))}
                 </Select>
               </Form.Item>
@@ -610,12 +732,137 @@ function Booking() {
               </Button>
             </motion.div>
           </Form>
-        </motion.div>
+        </Modal>
       </div>
 
-      <Footer />
-    </div>
-  );
-}
+      {loading ? (
+        <div className="text-white">Loading...</div>
+      ) : error ? (
+        <div className="text-red-500">Error: {error}</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-700">
+            <thead>
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Booking ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Customer Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Total
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
 
-export default Booking;
+            <tbody className="divide divide-gray-700">
+              {filteredBookings.map((booking) => (
+                <motion.tr
+                  key={booking.bookingID}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                    {booking.bookingID}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                    {booking.customerName}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                    ${booking.initAmount.toFixed(2)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        booking.bookingStatus === "Succeeded"
+                          ? "bg-green-100 text-green-800"
+                          : booking.bookingStatus === "Pending"
+                          ? "bg-yellow-100 text-yellow-400"
+                          : booking.bookingStatus === "Scheduled"
+                          ? "bg-blue-100 text-blue-800"
+                          : booking.bookingStatus === "Ongoing"
+                          ? "bg-orange-100 text-orange-800"
+                          : booking.bookingStatus === "Completed"
+                          ? "bg-teal-100 text-teal-800"
+                          : booking.bookingStatus === "Received_Money"
+                          ? "bg-purple-100 text-purple-800"
+                          : "bg-red-100 text-red-800" // Default màu đỏ cho các trạng thái khác
+                      }`}
+                    >
+                      {booking.bookingStatus}
+                    </span>
+                  </td>
+
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    {booking.bookingDate}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <button
+                      className="text-indigo-400 hover:text-indigo-300 mr-2"
+                      onClick={() => handleViewDetails(booking)} // Khi bấm vào nút Eye sẽ mở dialog
+                    >
+                      <Eye size={18} />
+                    </button>
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Dialog hiển thị chi tiết booking */}
+      {selectedBooking && (
+        <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Booking Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p>
+                <strong>Booking ID:</strong> {selectedBooking.bookingID}
+              </p>
+              <p>
+                <strong>Customer Name:</strong> {selectedBooking.customerName}
+              </p>
+              <p>
+                <strong>Service:</strong> {selectedBooking.serviceName}
+              </p>
+              <p>
+                <strong>Location:</strong> {selectedBooking.location}
+              </p>
+              <p>
+                <strong>Phone Number:</strong> {selectedBooking.phoneNumber}
+              </p>
+              <p>
+                <strong>Status:</strong> {selectedBooking.bookingStatus}
+              </p>
+              <p>
+                <strong>Booking Date:</strong> {selectedBooking.bookingDate}
+              </p>
+              <p>
+                <strong>Payment Type:</strong> {selectedBooking.paymentType}
+              </p>
+              <p>
+                <strong>Slot:</strong> {selectedBooking.slotStartTime} -{" "}
+                {selectedBooking.slotEndTime} ({selectedBooking.slotWeekDate})
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </motion.div>
+  );
+};
+export default OrdersTable;
