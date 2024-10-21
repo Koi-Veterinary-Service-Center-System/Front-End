@@ -9,6 +9,7 @@ import {
   FileText,
   PhoneCall,
   Loader2,
+  Home,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +47,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import api from "@/configs/axios";
 import { Booking } from "@/types/info";
+import { FaUserDoctor } from "react-icons/fa6";
+import { RiServiceLine } from "react-icons/ri";
+import { GiCirclingFish } from "react-icons/gi";
+import { HiOutlineStatusOnline } from "react-icons/hi";
 
 const prescriptionSchema = z.object({
   diseaseName: z.string().min(1, "Disease name is required"),
@@ -105,15 +110,15 @@ export default function Component() {
               hasPrescription: !!prescription.data,
               presRecID: prescription.data.id, // Lưu presRecID để sử dụng khi cần update
             };
-          } catch (error) {
+          } catch (error: any) {
             return { ...appointment, hasPrescription: false };
           }
         })
       );
       setAppointments(appointmentsWithPrescriptions);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to fetch appointments:", error);
-      toast.error("Failed to load appointments. Please try again.");
+      toast.info(error.response.data);
     } finally {
       setLoading(false);
     }
@@ -129,9 +134,9 @@ export default function Component() {
       const prescriptionData = response.data;
       form.reset(prescriptionData);
       setSelectedPresRecID(presRecID); // Lưu presRecID khi load đơn thuốc
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to fetch prescription:", error);
-      toast.error("Failed to load prescription data.");
+      toast.info(error.response.data);
     }
   };
 
@@ -214,15 +219,30 @@ export default function Component() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-teal-100 to-green-100 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-300 to-teal-200 p-8">
       <div className="container mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
+          <Button
+            variant="outline"
+            className="bg-white/90 backdrop-blur-sm hover:bg-white/70 text-blue-600 border-blue-300 hover:border-blue-400 transition-all duration-300"
+            onClick={() => (window.location.href = "/")}
+          >
+            <Home className="mr-2 h-4 w-4" />
+            Back to Home
+          </Button>
+        </motion.div>
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-4xl font-bold mb-8 text-center text-gray-800"
+          className="text-5xl font-bold mb-12 text-center text-white drop-shadow-lg"
         >
-          Veterinarian Appointments
+          Koi Veterinary Appointments
         </motion.h1>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -231,19 +251,19 @@ export default function Component() {
           className="mb-8 flex justify-center"
         >
           <div className="relative w-full max-w-md">
-            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             <Input
               type="text"
               placeholder="Search by customer name"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 pr-4 py-2 w-full rounded-full shadow-md focus:ring-2 focus:ring-blue-300 transition-all duration-300"
+              className="pl-10 pr-4 py-2 w-full rounded-full shadow-lg focus:ring-2 focus:ring-blue-300 transition-all duration-300 bg-white/90 backdrop-blur-sm"
             />
           </div>
         </motion.div>
         {loading ? (
           <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
           </div>
         ) : (
           <AnimatePresence>
@@ -255,9 +275,10 @@ export default function Component() {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
-                <Card className="bg-white/90 backdrop-blur-sm mb-6 overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                  <CardHeader className="bg-gradient-to-r from-blue-500 to-teal-500 text-white">
-                    <CardTitle className="text-2xl font-bold">
+                <Card className="bg-white/90 backdrop-blur-sm mb-6 overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 rounded-xl">
+                  <CardHeader className="bg-gradient-to-r from-blue-600 to-teal-400 text-white py-4">
+                    <CardTitle className="text-2xl font-bold flex items-center">
+                      <GiCirclingFish className="mr-2 h-6 w-6" />
                       Appointment Details
                     </CardTitle>
                   </CardHeader>
@@ -265,7 +286,7 @@ export default function Component() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-blue-50 p-3 rounded-lg"
+                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
                       >
                         <User className="mr-3 h-6 w-6 text-blue-500" />
                         <div>
@@ -279,9 +300,9 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-green-50 p-3 rounded-lg"
+                        className="flex items-center bg-teal-50 p-4 rounded-lg shadow"
                       >
-                        <Fish className="mr-3 h-6 w-6 text-green-500" />
+                        <Fish className="mr-3 h-6 w-6 text-teal-500" />
                         <div>
                           <span className="font-semibold text-gray-700">
                             Koi/Pool:
@@ -293,7 +314,7 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-yellow-50 p-3 rounded-lg"
+                        className="flex items-center bg-yellow-50 p-4 rounded-lg shadow"
                       >
                         <Calendar className="mr-3 h-6 w-6 text-yellow-500" />
                         <div>
@@ -307,7 +328,7 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-purple-50 p-3 rounded-lg"
+                        className="flex items-center bg-purple-50 p-4 rounded-lg shadow"
                       >
                         <Clock className="mr-3 h-6 w-6 text-purple-500" />
                         <div>
@@ -319,7 +340,7 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-red-50 p-3 rounded-lg"
+                        className="flex items-center bg-red-50 p-4 rounded-lg shadow"
                       >
                         <MapPin className="mr-3 h-6 w-6 text-red-500" />
                         <div>
@@ -333,9 +354,9 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-indigo-50 p-3 rounded-lg"
+                        className="flex items-center bg-indigo-50 p-4 rounded-lg shadow"
                       >
-                        <User className="mr-3 h-6 w-6 text-indigo-500" />
+                        <FaUserDoctor className="mr-3 h-6 w-6 text-indigo-500" />
                         <div>
                           <span className="font-semibold text-gray-700">
                             Veterinarian:
@@ -345,7 +366,7 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-pink-50 p-3 rounded-lg"
+                        className="flex items-center bg-pink-50 p-4 rounded-lg shadow"
                       >
                         <PhoneCall className="mr-3 h-6 w-6 text-pink-500" />
                         <div>
@@ -359,8 +380,9 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-orange-50 p-3 rounded-lg"
+                        className="flex items-center bg-orange-50 p-4 rounded-lg shadow"
                       >
+                        <RiServiceLine className="mr-3 h-6 w-6 text-orange-700" />
                         <span className="font-semibold text-gray-700 mr-2">
                           Service:
                         </span>
@@ -373,14 +395,15 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-teal-50 p-3 rounded-lg"
+                        className="flex items-center bg-green-50 p-4 rounded-lg shadow"
                       >
+                        <HiOutlineStatusOnline className="mr-3 h-6 w-6 text-green-500" />
                         <span className="font-semibold text-gray-700 mr-2">
                           Status:
                         </span>
                         <Badge
                           variant="outline"
-                          className="bg-teal-200 text-teal-700"
+                          className="bg-green-200 text-green-700"
                         >
                           {appointment.bookingStatus}
                         </Badge>
@@ -402,14 +425,14 @@ export default function Component() {
                               appointment.presRecID
                             );
                           } else {
-                            form.reset(); // Reset form cho trường hợp không có đơn thuốc
+                            form.reset();
                           }
                         }}
                       >
                         <DialogTrigger asChild>
                           <Button
                             variant="default"
-                            className="bg-green-500 hover:bg-green-600 transition-colors duration-300"
+                            className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300"
                           >
                             <FileText className="mr-2 h-4 w-4" />
                             {appointment.hasPrescription
@@ -537,7 +560,10 @@ export default function Component() {
                                 />
                               </div>
                               <DialogFooter>
-                                <Button type="submit">
+                                <Button
+                                  type="submit"
+                                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                                >
                                   {selectedPresRecID
                                     ? "Update Prescription"
                                     : "Save Prescription"}
@@ -547,29 +573,27 @@ export default function Component() {
                           </Form>
                         </DialogContent>
                       </Dialog>
-                      <div className="flex justify-end space-x-4 mt-0">
-                        <Select
-                          onValueChange={(value) =>
-                            handleStatusChange(
-                              appointment.bookingID,
-                              value,
-                              appointment.bookingStatus
-                            )
-                          } // Thêm trạng thái hiện tại
-                          defaultValue={appointment.bookingStatus}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Update Status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="On Going">On Going</SelectItem>
-                            <SelectItem value="Completed">Completed</SelectItem>
-                            <SelectItem value="Received_Money">
-                              Receive Money
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      <Select
+                        onValueChange={(value) =>
+                          handleStatusChange(
+                            appointment.bookingID,
+                            value,
+                            appointment.bookingStatus
+                          )
+                        }
+                        defaultValue={appointment.bookingStatus}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Update Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="On Going">On Going</SelectItem>
+                          <SelectItem value="Completed">Completed</SelectItem>
+                          <SelectItem value="Received_Money">
+                            Receive Money
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </CardContent>
                 </Card>
