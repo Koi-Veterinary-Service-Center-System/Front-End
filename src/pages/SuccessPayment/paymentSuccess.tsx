@@ -119,7 +119,7 @@ export default function PaymentSuccessful() {
                     size="sm"
                   >
                     <Home className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-                    <Link href="/" className="flex items-center text-sm">
+                    <Link to="/" className="flex items-center text-sm">
                       Return to Home
                     </Link>
                   </Button>

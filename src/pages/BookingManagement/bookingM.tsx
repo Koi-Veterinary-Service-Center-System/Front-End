@@ -1,10 +1,11 @@
-import { CheckCircle, Clock, DollarSign, ShoppingBag } from "lucide-react";
+import { CheckCircle, Clock, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import HeaderAd from "@/components/common/header";
 import StatCard from "@/components/common/StatCard";
 import OrdersTable from "@/components/BookingManager/BookingTable";
 import Sidebar from "@/components/Sidebar/sidebar";
 import { useEffect, useState } from "react";
+import { FaDongSign } from "react-icons/fa6";
 import api from "../../configs/axios";
 import { Booking } from "@/types/info";
 
@@ -15,7 +16,7 @@ const BookMPage = () => {
     completedOrders: "0",
     ongoingOrders: "0",
     cancelledOrders: "0",
-    totalRevenue: "$0",
+    totalRevenue: "0",
   });
 
   const fetchBookingData = async () => {
@@ -31,7 +32,7 @@ const BookMPage = () => {
         (b: Booking) => b.bookingStatus === "Pending"
       ).length;
       const completedOrders = bookings.filter(
-        (b: Booking) => b.bookingStatus === "Completed"
+        (b: Booking) => b.bookingStatus === "Succeeded"
       ).length;
       const ongoingOrders = bookings.filter(
         (b: Booking) => b.bookingStatus === "Ongoing"
@@ -52,7 +53,7 @@ const BookMPage = () => {
         completedOrders,
         ongoingOrders,
         cancelledOrders,
-        totalRevenue: `$${totalRevenue.toLocaleString()}`,
+        totalRevenue: `${totalRevenue.toLocaleString()}vnd`,
       });
     } catch (error) {
       console.error("Failed to fetch booking data", error);
@@ -100,7 +101,7 @@ const BookMPage = () => {
             />
             <StatCard
               name="Total Revenue"
-              icon={DollarSign}
+              icon={FaDongSign}
               value={orderStats.totalRevenue}
               color="#EF4444"
             />

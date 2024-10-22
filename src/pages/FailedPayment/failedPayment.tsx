@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -6,86 +10,123 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  XCircle,
-  Calendar,
-  Clock,
-  RefreshCw,
-  LifeBuoy,
-  Fish,
-} from "lucide-react";
+import { RefreshCw, LifeBuoy } from "lucide-react";
+import { Link } from "react-router-dom";
+
+const XCircleSVG = () => (
+  <svg
+    width="40"
+    height="40"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <motion.path
+      d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+      stroke="#DC2626"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      initial={{ pathLength: 0 }}
+      animate={{ pathLength: 1 }}
+      transition={{ duration: 1, ease: "easeInOut" }}
+    />
+    <motion.path
+      d="M15 9L9 15"
+      stroke="#DC2626"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      initial={{ pathLength: 0 }}
+      animate={{ pathLength: 1 }}
+      transition={{ duration: 0.5, ease: "easeInOut", delay: 1 }}
+    />
+    <motion.path
+      d="M9 9L15 15"
+      stroke="#DC2626"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      initial={{ pathLength: 0 }}
+      animate={{ pathLength: 1 }}
+      transition={{ duration: 0.5, ease: "easeInOut", delay: 1.5 }}
+    />
+  </svg>
+);
 
 export default function PaymentFailed() {
-  // In a real application, you would fetch these details from your backend or state management
-  const bookingDetails = {
-    service: "Annual Check-up",
-    date: "April 15, 2024",
-    time: "2:30 PM",
-    petName: "Goldie",
+  const [isHovering, setIsHovering] = useState(false);
+
+  const contentVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.2 } },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-200 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-white shadow-xl">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-            <XCircle className="h-10 w-10 text-red-600" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-red-600">
-            Payment Failed
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-center">
-          <p className="text-lg mb-6">
-            We're sorry, but there was an issue processing your payment for Koi
-            Veterinary Services
-          </p>
-          <div className="space-y-4 mb-6">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center text-gray-600">
-                <Calendar className="mr-2 h-5 w-5" />
-                Date:
-              </span>
-              <span className="font-semibold">{bookingDetails.date}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center text-gray-600">
-                <Clock className="mr-2 h-5 w-5" />
-                Time:
-              </span>
-              <span className="font-semibold">{bookingDetails.time}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center text-gray-600">
-                <Fish className="mr-2 h-5 w-5" />
-                Pet:
-              </span>
-              <span className="font-semibold">{bookingDetails.petName}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center text-gray-600">Service:</span>
-              <span className="font-semibold">{bookingDetails.service}</span>
-            </div>
-          </div>
-          <p className="text-sm text-gray-600 mb-4">
-            Your booking is not confirmed. Please try again or contact our
-            support team for assistance.
-          </p>
-        </CardContent>
-        <CardFooter className="flex justify-center space-x-4">
-          <Button className="bg-blue-500 hover:bg-blue-600 text-white flex items-center">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Try Again
-          </Button>
-          <Button
-            variant="outline"
-            className="border-blue-500 text-blue-500 hover:bg-blue-50 flex items-center"
-          >
-            <LifeBuoy className="mr-2 h-4 w-4" />
-            Contact Support
-          </Button>
-        </CardFooter>
-      </Card>
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className="w-full max-w-md bg-white shadow-xl">
+          <CardHeader className="text-center">
+            <motion.div
+              className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100"
+              animate={{ rotate: isHovering ? 360 : 0 }}
+              transition={{ duration: 0.5 }}
+              onHoverStart={() => setIsHovering(true)}
+              onHoverEnd={() => setIsHovering(false)}
+            >
+              <XCircleSVG />
+            </motion.div>
+            <CardTitle className="text-2xl font-bold text-red-600">
+              Payment Failed
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <motion.div
+              variants={contentVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <motion.p className="text-lg mb-6" variants={itemVariants}>
+                We're sorry, but there was an issue processing your payment for
+                Koi Veterinary Services
+              </motion.p>
+              <motion.p
+                className="text-sm text-gray-600 mb-4"
+                variants={itemVariants}
+              >
+                Your booking is not confirmed. Please try again or contact our
+                support team for assistance.
+              </motion.p>
+            </motion.div>
+          </CardContent>
+          <CardFooter className="flex justify-center space-x-4">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button className="bg-blue-500 hover:bg-blue-600 text-white flex items-center">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                <Link to="/process">Try Again</Link>
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                className="border-blue-500 text-blue-500 hover:bg-blue-50 flex items-center"
+              >
+                <LifeBuoy className="mr-2 h-4 w-4" />
+                Contact Support
+              </Button>
+            </motion.div>
+          </CardFooter>
+        </Card>
+      </motion.div>
     </div>
   );
 }
