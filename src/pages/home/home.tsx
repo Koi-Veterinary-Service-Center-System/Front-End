@@ -291,13 +291,13 @@ function Home() {
       <AnimatePresence>
         {isChatBoxVisible && (
           <motion.div
-            className="faq-chat-box"
+            className="fixed bottom-20 right-4 w-80 bg-white rounded-lg shadow-lg overflow-hidden"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
           >
-            <div className="faq-header">
-              <h4>Frequently Asked Questions</h4>
+            <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
+              <h4 className="font-semibold">Frequently Asked Questions</h4>
               <Button
                 type="text"
                 icon={<CloseOutlined />}
@@ -305,17 +305,17 @@ function Home() {
                 className="close-button"
               />
             </div>
-            <div className="faq-content">
+            <div className="p-4 max-h-96 overflow-y-auto">
               {faqs.map((faq, index) => (
                 <motion.div
                   key={index}
-                  className="faq-item"
+                  className="mb-4"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <h5>{faq.question}</h5>
-                  <p>{faq.answer}</p>
+                  <h5 className="font-semibold">{faq.question}</h5>
+                  <p className="text-gray-600 mt-1">{faq.answer}</p>
                 </motion.div>
               ))}
             </div>
@@ -323,13 +323,19 @@ function Home() {
         )}
       </AnimatePresence>
 
-      <FloatButton.Group shape="circle" style={{ insetInlineEnd: 24 }}>
+      {/* FloatButton Group */}
+      <FloatButton.Group
+        shape="circle"
+        className="fixed bottom-4 right-4 space-y-2"
+      >
+        {/* FAQ Button */}
         <FloatButton
           icon={<QuestionCircleOutlined />}
           type="primary"
-          style={{ insetInlineEnd: 94 }}
           onClick={toggleChatBox}
+          className="rounded-full"
         />
+        {/* Back to Top Button */}
         <FloatButton.BackTop visibilityHeight={0} />
       </FloatButton.Group>
 
