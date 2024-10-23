@@ -7,16 +7,61 @@ import HeaderAd from "@/components/common/header";
 import ServicesTable from "@/components/services/ServicesTable";
 import SalesTrendChart from "@/components/services/SalesTrendChart";
 import { toast } from "sonner"; // Use sonner for toast notifications
+import { useEffect, useState } from "react";
+import api from "@/configs/axios"; // Ensure API is configured
 
 const Service = () => {
+  const [isLoadingServices, setLoadingServices] = useState(false);
+  const [services, setServices] = useState<any[]>([]);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [topSelling, setTopSelling] = useState(0); // Placeholder for top selling
+  const [lowService, setLowService] = useState(0); // Placeholder for low service
+
   // Function to show delete success toast
   const handleDeleteSuccess = () => {
     toast.success("Service deleted successfully");
   };
 
   const handleAddSuccess = () => {
-    toast.success("Service added sucessfully");
+    toast.success("Service added successfully");
   };
+
+  // Fetch Services and calculate stats
+  useEffect(() => {
+    const fetchServicesAndRevenue = async () => {
+      try {
+        setLoadingServices(true);
+
+        // Call API to get all services
+        const servicesResponse = await api.get("/service/all-service");
+        const servicesData = servicesResponse.data;
+        setServices(servicesData);
+
+        // Call API to get all bookings and calculate total revenue
+        const bookingsResponse = await api.get("/booking/all-booking");
+        const bookingsData = bookingsResponse.data;
+
+        // Calculate total revenue by summing totalAmount from bookings
+        const totalRev = bookingsData.reduce((total, booking) => {
+          return total + booking.totalAmount;
+        }, 0);
+        setTotalRevenue(totalRev);
+
+        // Logic for other statistics (dummy data for now)
+        setTopSelling(servicesData.length > 0 ? 89 : 0); // Placeholder for top-selling
+        setLowService(
+          servicesData.filter((service) => service.price < 100).length
+        ); // Low service example
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast.error("Failed to load data.");
+      } finally {
+        setLoadingServices(false);
+      }
+    };
+
+    fetchServicesAndRevenue();
+  }, []);
 
   return (
     <div className="flex h-screen bg-gray-900 text-gray-100 overflow-hidden">
@@ -25,7 +70,7 @@ const Service = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 opacity-80 " />
         <div className="absolute inset-0 backdrop-blur-sm" />
       </div>
-      <Sidebar />;
+      <Sidebar />
       <div className="flex-1 overflow-auto relative z-10">
         <HeaderAd title="Services" />
 
@@ -40,25 +85,28 @@ const Service = () => {
             <StatCard
               name="Total Services"
               icon={Package}
-              value={1234}
+              value={services.length} // Tổng số dịch vụ
               color="#6366F1"
             />
             <StatCard
               name="Top Selling"
               icon={TrendingUp}
-              value={89}
+              value={topSelling} // Placeholder cho dịch vụ bán chạy nhất
               color="#10B981"
             />
             <StatCard
               name="Low Service"
               icon={AlertTriangle}
-              value={23}
+              value={lowService} // Số dịch vụ có giá thấp
               color="#F59E0B"
             />
             <StatCard
               name="Total Revenue"
               icon={DollarSign}
-              value={"$543,210"}
+              value={totalRevenue.toLocaleString("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              })} // Tổng doanh thu
               color="#EF4444"
             />
           </motion.div>

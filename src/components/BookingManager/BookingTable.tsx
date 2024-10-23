@@ -140,15 +140,9 @@ const OrdersTable = () => {
         setLoadingKoiAndPools(true);
         const response = await api.get("/koi-or-pool/all-customer-koi-pool");
         setKoiAndPools(response.data);
-      } catch (error) {
+      } catch (error: any) {
         console.log("Error fetching koi and pools: ", error);
-
-        // Kiểm tra nếu lỗi có chứa response và lấy message từ response body
-        if (error.response && error.response.data) {
-          toast.info(error.response.data); // Hiển thị message từ response body
-        } else {
-          toast.error("Failed to fetch Koi or Pools data"); // Hiển thị message mặc định nếu không có message từ API
-        }
+        toast.error("Failed to fetch Koi or Pools data"); // Hiển thị message mặc định nếu không có message từ API
       } finally {
         setLoadingKoiAndPools(false);
       }
@@ -780,8 +774,9 @@ const OrdersTable = () => {
                     {booking.customerName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
-                    ${booking.initAmount.toFixed(2)}
+                    {booking.totalAmount?.toLocaleString("vi-VN")} vnd
                   </td>
+
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

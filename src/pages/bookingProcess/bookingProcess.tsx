@@ -496,11 +496,13 @@ const Process = () => {
                       <div className="flex items-center text-sm">
                         <CreditCardIcon className="h-4 w-4 mr-2 text-gray-500" />
                         <span>
-                          $
-                          {booking.initAmount.toLocaleString("en-US", {
+                          {(
+                            booking.initAmount + booking.arisedMoney
+                          ).toLocaleString("en-US", {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
                           })}
+                          vnd
                         </span>
                       </div>
                     </div>

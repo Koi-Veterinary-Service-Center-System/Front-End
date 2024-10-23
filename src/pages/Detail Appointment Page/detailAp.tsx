@@ -51,6 +51,7 @@ import { FaUserDoctor } from "react-icons/fa6";
 import { RiServiceLine } from "react-icons/ri";
 import { GiCirclingFish } from "react-icons/gi";
 import { HiOutlineStatusOnline } from "react-icons/hi";
+import BookingRecord from "../booking/bookingRecord";
 
 const prescriptionSchema = z.object({
   diseaseName: z.string().min(1, "Disease name is required"),
@@ -66,6 +67,7 @@ export default function Component() {
   const [appointments, setAppointments] = useState<Booking[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
+  const [isOpenRecord, setOpenRecord] = useState(false);
   const [selectedBookingID, setSelectedBookingID] = useState<string | null>(
     null
   );
@@ -165,7 +167,8 @@ export default function Component() {
     if (newStatus === "On Going") {
       endpoint = `/booking/ongoing/${bookingID}`;
     } else if (newStatus === "Completed") {
-      endpoint = `/booking/complete/${bookingID}`;
+      setSelectedBookingID(bookingID);
+      setOpen(true); // Mở modal khi chọn On Going
     } else if (newStatus === "Received_Money") {
       endpoint = `/booking/receive-money/${bookingID}`;
     } else {
@@ -182,7 +185,7 @@ export default function Component() {
       });
       fetchAppointments();
       toast.success(`Appointment status updated successfully to ${newStatus}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to update status:", error);
       toast.error(error.response.data);
     }
@@ -218,8 +221,13 @@ export default function Component() {
     appointment.customerName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleCloseModal = () => {
+    setOpenRecord(false);
+    fetchAppointments();
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-300 to-teal-200 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white p-8">
       <div className="container mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -599,6 +607,22 @@ export default function Component() {
                 </Card>
               </motion.div>
             ))}
+            {/* Modal cho KoiVetBookingForm */}
+            <Dialog open={isOpenRecord} onOpenChange={setOpenRecord}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Complete Booking</DialogTitle>
+                  <DialogDescription>
+                    Please fill out the form to complete the booking.
+                  </DialogDescription>
+                </DialogHeader>
+                {/* Truyền onClose để đóng modal sau khi booking hoàn thành */}
+                <BookingRecord
+                  bookingID={selectedBookingID}
+                  onClose={handleCloseModal}
+                />
+              </DialogContent>
+            </Dialog>
           </AnimatePresence>
         )}
       </div>

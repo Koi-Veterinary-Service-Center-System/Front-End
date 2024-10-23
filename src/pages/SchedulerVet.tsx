@@ -152,85 +152,122 @@ export default function VetCalendar() {
 
   return (
     <motion.div
-      className="container mx-auto p-4"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5 }}
+      className="min-h-screen bg-gradient-to-br from-blue-100 to-white p-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
     >
-      <h1 className="text-2xl font-bold mb-4">Calendar</h1>
-      <div className="bg-white shadow rounded-lg">
-        <div className="flex justify-between items-center p-4 border-b">
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={handlePrevWeek}
-              className="p-1 rounded-full hover:bg-gray-100"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={handleNextWeek}
-              className="p-1 rounded-full hover:bg-gray-100"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-            <span className="text-lg font-semibold">
-              {formatDate(currentDate)}
-            </span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <button className="p-1 rounded-full hover:bg-gray-100">
-              <CalendarIcon className="w-5 h-5" />
-            </button>
-            <button className="p-1 rounded-full hover:bg-gray-100">
-              <MoreVertical className="w-5 h-5" />
-            </button>
+      <motion.div
+        className="container mx-auto bg-white shadow-2xl rounded-3xl overflow-hidden"
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        <div className="bg-blue-600 text-white p-6">
+          <h1 className="text-3xl font-bold mb-4">Calendar</h1>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handlePrevWeek}
+                className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleNextWeek}
+                className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </motion.button>
+              <span className="text-2xl font-semibold">
+                {formatDate(currentDate)}
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200"
+              >
+                <CalendarIcon className="w-6 h-6" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200"
+              >
+                <MoreVertical className="w-6 h-6" />
+              </motion.button>
+            </div>
           </div>
         </div>
-        <div className="grid grid-cols-8 border-b">
-          <div className="p-2 border-r"></div>
+        <div className="grid grid-cols-8 bg-blue-50">
+          <div className="p-4 border-r border-blue-100"></div>
           {getDaysOfWeek().map((day, index) => (
             <div
               key={index}
-              className="p-2 text-center border-r last:border-r-0"
+              className="p-4 text-center border-r border-blue-100 last:border-r-0"
             >
-              <div className="font-medium">{daysOfWeek[day.getDay()]}</div>
-              <div>{day.getDate()}</div>
+              <div className="font-medium text-blue-800">
+                {daysOfWeek[day.getDay()]}
+              </div>
+              <div className="text-2xl font-bold text-blue-600">
+                {day.getDate()}
+              </div>
             </div>
           ))}
         </div>
         <div className="grid grid-cols-8">
           {timeSlots.map((time, timeIndex) => (
             <React.Fragment key={timeIndex}>
-              <div className="p-2 border-r border-b text-sm text-gray-500">
+              <div className="p-4 border-r border-b border-blue-100 text-sm text-blue-600 font-medium">
                 {time}
               </div>
               {getDaysOfWeek().map((day, dayIndex) => {
                 const event = getEventForSlot(day, time);
                 return (
-                  <div
+                  <motion.div
                     key={`${timeIndex}-${dayIndex}`}
-                    className="border-r border-b last:border-r-0 relative p-6"
+                    className="border-r border-b border-blue-100 last:border-r-0 relative p-4"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 10 }}
                   >
                     {event && (
-                      <div className="absolute inset-0 bg-blue-100 border border-blue-300 rounded p-2">
-                        <Link to="/detail">
-                          <div className="font-semibold">{event.vetName}</div>
+                      <motion.div
+                        className="absolute inset-1 bg-blue-200 border border-blue-300 rounded-lg p-2 shadow-md"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 * (timeIndex + dayIndex) }}
+                      >
+                        <Link to="/detail" className="block">
+                          <div className="font-semibold text-blue-800">
+                            {event.vetName}
+                          </div>
+                          <div className="text-xs text-blue-600">
+                            {event.slotStartTime} - {event.slotEndTime}
+                          </div>
                         </Link>
-                        <div className="text-xs">
-                          {event.slotStartTime} - {event.slotEndTime}
-                        </div>
-                      </div>
+                      </motion.div>
                     )}
-                  </div>
+                  </motion.div>
                 );
               })}
             </React.Fragment>
           ))}
         </div>
-      </div>
-      <div className="mt-4 text-sm text-gray-600">
+      </motion.div>
+      <motion.div
+        className="mt-6 text-sm text-blue-600 text-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
         Current Date: {currentDate.toLocaleDateString()}
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

@@ -83,11 +83,12 @@ const Sidebar = () => {
             duration: 2,
             x: { duration: 1 },
           }}
+          className="align-middle justify-center flex"
         >
           <img
             src="src/assets/images/logo.png"
             alt="Logo"
-            className="w-full h-48"
+            className="w-36 h-36 "
           />
         </motion.div>
 

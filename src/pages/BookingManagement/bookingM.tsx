@@ -5,7 +5,7 @@ import StatCard from "@/components/common/StatCard";
 import OrdersTable from "@/components/BookingManager/BookingTable";
 import Sidebar from "@/components/Sidebar/sidebar";
 import { useEffect, useState } from "react";
-import { FaDongSign } from "react-icons/fa6";
+import { PiHandCoins } from "react-icons/pi";
 import api from "../../configs/axios";
 import { Booking } from "@/types/info";
 
@@ -43,7 +43,7 @@ const BookMPage = () => {
 
       // Tính tổng doanh thu
       const totalRevenue = bookings.reduce(
-        (acc: number, b: Booking) => acc + b.initAmount,
+        (acc: number, b: Booking) => acc + b.totalAmount,
         0
       );
 
@@ -101,7 +101,7 @@ const BookMPage = () => {
             />
             <StatCard
               name="Total Revenue"
-              icon={FaDongSign}
+              icon={PiHandCoins}
               value={orderStats.totalRevenue}
               color="#EF4444"
             />
