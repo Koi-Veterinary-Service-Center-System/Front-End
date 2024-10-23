@@ -66,8 +66,8 @@ type PrescriptionForm = z.infer<typeof prescriptionSchema>;
 export default function Component() {
   const [appointments, setAppointments] = useState<Booking[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [open, setOpen] = useState(false);
-  const [isOpenRecord, setOpenRecord] = useState(false);
+  const [openPrescriptionDialog, setOpenPrescriptionDialog] = useState(false);
+  const [openBookingDialog, setOpenBookingDialog] = useState(false);
   const [selectedBookingID, setSelectedBookingID] = useState<string | null>(
     null
   );
@@ -168,7 +168,7 @@ export default function Component() {
       endpoint = `/booking/ongoing/${bookingID}`;
     } else if (newStatus === "Completed") {
       setSelectedBookingID(bookingID);
-      setOpen(true); // Mở modal khi chọn On Going
+      setOpenBookingDialog(true); // Mở modal khi chọn On Going
     } else if (newStatus === "Received_Money") {
       endpoint = `/booking/receive-money/${bookingID}`;
     } else {
@@ -208,7 +208,7 @@ export default function Component() {
         toast.success("Prescription added successfully!");
       }
 
-      setOpen(false);
+      setOpenPrescriptionDialog(false);
       form.reset();
       fetchAppointments();
     } catch (error) {
@@ -222,7 +222,7 @@ export default function Component() {
   );
 
   const handleCloseModal = () => {
-    setOpenRecord(false);
+    setOpenBookingDialog(false);
     fetchAppointments();
   };
 
@@ -248,10 +248,11 @@ export default function Component() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-5xl font-bold mb-12 text-center text-white drop-shadow-lg"
+          className="text-5xl font-bold mb-12 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-blue-500 drop-shadow-lg"
         >
           Koi Veterinary Appointments
         </motion.h1>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -259,7 +260,7 @@ export default function Component() {
           className="mb-8 flex justify-center"
         >
           <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-400" />
             <Input
               type="text"
               placeholder="Search by customer name"
@@ -308,9 +309,9 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-teal-50 p-4 rounded-lg shadow"
+                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
                       >
-                        <Fish className="mr-3 h-6 w-6 text-teal-500" />
+                        <Fish className="mr-3 h-6 w-6 text-blue-500" />
                         <div>
                           <span className="font-semibold text-gray-700">
                             Koi/Pool:
@@ -322,9 +323,9 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-yellow-50 p-4 rounded-lg shadow"
+                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
                       >
-                        <Calendar className="mr-3 h-6 w-6 text-yellow-500" />
+                        <Calendar className="mr-3 h-6 w-6 text-blue-500" />
                         <div>
                           <span className="font-semibold text-gray-700">
                             Date:
@@ -336,9 +337,9 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-purple-50 p-4 rounded-lg shadow"
+                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
                       >
-                        <Clock className="mr-3 h-6 w-6 text-purple-500" />
+                        <Clock className="mr-3 h-6 w-6 text-blue-500" />
                         <div>
                           <span className="font-semibold text-gray-700">
                             Time:
@@ -348,9 +349,9 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-red-50 p-4 rounded-lg shadow"
+                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
                       >
-                        <MapPin className="mr-3 h-6 w-6 text-red-500" />
+                        <MapPin className="mr-3 h-6 w-6 text-blue-500" />
                         <div>
                           <span className="font-semibold text-gray-700">
                             Location:
@@ -362,9 +363,9 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-indigo-50 p-4 rounded-lg shadow"
+                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
                       >
-                        <FaUserDoctor className="mr-3 h-6 w-6 text-indigo-500" />
+                        <FaUserDoctor className="mr-3 h-6 w-6 text-blue-500" />
                         <div>
                           <span className="font-semibold text-gray-700">
                             Veterinarian:
@@ -374,9 +375,9 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-pink-50 p-4 rounded-lg shadow"
+                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
                       >
-                        <PhoneCall className="mr-3 h-6 w-6 text-pink-500" />
+                        <PhoneCall className="mr-3 h-6 w-6 text-blue-500" />
                         <div>
                           <span className="font-semibold text-gray-700">
                             Phone:
@@ -388,30 +389,30 @@ export default function Component() {
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-orange-50 p-4 rounded-lg shadow"
+                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
                       >
-                        <RiServiceLine className="mr-3 h-6 w-6 text-orange-700" />
+                        <RiServiceLine className="mr-3 h-6 w-6 text-blue-500" />
                         <span className="font-semibold text-gray-700 mr-2">
                           Service:
                         </span>
                         <Badge
                           variant="secondary"
-                          className="bg-orange-200 text-orange-700"
+                          className="bg-blue-100 text-blue-700"
                         >
                           {appointment.serviceName}
                         </Badge>
                       </motion.div>
                       <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-green-50 p-4 rounded-lg shadow"
+                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
                       >
-                        <HiOutlineStatusOnline className="mr-3 h-6 w-6 text-green-500" />
+                        <HiOutlineStatusOnline className="mr-3 h-6 w-6 text-blue-500" />
                         <span className="font-semibold text-gray-700 mr-2">
                           Status:
                         </span>
                         <Badge
                           variant="outline"
-                          className="bg-green-200 text-green-700"
+                          className="bg-blue-100 text-blue-700"
                         >
                           {appointment.bookingStatus}
                         </Badge>
@@ -420,10 +421,11 @@ export default function Component() {
                     <div className="flex justify-end space-x-4 mt-6">
                       <Dialog
                         open={
-                          open && selectedBookingID === appointment.bookingID
+                          openPrescriptionDialog &&
+                          selectedBookingID === appointment.bookingID
                         }
                         onOpenChange={(isOpen) => {
-                          setOpen(isOpen);
+                          setOpenPrescriptionDialog(isOpen);
                           setSelectedBookingID(
                             isOpen ? appointment.bookingID : null
                           );
@@ -608,7 +610,10 @@ export default function Component() {
               </motion.div>
             ))}
             {/* Modal cho KoiVetBookingForm */}
-            <Dialog open={isOpenRecord} onOpenChange={setOpenRecord}>
+            <Dialog
+              open={openBookingDialog}
+              onOpenChange={setOpenBookingDialog}
+            >
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Complete Booking</DialogTitle>
