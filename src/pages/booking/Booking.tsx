@@ -4,7 +4,6 @@ import Footer from "../../components/Footer/footer";
 import { Input, Form, Button, Select, DatePicker } from "antd";
 import { useEffect, useRef, useState } from "react";
 
-import Banner from "../../components/banner";
 import api from "../../configs/axios";
 
 import {

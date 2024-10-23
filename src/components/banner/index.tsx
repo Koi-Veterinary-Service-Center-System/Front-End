@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button, Checkbox, Form, Input, Modal } from "antd";
-import { Link } from "react-router-dom";
 import TextArea from "antd/es/input/TextArea";
 import "./index.scss";
 import api from "@/configs/axios";
@@ -59,7 +58,7 @@ function Banner() {
           rhoncus quisque eget sit
         </p>
         <div className="flex gap-3">
-          <ShimmerButton href="/booking" className="shadow-2xl">
+          <ShimmerButton href="/booking" className="shadow-2xl ">
             Booking Service
           </ShimmerButton>
           <ShimmerButton className="fakeButton" onClick={handleOpenModal}>

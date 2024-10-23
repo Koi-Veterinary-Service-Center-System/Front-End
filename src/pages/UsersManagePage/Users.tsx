@@ -7,6 +7,9 @@ import UserDemographicsChart from "@/components/users/UserDemographicsChart";
 import UsersTable from "@/components/users/UsersTable";
 import UserGrowthChart from "@/components/users/UserGrowthChart";
 import Sidebar from "@/components/Sidebar/sidebar";
+import { useEffect, useState } from "react";
+import { User } from "@/types/info";
+import api from "@/configs/axios";
 
 const userStats = {
   totalUsers: 152845,
@@ -16,6 +19,23 @@ const userStats = {
 };
 
 const UsersPage = () => {
+  const [users, setUsers] = useState<User[]>([]);
+
+  const fetchUser = async () => {
+    try {
+      const response = await api.get("User/all-user", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      setUsers(response.data);
+    } catch (error: any) {
+      console.error("Failed to fetch user data:", error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
   return (
     <div className="flex h-screen bg-gray-900 text-gray-100 overflow-hidden">
       {/* BG */}
@@ -67,7 +87,6 @@ const UsersPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
             <UserGrowthChart />
             <UserActivityHeatmap />
-            <UserDemographicsChart />
           </div>
         </main>
       </div>

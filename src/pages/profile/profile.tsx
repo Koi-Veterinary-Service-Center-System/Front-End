@@ -102,6 +102,7 @@ function ProfilePage() {
           className="w-64 bg-gray-100 dark:bg-gray-800 h-screen sticky top-0"
           initial="hidden"
           animate="visible"
+          variants={sidebarVariants}
         >
           <div className="p-4">
             <Link to="/" className="flex items-center space-x-2 text-primary">
@@ -173,7 +174,7 @@ function ProfilePage() {
             <Button
               variant="default"
               size="lg"
-              className="w-full shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center"
+              className="w-full shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white"
               onClick={() => window.history.back()}
               aria-label="Go back to previous page"
             >

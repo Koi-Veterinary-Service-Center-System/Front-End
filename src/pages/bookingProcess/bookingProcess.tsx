@@ -407,7 +407,7 @@ const Process = () => {
             <Button
               variant="default"
               size="lg"
-              className="w-full shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center"
+              className="w-full shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white"
               onClick={() => window.history.back()}
               aria-label="Go back to previous page"
             >

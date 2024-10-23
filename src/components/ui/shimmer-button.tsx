@@ -17,11 +17,11 @@ export interface ShimmerButtonProps
 const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
   (
     {
-      shimmerColor = "#ffffff",
+      shimmerColor = "#FFFAF0", // Light blue for the shimmer
       shimmerSize = "0.05em",
       shimmerDuration = "3s",
       borderRadius = "100px",
-      background = "rgba(0, 0, 0, 1)",
+      background = "rgba(0, 102, 255, 1)", // Blue background
       className,
       children,
       href, // Destructure href prop
@@ -68,10 +68,10 @@ const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
         <div
           className={cn(
             "insert-0 absolute size-full",
-            "rounded-2xl px-4 py-1.5 text-sm font-medium shadow-[inset_0_-8px_10px_#ffffff1f]",
+            "rounded-2xl px-4 py-1.5 text-sm font-medium shadow-[inset_0_-8px_10px_#00BFFF1f]", // Light blue inner shadow
             "transform-gpu transition-all duration-300 ease-in-out",
-            "group-hover:shadow-[inset_0_-6px_10px_#ffffff3f]",
-            "group-active:shadow-[inset_0_-10px_10px_#ffffff3f]"
+            "group-hover:shadow-[inset_0_-6px_10px_#00BFFF3f]", // Lighter blue shadow on hover
+            "group-active:shadow-[inset_0_-10px_10px_#00BFFF3f]" // Stronger blue shadow when active
           )}
         />
 

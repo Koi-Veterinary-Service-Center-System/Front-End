@@ -5,9 +5,9 @@ import {
   Menu,
   Settings,
   ShoppingBag,
-  ShoppingCart,
   Users,
 } from "lucide-react";
+import { TbBrandBooking } from "react-icons/tb";
 import { VscFeedback } from "react-icons/vsc";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -20,7 +20,12 @@ const SIDEBAR_ITEMS = [
   { name: "Service", icon: ShoppingBag, color: "#8B5CF6", path: "/service" },
   { name: "Users", icon: Users, color: "#EC4899", path: "/users" },
   { name: "Schedules", icon: Calendar, color: "#10B981", path: "/schedules" },
-  { name: "Booking", icon: ShoppingCart, color: "#F59E0B", path: "/bookings" },
+  {
+    name: "Booking",
+    icon: TbBrandBooking,
+    color: "#F59E0B",
+    path: "/bookings",
+  },
   {
     name: "FeedBack",
     icon: VscFeedback,
