@@ -433,7 +433,11 @@ const Process = () => {
                   <Moon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <Avatar>
-                  <AvatarImage src={profile?.imageURL} alt="Profile" />
+                  <AvatarImage
+                    src={profile?.imageURL}
+                    alt="Profile"
+                    className="object-cover"
+                  />
                   <AvatarFallback>
                     {profile?.firstName?.[0]}
                     {profile?.lastName?.[0]}
@@ -466,6 +470,7 @@ const Process = () => {
                         <AvatarImage
                           src={booking.imageURL}
                           alt={booking.vetName}
+                          className="object-cover"
                         />
                         <AvatarFallback>
                           {booking.vetName.charAt(0)}
@@ -498,10 +503,7 @@ const Process = () => {
                         <span>
                           {(
                             booking.initAmount + booking.arisedMoney
-                          ).toLocaleString("en-US", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
+                          ).toLocaleString("vi-VN")}
                           vnd
                         </span>
                       </div>

@@ -78,7 +78,7 @@ export type Booking = {
   paymentType: string;
   serviceID: number;
   serviceName: string;
-  slotID: number;
+  slotID: string;
   slotStartTime: string;
   slotEndTime: string;
   slotWeekDate: string;
@@ -87,9 +87,10 @@ export type Booking = {
   phoneNumber: string;
   vetID: string;
   vetName: string;
-  koiOrPoolID: number;
   koiOrPoolName: string;
   imageUrl: string;
+  quantity: number;
+  district: string;
 };
 
 export type User = {

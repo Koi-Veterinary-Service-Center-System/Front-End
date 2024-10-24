@@ -39,12 +39,9 @@ function Banner() {
       } else {
         toast.error("Failed to add the item."); // Display error toast if the response isn't 200
       }
-    } catch (error) {
+    } catch (error: any) {
       // Catch errors and display appropriate error toast
-      toast.error(
-        error.response?.data?.errors?.IsPool[0] ||
-          "An error occurred. Please try again."
-      );
+      toast.error("Forbidden");
     }
   };
 

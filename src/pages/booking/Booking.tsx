@@ -1,36 +1,32 @@
 import "./booking.scss";
 import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
-import { Input, Form, Button, Select, DatePicker } from "antd";
+import { Input, Form, Button, Select, DatePicker, InputNumber } from "antd";
 import { useEffect, useRef, useState } from "react";
-
 import api from "../../configs/axios";
-
 import {
   Slot,
-  Service,
   Vet,
   koiOrPool,
   Payment,
   Distance,
+  Booking,
 } from "../../types/info";
 import { toast } from "sonner";
-import { Fish, Waves } from "lucide-react";
 import { MdOutlineMedicalServices } from "react-icons/md";
 import { FaLocationArrow } from "react-icons/fa";
 import { FaUserDoctor } from "react-icons/fa6";
 import { MdNoteAlt } from "react-icons/md";
 import { RiSecurePaymentFill } from "react-icons/ri";
-import { LuFish } from "react-icons/lu";
+import { RiSortNumberDesc } from "react-icons/ri";
 import { motion } from "framer-motion";
 import TextArea from "antd/es/input/TextArea";
 import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
-function Booking() {
+function BookingPage() {
   const [total, setTotal] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState("");
   const bookingRef = useRef(null);
 
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -38,7 +34,7 @@ function Booking() {
   const [services, setServices] = useState<Service[]>([]);
   const [vets, setVets] = useState<Vet[]>([]);
   const [allVets, setAllVets] = useState<Vet[]>([]); // To keep all vets
-  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [selectedVet, setSelectedVet] = useState<number | null>(null);
 
   const [isLoadingSlots, setLoadingSlots] = useState(false);
@@ -127,29 +123,6 @@ function Booking() {
     fetchDistance();
   }, []);
 
-  //Handle fetch fish or Pool
-  useEffect(() => {
-    const fetchKoiOrPools = async () => {
-      try {
-        setLoadingKoiAndPools(true);
-        const response = await api.get("/koi-or-pool/all-customer-koi-pool");
-        setKoiAndPools(response.data);
-      } catch (error) {
-        console.log("Error fetching koi and pools: ", error);
-
-        // Kiểm tra nếu lỗi có chứa response và lấy message từ response body
-        if (error.response && error.response.data) {
-          toast.info(error.response.data); // Hiển thị message từ response body
-        } else {
-          toast.error("Failed to fetch Koi or Pools data"); // Hiển thị message mặc định nếu không có message từ API
-        }
-      } finally {
-        setLoadingKoiAndPools(false);
-      }
-    };
-    fetchKoiOrPools();
-  }, []);
-
   //Fetch payment data
   useEffect(() => {
     const fetchPayments = async () => {
@@ -169,10 +142,10 @@ function Booking() {
   }, []); // Empty dependency array means this effect runs once when component mounts
 
   // Fetch available Vets for a selected slot
-  const fetchVetsBySlot = async (slotId: number) => {
+  const fetchVetsBySlot = async (slotID: string) => {
     try {
       setLoadingVets(true);
-      const response = await api.get(`/vet/available-vet/${slotId}`);
+      const response = await api.get(`/vet/available-vet/${slotID}`);
       setVets(response.data); // Update the vets list based on the slot
     } catch (error) {
       console.error("Error fetching available vets:", error);
@@ -183,11 +156,11 @@ function Booking() {
   };
 
   // Handle slot change to fetch vets
-  const handleSlotChange = (slotId: number) => {
-    setSelectedSlot(slotId);
+  const handleSlotChange = (slotID: string) => {
+    setSelectedSlot(slotID);
 
     // Fetch new vets for the selected slot
-    fetchVetsBySlot(slotId).then(() => {
+    fetchVetsBySlot(slotID).then(() => {
       // If the previously selected vet is still available in the new slot, retain it
       const currentVetId = form.getFieldValue("vet");
       if (!vets.find((vet) => vet.id === currentVetId)) {
@@ -209,14 +182,14 @@ function Booking() {
     console.log("Selected Vet Name:", selectedVetName); // Debugging
   };
 
-  const handleBooking = async (values: any) => {
+  const handleBooking = async (values: Booking) => {
     try {
       // Format the date to YYYY-MM-DD according to the system's default timezone
       const bookingDate = new Intl.DateTimeFormat("en-CA", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
-      }).format(values.pickupDate.toDate());
+      }).format(values.bookingDate.toDate());
 
       // Retrieve selected district's information
       const selectedDistrict = distances.find(
@@ -228,14 +201,14 @@ function Booking() {
 
       const bookingData = {
         note: values.note || "",
-        koiOrPoolId: values.koiOrPoolId || null,
         vetName: form.getFieldValue("vetName") || "",
         initAmount: total,
         location: fullLocation, // Use the combined location here
-        slotId: values.slot || 0,
-        serviceId: values.serviceType || 0,
-        paymentId: values.paymentMethod || 0,
+        slotID: values.slotID || 0,
+        serviceId: values.serviceName || 0,
+        paymentId: values.paymentType || 0,
         bookingDate: bookingDate,
+        quantity: values.quantity,
       };
 
       console.log("Booking Data:", bookingData);
@@ -245,7 +218,7 @@ function Booking() {
       if (response.status === 200 || response.status === 201) {
         toast.success("Booking successful!");
       }
-      navigate("/process");
+      window.location.href = "/process";
     } catch (error: any) {
       console.error("Booking error:", error);
       if (error.response && error.response.data) {
@@ -258,14 +231,14 @@ function Booking() {
 
   const calculateTota = () => {
     const selectedService = services.find(
-      (service) => service.serviceID === form.getFieldValue("serviceType")
+      (service) => service.serviceID === form.getFieldValue("serviceName")
     );
     const selectedDistance = distances.find(
       (distance) => distance.distanceID === form.getFieldValue("district")
     );
 
     if (selectedService && selectedDistance) {
-      const initAmount = selectedService.price + selectedDistance.price; // Adjust based on requirements
+      const initAmount = selectedService.price + selectedDistance.price; // Tính tổng giá trị
       setTotal(initAmount);
     } else if (selectedService) {
       setTotal(selectedService.price);
@@ -324,7 +297,7 @@ function Booking() {
               >
                 <Form.Item
                   label="Pickup Date"
-                  name="pickupDate"
+                  name="bookingDate"
                   rules={[{ required: true, message: "Please select a date" }]}
                 >
                   <DatePicker className="w-full p-2 shadow-sm" />
@@ -342,7 +315,7 @@ function Booking() {
                       Type of Services
                     </span>
                   }
-                  name="serviceType"
+                  name="serviceName"
                   rules={[
                     { required: true, message: "Please select a service" },
                   ]}
@@ -367,7 +340,7 @@ function Booking() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Form.Item label="Slot" name="slot">
+                <Form.Item label="Slot" name="slotID">
                   <Select
                     className="w-full p-0"
                     style={{ height: "50px" }}
@@ -477,8 +450,8 @@ function Booking() {
                         key={distance.distanceID}
                         value={distance.distanceID}
                       >
-                        {distance.district} - {distance.area} (${distance.price}
-                        )
+                        {distance.district} - {distance.area} ($
+                        {distance.price.toLocaleString("vi-VN")})
                       </Option>
                     ))}
                   </Select>
@@ -492,39 +465,24 @@ function Booking() {
                 <Form.Item
                   label={
                     <span className="flex items-center gap-2">
-                      <LuFish />
-                      Choose Fish Or Pool
+                      <RiSortNumberDesc />
+                      Quantity
                     </span>
                   }
-                  name="koiOrPoolId"
+                  name="quantity"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter a quantity", // Bắt lỗi khi trường bị bỏ trống
+                    },
+                    {
+                      type: "number",
+                      min: 1,
+                      message: "Quantity must be at least 1", // Bắt lỗi nếu người dùng nhập số nhỏ hơn 1
+                    },
+                  ]}
                 >
-                  <Select
-                    className="w-full p-0"
-                    style={{ height: "50px" }}
-                    loading={isLoadingKoiAndPools}
-                    placeholder="Select a fish or pool"
-                  >
-                    {/* Tùy chọn 'None' */}
-                    <Option key="none" value={null}>
-                      <div className="flex items-center gap-2">
-                        <span>None</span> {/* Hiển thị văn bản 'None' */}
-                      </div>
-                    </Option>
-
-                    {/* Các tùy chọn từ API */}
-                    {koiAndPools.map((item) => (
-                      <Option key={item.koiOrPoolID} value={item.koiOrPoolID}>
-                        <div className="flex items-center gap-2">
-                          <span>{item.name}</span>
-                          {item.isPool ? (
-                            <Waves className="text-cyan-400" />
-                          ) : (
-                            <Fish className="text-orange-500" />
-                          )}
-                        </div>
-                      </Option>
-                    ))}
-                  </Select>
+                  <InputNumber min={1} className="w-full p-2 shadow-sm" />
                 </Form.Item>
               </motion.div>
             </motion.div>
@@ -563,7 +521,7 @@ function Booking() {
                     Payment Method
                   </span>
                 }
-                name="paymentMethod"
+                name="paymentType"
                 rules={[
                   { required: true, message: "Please select a payment method" },
                 ]}
@@ -591,7 +549,7 @@ function Booking() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <h3>Total: {total.toLocaleString("vi-VN")} $</h3>{" "}
+              <h3>Total: {total.toLocaleString("vi-VN")} vnd</h3>{" "}
               {/* Định dạng số với dấu chấm phân tách hàng nghìn */}
             </motion.div>
 
@@ -617,4 +575,4 @@ function Booking() {
   );
 }
 
-export default Booking;
+export default BookingPage;

@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/scrollToTop";
 import Home from "./pages/home/home";
-import Booking from "./pages/booking/Booking";
 import Register from "./pages/register/register";
 import Login from "./pages/login/login";
 import UpdateProfile from "./pages/updateProfile/updateProfile";
@@ -31,6 +30,7 @@ import PaymentFailed from "./pages/FailedPayment/failedPayment";
 import VetCalendar from "./pages/SchedulerVet";
 import BookMPage from "./pages/BookingManagement/bookingM";
 import BookingRecord from "./pages/booking/bookingRecord";
+import BookingPage from "./pages/booking/Booking";
 
 // Add your license key here
 registerLicense("Your_License_Key_Here");
@@ -75,7 +75,7 @@ function App() {
           path="/booking"
           element={
             <PrivateRoute>
-              <Booking />
+              <BookingPage />
             </PrivateRoute>
           }
         />

@@ -316,7 +316,11 @@ function AuthButtons({ isLoggedIn, profile, handleLogout }) {
         >
           {isLoggedIn ? (
             <Avatar className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12">
-              <AvatarImage src={profile?.imageURL} alt="Profile" />
+              <AvatarImage
+                src={profile?.imageURL}
+                alt="Profile"
+                className="object-cover"
+              />
               <AvatarFallback className="text-lg">
                 {profile?.firstName?.[0]}
                 {profile?.lastName?.[0]}

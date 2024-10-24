@@ -309,8 +309,15 @@ function UpdateProfile() {
                   <Moon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <Avatar>
-                  <AvatarImage src={profile?.imageURL} alt="Profile" />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarImage
+                    src={profile?.imageURL}
+                    alt="Profile"
+                    className="object-cover"
+                  />
+                  <AvatarFallback>
+                    {profile?.firstName?.[0]}
+                    {profile?.lastName?.[0]}
+                  </AvatarFallback>
                 </Avatar>
               </div>
             </div>

@@ -15,7 +15,6 @@ import {
   Filter,
   Plus,
   Download,
-  ChevronLeft,
   Moon,
   Sun,
   MessageSquare,
@@ -24,6 +23,8 @@ import {
   CalendarClock,
   ArrowLeft,
 } from "lucide-react";
+import { VscFeedback } from "react-icons/vsc";
+import { CiViewList } from "react-icons/ci";
 import { Checkbox, Form, Input, Modal } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import ModalDelete from "@/components/ModalDelete/ModalDelete/ModalDelete";
@@ -303,7 +304,11 @@ const History = () => {
                   <Moon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <Avatar>
-                  <AvatarImage src={profile?.imageURL} alt="Profile" />
+                  <AvatarImage
+                    src={profile?.imageURL}
+                    alt="Profile"
+                    className="object-cover"
+                  />
                   <AvatarFallback>
                     {profile?.firstName?.[0]}
                     {profile?.lastName?.[0]}
@@ -414,12 +419,12 @@ const History = () => {
                               </span>
                             )}
                           </td>
-                          <td className="py-2">
+                          <td className="py-2 flex text-lg gap-3">
+                            <CiViewList className="text-yellow-300" />
+
                             {booking.bookingStatus !== "Cancelled" && ( // Check if the status is not "Cancelled"
                               <Link to={`/feedback/${booking.bookingID}`}>
-                                <Button variant="outline" size="sm">
-                                  Feedback
-                                </Button>
+                                <VscFeedback className="text-blue-500" />
                               </Link>
                             )}
                           </td>
