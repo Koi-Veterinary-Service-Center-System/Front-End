@@ -1,21 +1,61 @@
 import { UserCheck, UserPlus, UsersIcon, UserX } from "lucide-react";
 import { motion } from "framer-motion";
-import HeaderAd from "@/components/common/header";
+import HeaderAd from "@/components/Header/headerAd";
 import StatCard from "@/components/common/StatCard";
 import UserActivityHeatmap from "@/components/users/UserActivityHeatmap";
-import UserDemographicsChart from "@/components/users/UserDemographicsChart";
 import UsersTable from "@/components/users/UsersTable";
 import UserGrowthChart from "@/components/users/UserGrowthChart";
 import Sidebar from "@/components/Sidebar/sidebar";
-
-const userStats = {
-  totalUsers: 152845,
-  newUsersToday: 243,
-  activeUsers: 98520,
-  churnRate: "2.4%",
-};
+import { useEffect, useState } from "react";
+import { User } from "@/types/info";
+import api from "@/configs/axios";
+import dayjs from "dayjs"; // Ensure you have installed dayjs for date comparison
 
 const UsersPage = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [newUsersToday, setNewUsersToday] = useState(0);
+  const [churnRate, setChurnRate] = useState(0);
+  const [activeUsers, setActiveUsers] = useState(0);
+
+  const fetchUser = async () => {
+    try {
+      const response = await api.get("User/all-user", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+
+      const allUsers = response.data;
+      const today = dayjs().format("YYYY-MM-DD");
+      const oneMonthAgo = dayjs().subtract(30, "day").format("YYYY-MM-DD");
+
+      // Tổng số người dùng
+      setTotalUsers(allUsers.length);
+
+      // Người dùng mới hôm nay
+      const newUsers = allUsers.filter(
+        (user) => dayjs(user.created_at).format("YYYY-MM-DD") === today
+      );
+      setNewUsersToday(newUsers.length);
+
+      // Người dùng không hoạt động trong 30 ngày => Tính churn rate
+      const inactiveUsers = allUsers.filter((user) =>
+        dayjs(user.last_login).isBefore(oneMonthAgo)
+      );
+      const churnRateCalculated = (inactiveUsers.length / totalUsers) * 100;
+      setChurnRate(churnRateCalculated.toFixed(2)); // Churn rate dạng phần trăm
+
+      // Người dùng đang hoạt động (đăng nhập trong 30 ngày qua)
+      const activeUsersCount = allUsers.length - inactiveUsers.length;
+      setActiveUsers(activeUsersCount);
+    } catch (error: any) {
+      console.error("Failed to fetch user data:", error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
   return (
     <div className="flex h-screen bg-gray-900 text-gray-100 overflow-hidden">
       {/* BG */}
@@ -38,25 +78,25 @@ const UsersPage = () => {
             <StatCard
               name="Total Users"
               icon={UsersIcon}
-              value={userStats.totalUsers.toLocaleString()}
+              value={totalUsers.toLocaleString()}
               color="#6366F1"
             />
             <StatCard
               name="New Users Today"
               icon={UserPlus}
-              value={userStats.newUsersToday}
+              value={newUsersToday}
               color="#10B981"
             />
             <StatCard
               name="Active Users"
               icon={UserCheck}
-              value={userStats.activeUsers.toLocaleString()}
+              value={activeUsers.toLocaleString()}
               color="#F59E0B"
             />
             <StatCard
               name="Churn Rate"
               icon={UserX}
-              value={userStats.churnRate}
+              value={`${churnRate}%`}
               color="#EF4444"
             />
           </motion.div>
@@ -67,11 +107,11 @@ const UsersPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
             <UserGrowthChart />
             <UserActivityHeatmap />
-            <UserDemographicsChart />
           </div>
         </main>
       </div>
     </div>
   );
 };
+
 export default UsersPage;

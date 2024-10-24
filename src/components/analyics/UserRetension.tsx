@@ -25,7 +25,7 @@ const UserRetention = () => {
       });
       setFeedBack(response.data);
     } catch (error: any) {
-      setError(error.message);
+      setError(error.response.data);
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,7 @@ const UserRetention = () => {
       {loading ? (
         <p className="text-gray-100">Loading...</p>
       ) : error ? (
-        <p className="text-red-500">Error: {error}</p>
+        <p className="text-blue-500">{error}</p>
       ) : (
         <div style={{ width: "100%", height: 300 }}>
           <ResponsiveContainer>

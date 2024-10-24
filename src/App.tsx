@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/scrollToTop";
 import Home from "./pages/home/home";
-import Booking from "./pages/booking/Booking";
 import Register from "./pages/register/register";
 import Login from "./pages/login/login";
 import UpdateProfile from "./pages/updateProfile/updateProfile";
@@ -10,12 +9,11 @@ import OverviewPage from "./pages/OverviewPage/overView";
 import Service from "./pages/ServicePage/service";
 import UsersPage from "./pages/UsersManagePage/Users";
 import SchedulesMPage from "./pages/SchedulesMPage/SchedulesMPage";
-import SchedulesV from "./pages/SchedulerVet";
 import AllService from "./pages/AllService/allService";
 import ErrorBoundary from "./errorBoudary";
 import { registerLicense } from "@syncfusion/ej2-base";
 import "./index.css";
-import AnalyticsPage from "./pages/AnalyticsPage/AnalyticsPage";
+import AnalyticsPage from "./pages/FeedBack/FeedbackMPage";
 import SettingsPage from "./pages/settingpage/setting";
 import FishPrescription from "./pages/prescriptions/prescription";
 import { Toaster } from "sonner";
@@ -29,6 +27,10 @@ import AboutUs from "./pages/About Us/aboutUs";
 import ContactUs from "./pages/Contact Us/contactUs";
 import PaymentSuccessful from "./pages/SuccessPayment/paymentSuccess";
 import PaymentFailed from "./pages/FailedPayment/failedPayment";
+import VetCalendar from "./pages/SchedulerVet";
+import BookMPage from "./pages/BookingManagement/bookingM";
+import BookingRecord from "./pages/booking/bookingRecord";
+import BookingPage from "./pages/booking/Booking";
 
 // Add your license key here
 registerLicense("Your_License_Key_Here");
@@ -73,7 +75,7 @@ function App() {
           path="/booking"
           element={
             <PrivateRoute>
-              <Booking />
+              <BookingPage />
             </PrivateRoute>
           }
         />
@@ -126,6 +128,14 @@ function App() {
           }
         />
         <Route
+          path="/record"
+          element={
+            <PrivateRoute requiredRoles={["Vet"]}>
+              <BookingRecord />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/admin"
           element={
             <PrivateRoute requiredRoles={["Manager", "Staff"]}>
@@ -166,10 +176,18 @@ function App() {
           }
         />
         <Route
+          path="/bookings"
+          element={
+            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
+              <BookMPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/schedulesV"
           element={
             <PrivateRoute requiredRoles={["Vet", "Customer"]}>
-              <SchedulesV />
+              <VetCalendar />
             </PrivateRoute>
           }
         />

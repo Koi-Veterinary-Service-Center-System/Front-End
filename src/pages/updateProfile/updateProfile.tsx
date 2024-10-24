@@ -24,6 +24,7 @@ import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "../../configs/firebase";
 import { toast } from "sonner";
 import {
+  ArrowLeft,
   CalendarClock,
   ChevronLeft,
   MessageSquare,
@@ -47,6 +48,12 @@ function UpdateProfile() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const backgroundStyle = {
+    backgroundImage: "url('src/assets/images/subtle-prism.png')", // Add the path to your image here
+    backgroundSize: "cover", // Makes the background cover the entire area
+    backgroundPosition: "center", // Centers the background
+    backgroundRepeat: "no-repeat", // Ensures the image doesn't repeat
+  };
 
   const getBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -134,23 +141,39 @@ function UpdateProfile() {
     try {
       let imageURL = profile?.imageURL || "";
 
+      // Kiểm tra nếu có file ảnh mới được tải lên thì upload ảnh mới
       if (fileList.length > 0 && fileList[0].originFileObj) {
         const file = fileList[0].originFileObj;
         imageURL = await uploadFileToFirebase(file);
       }
 
+      // Gán lại các giá trị từ profile cũ nếu người dùng không nhập thông tin mới
       const updatedProfile = {
-        ...values,
-        gender: values.gender === "Male" ? true : false,
-        imageURL,
+        userName: values.userName || profile?.userName,
+        firstName: values.firstName || profile?.firstName,
+        lastName: values.lastName || profile?.lastName,
+        phoneNumber: values.phoneNumber || profile?.phoneNumber,
+        email: values.email || profile?.email, // Người dùng bắt buộc nhập email nếu muốn cập nhật
+        address: values.address || profile?.address,
+        gender:
+          values.gender === undefined
+            ? profile?.gender === "Male"
+              ? true
+              : false
+            : values.gender === "Male"
+            ? true
+            : false,
+        imageURL, // Dùng URL ảnh mới nếu có, nếu không lấy từ profile cũ
       };
 
+      // Gửi request cập nhật profile
       await api.put("User/update-profile", updatedProfile, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
+      // Lấy lại thông tin profile đã cập nhật và điều hướng về trang profile
       fetchProfile();
       navigate("/profile", { state: { updateProfileSuccess: true } });
     } catch (error) {
@@ -250,13 +273,16 @@ function UpdateProfile() {
               </li>
             </ul>
           </nav>
-          <div className="absolute bottom-4 left-4">
+          <div className="absolute bottom-6 left-6">
             <Button
-              variant="outline"
-              className="w-full"
+              variant="default"
+              size="lg"
+              className="w-full shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white"
               onClick={() => window.history.back()}
+              aria-label="Go back to previous page"
             >
-              <ChevronLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Back
             </Button>
           </div>
         </motion.aside>
@@ -266,8 +292,9 @@ function UpdateProfile() {
           initial="hidden"
           animate="visible"
           variants={contentVariants}
+          style={backgroundStyle}
         >
-          <header className="bg-white dark:bg-gray-800 shadow">
+          <header className="bg-white dark:bg-gray-800 shadow  bg-gradient-to-br from-blue-50 to-blue-400">
             <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Update Profile
@@ -282,8 +309,15 @@ function UpdateProfile() {
                   <Moon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <Avatar>
-                  <AvatarImage src={profile?.imageURL} alt="Profile" />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarImage
+                    src={profile?.imageURL}
+                    alt="Profile"
+                    className="object-cover"
+                  />
+                  <AvatarFallback>
+                    {profile?.firstName?.[0]}
+                    {profile?.lastName?.[0]}
+                  </AvatarFallback>
                 </Avatar>
               </div>
             </div>

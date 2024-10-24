@@ -1,4 +1,3 @@
-import HeaderAd from "@/components/common/header";
 import ConnectedAccounts from "@/components/settings/ConnectedAccounts";
 import DangerZone from "@/components/settings/DangerZone";
 import Notifications from "@/components/settings/Notifications";
@@ -15,7 +14,6 @@ const SettingsPage = () => {
       </div>
       <Sidebar />
       <div className="flex-1 overflow-auto relative z-10">
-        <HeaderAd title="Settings" />
         <main className="max-w-4xl mx-auto py-6 px-4 lg:px-8">
           <ProfileAd />
           <Notifications />

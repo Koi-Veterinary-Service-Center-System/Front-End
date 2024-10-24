@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button, Checkbox, Form, Input, Modal } from "antd";
-import { Link } from "react-router-dom";
 import TextArea from "antd/es/input/TextArea";
 import "./index.scss";
 import api from "@/configs/axios";
@@ -40,12 +39,9 @@ function Banner() {
       } else {
         toast.error("Failed to add the item."); // Display error toast if the response isn't 200
       }
-    } catch (error) {
+    } catch (error: any) {
       // Catch errors and display appropriate error toast
-      toast.error(
-        error.response?.data?.errors?.IsPool[0] ||
-          "An error occurred. Please try again."
-      );
+      toast.error("Forbidden");
     }
   };
 
@@ -59,7 +55,7 @@ function Banner() {
           rhoncus quisque eget sit
         </p>
         <div className="flex gap-3">
-          <ShimmerButton href="/booking" className="shadow-2xl">
+          <ShimmerButton href="/booking" className="shadow-2xl ">
             Booking Service
           </ShimmerButton>
           <ShimmerButton className="fakeButton" onClick={handleOpenModal}>

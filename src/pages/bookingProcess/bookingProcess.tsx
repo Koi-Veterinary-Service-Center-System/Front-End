@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import api from "../../configs/axios";
 import { Booking, Profile } from "../../types/info";
 import {
-  ChevronLeft,
   Moon,
   Sun,
   MessageSquare,
@@ -19,6 +18,7 @@ import {
   DollarSign,
   Loader2,
   Activity,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -39,7 +39,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 
 const statusSteps = [
   {
@@ -53,7 +52,7 @@ const statusSteps = [
     color: "bg-blue-400",
   },
   {
-    label: "On-going",
+    label: "Ongoing",
     icon: <Activity className="h-4 w-4" />,
     color: "bg-purple-400",
   },
@@ -63,7 +62,7 @@ const statusSteps = [
     color: "bg-green-400",
   },
   {
-    label: "Received Money",
+    label: "Received_Money",
     icon: <DollarSign className="h-4 w-4" />,
     color: "bg-emerald-400",
   },
@@ -74,8 +73,11 @@ const StatusComponent = ({ currentStatus }: { currentStatus?: string }) => {
     (step) => step.label === currentStatus
   );
 
-  // Tính toán chiều dài của đường chạy
-  const progressPercentage = (currentIndex / (statusSteps.length - 1)) * 100;
+  // Tính toán chiều dài của đường chạy, ngừng ở "Received_Money"
+  const progressPercentage =
+    currentIndex === statusSteps.length - 1
+      ? 100
+      : (currentIndex / (statusSteps.length - 1)) * 100;
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -136,10 +138,16 @@ const Process = () => {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
     null
   );
+  const backgroundStyle = {
+    backgroundImage: "url('src/assets/images/subtle-prism.png')", // Add the path to your image here
+    backgroundSize: "cover", // Makes the background cover the entire area
+    backgroundPosition: "center", // Centers the background
+    backgroundRepeat: "no-repeat", // Ensures the image doesn't repeat
+  };
 
   // Fetch all booking and calculate totals
   // Fetch all booking and calculate totals based on the user's role
-  const fetchBooking = async (userId: string) => {
+  const fetchBooking = async () => {
     try {
       // Determine the endpoint based on user role
       const endpoint =
@@ -152,14 +160,13 @@ const Process = () => {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        params: { userId },
       });
 
       // Set the bookings data
       const fetchedBookings = response.data;
       setBookings(fetchedBookings);
       console.log("Fetched Bookings:", fetchedBookings);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Fetch error:", error); // Log the entire error object
       const errorMessage =
         error.response?.data?.message || "Failed to fetch bookings";
@@ -181,7 +188,7 @@ const Process = () => {
 
       console.log("Profile fetched:", response.data);
       setProfile(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching profile:", error); // Log full error
       const errorMessage =
         error.response?.data?.message || "Failed to fetch profile data";
@@ -205,14 +212,14 @@ const Process = () => {
     fetchBooking();
   }, []);
 
-  const handlePayOnline = async (bookingID: Booking) => {
+  const handlePayOnline = async (bookingID: string) => {
     try {
       // Make the POST request to the API endpoint with bookingId as a query parameter
       const response = await api.post(`/payment/create-paymentUrl`, null, {
         params: { bookingID },
       });
 
-      // If the request is successful, process the response (e.g., redirect to payment URL)
+      // If the request is successful, process the response
       if (response.status === 200 && response.data.paymentUrl) {
         window.location.href = response.data.paymentUrl; // Redirect to the payment URL
 
@@ -236,8 +243,8 @@ const Process = () => {
   };
 
   const handleUpdateStatus = async (
-    bookingID: Booking,
-    bookingStatus: Booking
+    bookingID: string,
+    bookingStatus: string
   ) => {
     try {
       // Make a PATCH request to the API endpoint
@@ -256,9 +263,9 @@ const Process = () => {
       } else {
         toast.error("Failed to update booking status.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating booking status:", error);
-      toast.error("An error occurred while updating the booking status.");
+      toast.error(error.response.data);
     }
   };
 
@@ -283,8 +290,8 @@ const Process = () => {
       toast.success(`Booking ${selectedBookingId} has been cancelled`);
       setIsCancelDialogOpen(false);
       fetchBooking(); // Refresh bookings after cancellation
-    } catch (error) {
-      toast.error("Failed to cancel booking.");
+    } catch (error: any) {
+      toast.error(error.response.data);
     }
   };
 
@@ -302,6 +309,8 @@ const Process = () => {
     switch (status.toLowerCase()) {
       case "confirmed":
         return "bg-green-100 text-green-800";
+      case "received_money":
+        return "bg-green-400 text-green-900";
       case "completed":
         return "bg-green-100 text-green-800";
       case "pending":
@@ -310,6 +319,8 @@ const Process = () => {
         return "bg-red-100 text-red-800";
       case "scheduled":
         return "bg-blue-100 text-blue-800";
+      case "ongoing":
+        return "bg-purple-100 text-purple-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -390,19 +401,22 @@ const Process = () => {
               </li>
             </ul>
           </nav>
-          <div className="absolute bottom-4 left-4">
+          <div className="absolute bottom-6 left-6">
             <Button
-              variant="outline"
-              className="w-full"
+              variant="default"
+              size="lg"
+              className="w-full shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white"
               onClick={() => window.history.back()}
+              aria-label="Go back to previous page"
             >
-              <ChevronLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Back
             </Button>
           </div>
         </motion.aside>
 
-        <main className="flex-1">
-          <header className="bg-white dark:bg-gray-800 shadow">
+        <main className="flex-1" style={backgroundStyle}>
+          <header className=" dark:bg-gray-800 shadow bg-gradient-to-br from-blue-50 to-blue-400">
             <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Services
@@ -417,7 +431,11 @@ const Process = () => {
                   <Moon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <Avatar>
-                  <AvatarImage src={profile?.imageURL} alt="Profile" />
+                  <AvatarImage
+                    src={profile?.imageURL}
+                    alt="Profile"
+                    className="object-cover"
+                  />
                   <AvatarFallback>
                     {profile?.firstName?.[0]}
                     {profile?.lastName?.[0]}
@@ -427,165 +445,163 @@ const Process = () => {
             </div>
           </header>
 
-          <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-                Booking Details
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {bookings.length > 0 ? (
-                  bookings.map((booking) => (
-                    <Card key={booking.bookingID} className="overflow-hidden">
-                      <CardHeader className="pb-4">
-                        <div className="flex justify-between items-center">
-                          <CardTitle className="text-lg">
-                            {booking.serviceName}
-                          </CardTitle>
-                          <Badge
-                            className={getStatusColor(booking.bookingStatus)}
-                          >
-                            {booking.bookingStatus}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center mb-4">
-                          <Avatar className="h-10 w-10 mr-3">
-                            <AvatarImage
-                              src={booking.vetImageURL}
-                              alt={booking.vetName}
-                            />
-                            <AvatarFallback>
-                              {booking.vetName.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-semibold">{booking.vetName}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              Veterinarian
-                            </p>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center text-sm">
-                            <CalendarIcon className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{booking.bookingDate}</span>
-                          </div>
-                          <div className="flex items-center text-sm">
-                            <ClockIcon className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>
-                              {booking.slotStartTime} - {booking.slotEndTime}
-                            </span>
-                          </div>
-                          <div className="flex items-center text-sm">
-                            <MapPinIcon className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{booking.location}</span>
-                          </div>
-                          <div className="flex items-center text-sm">
-                            <CreditCardIcon className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>${booking.totalAmount.toFixed(2)}</span>
-                          </div>
-                        </div>
-                        <StatusComponent
-                          currentStatus={booking.bookingStatus}
+          <div className="grid grid-cols-1 gap-6 m-5">
+            {bookings.length > 0 ? (
+              bookings.map((booking) => (
+                <Card
+                  key={booking.bookingID}
+                  className="overflow-hidden col-span-full"
+                >
+                  <CardHeader className="pb-4">
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-lg">
+                        {booking.serviceName}
+                      </CardTitle>
+                      <Badge className={getStatusColor(booking.bookingStatus)}>
+                        {booking.bookingStatus}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center mb-4">
+                      <Avatar className="h-10 w-10 mr-3">
+                        <AvatarImage
+                          src={booking.imageUrl}
+                          alt={booking.vetName}
+                          className="object-cover"
                         />
-                      </CardContent>
-                      <CardFooter className="flex justify-between">
-                        {profile?.role === "Staff" ? (
-                          // Buttons for staff to update status
-                          <>
-                            <Button
-                              variant="outline"
-                              onClick={() =>
-                                handleUpdateStatus(
-                                  booking.bookingID,
-                                  "Scheduled"
-                                )
-                              }
-                            >
-                              Set Scheduled
-                            </Button>
-                            <Button
-                              variant="outline"
-                              onClick={() =>
-                                handleUpdateStatus(
-                                  booking.bookingID,
-                                  "Completed"
-                                )
-                              }
-                            >
-                              Set Completed
-                            </Button>
-                          </>
+                        <AvatarFallback>
+                          {booking.vetName.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-semibold">{booking.vetName}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Veterinarian
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center text-sm">
+                        <CalendarIcon className="h-4 w-4 mr-2 text-gray-500" />
+                        <span>{booking.slotWeekDateAtBooking}</span>
+                      </div>
+                      <div className="flex items-center text-sm">
+                        <ClockIcon className="h-4 w-4 mr-2 text-gray-500" />
+                        <span>
+                          {booking.slotStartTimeAtBooking} -{" "}
+                          {booking.slotEndTimeAtBooking}
+                        </span>
+                      </div>
+                      <div className="flex items-center text-sm">
+                        <MapPinIcon className="h-4 w-4 mr-2 text-gray-500" />
+                        <span>{booking.location}</span>
+                      </div>
+                      <div className="flex items-center text-sm">
+                        <CreditCardIcon className="h-4 w-4 mr-2 text-gray-500" />
+                        <span>
+                          {(
+                            booking.initAmount + booking.arisedMoney
+                          ).toLocaleString("vi-VN")}
+                          vnd
+                        </span>
+                      </div>
+                    </div>
+                    <StatusComponent currentStatus={booking.bookingStatus} />
+                  </CardContent>
+                  <CardFooter className="flex justify-between">
+                    {profile?.role === "Staff" ? (
+                      <>
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            handleUpdateStatus(booking.bookingID, "Scheduled")
+                          }
+                        >
+                          Set Scheduled
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            handleUpdateStatus(booking.bookingID, "Completed")
+                          }
+                        >
+                          Set Completed
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        {[
+                          "Scheduled",
+                          "Completed",
+                          "Ongoing",
+                          "Received_Money",
+                        ].includes(booking.bookingStatus) ? (
+                          <Button
+                            className="bg-blue-400"
+                            variant="outline"
+                            onClick={() =>
+                              handleUpdateStatus(booking.bookingID, "Success")
+                            }
+                            disabled={[
+                              "Pending",
+                              "Scheduled",
+                              "Ongoing",
+                              "Completed",
+                            ].includes(booking.bookingStatus)}
+                          >
+                            Confirm to Success
+                          </Button>
                         ) : (
-                          // Conditional buttons for customers
-                          <>
-                            {["Scheduled", "Completed"].includes(
-                              booking.bookingStatus
-                            ) ? (
-                              <Button
-                                className="bg-blue-400"
-                                variant="outline"
-                                onClick={() =>
-                                  handleUpdateStatus(
-                                    booking.bookingID,
-                                    "Success"
-                                  )
-                                }
-                              >
-                                Confirm to Success
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="outline"
-                                onClick={() =>
-                                  handlePayOnline(booking.bookingID)
-                                }
-                              >
-                                Pay Online
-                              </Button>
-                            )}
-                            <Dialog
-                              open={isCancelDialogOpen}
-                              onOpenChange={setIsCancelDialogOpen}
-                            >
-                              <DialogTrigger asChild>
-                                <Button
-                                  variant="destructive"
-                                  onClick={() =>
-                                    openCancelDialog(booking.bookingID)
-                                  }
-                                >
-                                  Cancel Booking
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Cancel Booking</DialogTitle>
-                                </DialogHeader>
-                                <p>
-                                  Are you sure you want to cancel this booking?
-                                </p>
-                                <Button
-                                  className="mt-4 w-full bg-red-600"
-                                  onClick={handleCancelBooking}
-                                >
-                                  Confirm Cancel
-                                </Button>
-                              </DialogContent>
-                            </Dialog>
-                          </>
+                          <Button
+                            variant="outline"
+                            onClick={() => handlePayOnline(booking.bookingID)}
+                          >
+                            Pay Online
+                          </Button>
                         )}
-                      </CardFooter>
-                    </Card>
-                  ))
-                ) : (
-                  <p className="text-gray-500 dark:text-gray-400">
-                    No bookings available.
-                  </p>
-                )}
-              </div>
-            </div>
+                        <Dialog
+                          open={isCancelDialogOpen}
+                          onOpenChange={setIsCancelDialogOpen}
+                        >
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              onClick={() =>
+                                openCancelDialog(booking.bookingID)
+                              }
+                              disabled={[
+                                "Ongoing",
+                                "Completed",
+                                "Received_Money",
+                              ].includes(booking.bookingStatus)}
+                            >
+                              Cancel Booking
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Cancel Booking</DialogTitle>
+                            </DialogHeader>
+                            <p>Are you sure you want to cancel this booking?</p>
+                            <Button
+                              className="mt-4 w-full bg-red-600"
+                              onClick={handleCancelBooking}
+                            >
+                              Confirm Cancel
+                            </Button>
+                          </DialogContent>
+                        </Dialog>
+                      </>
+                    )}
+                  </CardFooter>
+                </Card>
+              ))
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400">
+                No bookings available.
+              </p>
+            )}
           </div>
         </main>
       </div>

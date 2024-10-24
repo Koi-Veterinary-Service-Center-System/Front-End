@@ -1,10 +1,11 @@
-import HeaderAd from "@/components/common/header";
+import HeaderAd from "@/components/Header/headerAd";
 import OverviewCards from "@/components/analyics/OverviewCards";
 import RevenueChart from "@/components/analyics/RevenueChart";
 import ChannelPerformance from "@/components/analyics/ChannelPerformance";
 import ProductPerformance from "@/components/analyics/ProductPerformance";
 import UserRetention from "@/components/analyics/UserRetension";
 import Sidebar from "@/components/Sidebar/sidebar";
+import FeedbackTable from "@/components/FeebBackManage/feedbackTable";
 
 const AnalyticsPage = () => {
   return (
@@ -19,6 +20,7 @@ const AnalyticsPage = () => {
 
         <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8">
           <OverviewCards />
+          <FeedbackTable />
           <RevenueChart />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">

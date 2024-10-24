@@ -6,9 +6,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Calendar, Clock, FishIcon } from "lucide-react";
+import { Calendar, Clock, FishIcon, Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link, useParams } from "react-router-dom";
+import { SiProcesswire } from "react-icons/si";
 
 export default function PaymentSuccessful() {
   const { bookingID } = useParams();
@@ -17,8 +18,8 @@ export default function PaymentSuccessful() {
   console.log("Booking ID from URL:", bookingID);
 
   const bookingDetails = {
-    service: "Annual Check-up",
-    date: "April 15, 2024",
+    service: "An Check-up",
+    date: "April 21, 2024",
     time: "2:30 PM",
     petName: "Goldie",
   };
@@ -97,35 +98,49 @@ export default function PaymentSuccessful() {
           </CardHeader>
           <CardContent className="text-center">
             <motion.p className="text-lg mb-6" variants={itemVariants}>
-              Thank you for booking with Koi Veterinary Services
+              Thank you for booking with KoiNe Services
             </motion.p>
-            <div className="space-y-4">
-              {[
-                { icon: Calendar, label: "Date", value: bookingDetails.date },
-                { icon: Clock, label: "Time", value: bookingDetails.time },
-                { icon: FishIcon, label: "Koi", value: bookingDetails.petName },
-                { icon: null, label: "Service", value: bookingDetails.service },
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="flex items-center justify-between"
-                  variants={itemVariants}
-                >
-                  <span className="flex items-center text-gray-600">
-                    {item.icon && <item.icon className="mr-2 h-5 w-5" />}
-                    {item.label}:
-                  </span>
-                  <span className="font-semibold">{item.value}</span>
-                </motion.div>
-              ))}
-            </div>
           </CardContent>
-          <CardFooter className="flex justify-center">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button className="bg-blue-500 hover:bg-blue-600 text-white">
-                <Link to="/">Return to Home</Link>
-              </Button>
-            </motion.div>
+          <CardFooter className="bg-gray-50 p-4">
+            <div className="w-full">
+              <motion.div
+                className="flex flex-col sm:flex-row justify-center items-stretch gap-4 sm:gap-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1"
+                >
+                  <Button
+                    className="w-full h-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-300 group"
+                    size="sm"
+                  >
+                    <Home className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                    <Link to="/" className="flex items-center text-sm">
+                      Return to Home
+                    </Link>
+                  </Button>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1"
+                >
+                  <Button
+                    className="w-full h-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white shadow-md hover:shadow-lg transition-all duration-300 group"
+                    size="sm"
+                  >
+                    <SiProcesswire className="mr-2 h-4 w-4 transition-transform group-hover:rotate-180" />
+                    <Link to="/process" className="flex items-center text-sm">
+                      Return to Booking
+                    </Link>
+                  </Button>
+                </motion.div>
+              </motion.div>
+            </div>
           </CardFooter>
         </Card>
       </motion.div>

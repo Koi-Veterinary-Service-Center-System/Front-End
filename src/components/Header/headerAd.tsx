@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import api from "@/configs/axios"; // Đảm bảo bạn đã config axios
 
-export default function HeaderAd({ title }) {
+export default function HeaderAd({ title }: { title: string }) {
   const [userProfile, setUserProfile] = useState({
     userName: "",
     firstName: "",
     lastName: "",
     role: "",
+    imageURL: "",
   });
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export default function HeaderAd({ title }) {
   return (
     <header className="bg-gray-800 bg-opacity-50 border-b">
       <div className="container py-1">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between ml-2">
           <div className="flex-col  items-center space-y-2">
             <h1 className="text-2xl font-semibold text-blue-500">
               Hi, {userProfile.firstName} {userProfile.lastName}
@@ -61,12 +62,15 @@ export default function HeaderAd({ title }) {
               <span className="sr-only">Messages</span>
             </Button>
             <div className="flex items-center space-x-3">
-              <Avatar>
+              <Avatar className="w-16 h-16">
+                {" "}
+                {/* Điều chỉnh kích thước avatar */}
                 <AvatarImage
                   src={userProfile.imageURL || "/placeholder.svg"}
                   alt={userProfile.userName}
+                  className="w-full h-full object-cover rounded-full"
                 />
-                <AvatarFallback className="bg-blue-500 text-white">
+                <AvatarFallback className="w-full h-full bg-blue-500 text-white text-2xl flex items-center justify-center rounded-full">
                   {userProfile?.firstName?.[0]}
                   {userProfile?.lastName?.[0]}
                 </AvatarFallback>

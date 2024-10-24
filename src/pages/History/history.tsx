@@ -15,14 +15,16 @@ import {
   Filter,
   Plus,
   Download,
-  ChevronLeft,
   Moon,
   Sun,
   MessageSquare,
   Store,
   User,
   CalendarClock,
+  ArrowLeft,
 } from "lucide-react";
+import { VscFeedback } from "react-icons/vsc";
+import { CiViewList } from "react-icons/ci";
 import { Checkbox, Form, Input, Modal } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import ModalDelete from "@/components/ModalDelete/ModalDelete/ModalDelete";
@@ -48,6 +50,12 @@ const History = () => {
   const [bookings, setBookings] = useState<Booking[]>([]); // Changed to array
   const [totalFishKoi, setTotalFishKoi] = useState(0);
   const [totalBookings, setTotalBookings] = useState(0);
+  const backgroundStyle = {
+    backgroundImage: "url('src/assets/images/subtle-prism.png')", // Add the path to your image here
+    backgroundSize: "cover", // Makes the background cover the entire area
+    backgroundPosition: "center", // Centers the background
+    backgroundRepeat: "no-repeat", // Ensures the image doesn't repeat
+  };
 
   // Fetch all booking and calculate totals
   const fetchBooking = async (userId?: string) => {
@@ -266,19 +274,22 @@ const History = () => {
               </li>
             </ul>
           </nav>
-          <div className="absolute bottom-4 left-4">
+          <div className="absolute bottom-6 left-6">
             <Button
-              variant="outline"
-              className="w-full"
+              variant="default"
+              size="lg"
+              className="w-full shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white"
               onClick={() => window.history.back()}
+              aria-label="Go back to previous page"
             >
-              <ChevronLeft className="mr-2 h-4 w-4" /> Back
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Back
             </Button>
           </div>
         </motion.aside>
 
-        <main className="flex-1">
-          <header className="bg-white dark:bg-gray-800 shadow">
+        <main className="flex-1" style={backgroundStyle}>
+          <header className="bg-white dark:bg-gray-800 shadow  bg-gradient-to-br from-blue-50 to-blue-400">
             <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Services
@@ -293,7 +304,11 @@ const History = () => {
                   <Moon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <Avatar>
-                  <AvatarImage src={profile?.imageURL} alt="Profile" />
+                  <AvatarImage
+                    src={profile?.imageURL}
+                    alt="Profile"
+                    className="object-cover"
+                  />
                   <AvatarFallback>
                     {profile?.firstName?.[0]}
                     {profile?.lastName?.[0]}
@@ -394,22 +409,24 @@ const History = () => {
                           <td className="py-2">{booking.bookingDate}</td>
                           <td className="py-2">
                             {booking.bookingStatus.toLowerCase() ===
-                            "completed" ? (
+                            "succeeded" ? (
                               <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
                                 {booking.bookingStatus}
                               </span>
                             ) : (
-                              <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/10">
+                              <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
                                 {booking.bookingStatus}
                               </span>
                             )}
                           </td>
-                          <td className="py-2">
-                            <Link to={`/feedback/${booking.bookingID}`}>
-                              <Button variant="outline" size="sm">
-                                Feedback
-                              </Button>
-                            </Link>
+                          <td className="py-2 flex text-lg gap-3">
+                            <CiViewList className="text-yellow-300" />
+
+                            {booking.bookingStatus !== "Cancelled" && ( // Check if the status is not "Cancelled"
+                              <Link to={`/feedback/${booking.bookingID}`}>
+                                <VscFeedback className="text-blue-500" />
+                              </Link>
+                            )}
                           </td>
                         </tr>
                       ))}

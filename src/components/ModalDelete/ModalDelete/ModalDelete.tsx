@@ -32,7 +32,7 @@ export default function ModalDelete({
     setError(null);
     try {
       // API call to delete the koi or pool
-      await api.delete(`/koi-or-pool/delete-koiorpool/${koiOrPoolID}`, {
+      await api.patch(`/koi-or-pool/soft-delete/${koiOrPoolID}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       onDeleteSuccess(); // Trigger the success callback to refresh or update the data

@@ -37,6 +37,8 @@ export type services = {
   description: string;
   price: number;
   estimatedDuration: number;
+  imageURL: string;
+  quantityPrice: number;
 };
 
 export type Distance = {
@@ -48,7 +50,7 @@ export type Distance = {
 
 export type vetSlots = {
   isBook: boolean;
-  slotID: string;
+  slotID: number;
   slotStartTime: string; // Set as string for any valid time format
   slotEndTime: string; // Similarly set as string
   weekDate: string; // Set as string to allow various days
@@ -69,14 +71,25 @@ export type Booking = {
   bookingDate: string;
   location: string;
   note: string;
-  totalAmount: number;
+  initAmount: number;
+  isPaid: boolean;
+  hasPres: boolean;
+  paymentTypeAtBooking: string;
+  serviceNameAtBooking: string;
+  servicePriceAtBooking: string;
+  serviceQuantityPriceAtBooking: string;
+  slotStartTimeAtBooking: string;
+  slotEndTimeAtBooking: string;
+  slotWeekDateAtBooking: string;
+  arisedMoney: number;
   bookingStatus: string;
-  meetURL: string | null;
+  totalAmount: number;
+  meetURL: string;
   paymentID: number;
   paymentType: string;
   serviceID: number;
   serviceName: string;
-  slotID: number;
+  slotID: string;
   slotStartTime: string;
   slotEndTime: string;
   slotWeekDate: string;
@@ -85,8 +98,10 @@ export type Booking = {
   phoneNumber: string;
   vetID: string;
   vetName: string;
-  koiOrPoolID: number;
   koiOrPoolName: string;
+  imageUrl: string;
+  quantity: number;
+  district: string;
 };
 
 export type User = {
@@ -120,4 +135,13 @@ export type Prescription = {
   refundPercent: number | null;
   bookingID: string;
   createAt: string;
+};
+
+export type Feedback = {
+  feedbackID: number;
+  bookingID: number;
+  customerName: string;
+  rate: number; // Đánh giá (rate) dưới dạng số, ví dụ: 1 đến 5 sao
+  comments: string; // Bình luận của khách hàng
+  isVisible: boolean; // Trạng thái hiển thị của phản hồi
 };

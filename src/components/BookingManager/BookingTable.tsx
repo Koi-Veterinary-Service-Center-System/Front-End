@@ -1,40 +1,57 @@
-import "./booking.scss";
-import Header from "../../components/Header/header";
-import Footer from "../../components/Footer/footer";
-import { Input, Form, Button, Select, DatePicker, InputNumber } from "antd";
-import { useEffect, useRef, useState } from "react";
-import api from "../../configs/axios";
-import {
-  Slot,
-  Vet,
-  koiOrPool,
-  Payment,
-  Distance,
-  Booking,
-  services,
-} from "../../types/info";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Search, Eye } from "lucide-react";
+import api from "@/configs/axios";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { MdAddBusiness } from "react-icons/md";
 import { MdOutlineMedicalServices } from "react-icons/md";
 import { FaLocationArrow } from "react-icons/fa";
 import { FaUserDoctor } from "react-icons/fa6";
 import { MdNoteAlt } from "react-icons/md";
-import { RiSecurePaymentFill } from "react-icons/ri";
-import { RiSortNumberDesc } from "react-icons/ri";
-import { motion } from "framer-motion";
+import { RiSecurePaymentFill, RiSortNumberDesc } from "react-icons/ri";
+
+import {
+  Booking,
+  Distance,
+  Payment,
+  services,
+  Slot,
+  User,
+  Vet,
+} from "@/types/info";
+import {
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Select,
+} from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { useNavigate } from "react-router-dom";
 
-const { Option } = Select;
-
-function BookingPage() {
-  const [total, setTotal] = useState(0);
-  const bookingRef = useRef(null);
-
+const OrdersTable = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null); // Lưu trữ booking đã chọn để hiển thị chi tiết
+  const [isModalOpen, setIsModalOpen] = useState(false); // Điều khiển trạng thái của dialog
+  const [users, setUsers] = useState<User[]>([]);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [services, setServices] = useState<services[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const [vets, setVets] = useState<Vet[]>([]);
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-  const [selectedVet, setSelectedVet] = useState<number | null>(null);
+  const [total, setTotal] = useState(0);
+  const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
 
   const [isLoadingSlots, setLoadingSlots] = useState(false);
   const [isLoadingServices, setLoadingServices] = useState(false);
@@ -44,7 +61,6 @@ function BookingPage() {
   const [distances, setDistances] = useState<Distance[]>([]);
   const [isLoadingPayment, setLoadingPayment] = useState(false);
 
-  // Ant Design form hook
   const [form] = Form.useForm();
 
   // Fetch Slots
@@ -54,6 +70,7 @@ function BookingPage() {
         setLoadingSlots(true);
         const response = await api.get("/slot/all-slot");
         setSlots(response.data); // Assuming response data is the array of slots
+        // setAllSlots(response.data); // Save all slots for filtering later
       } catch (error) {
         console.error("Error fetching slots:", error);
         toast.error("Failed to load slot data.");
@@ -90,6 +107,7 @@ function BookingPage() {
         setLoadingVets(true);
         const response = await api.get("/vet/all-vet");
         setVets(response.data); // Set all vets initially
+        // setAllVets(response.data); // Save all vets for filtering later
       } catch (error) {
         console.error("Error fetching all vets:", error);
         toast.error("Failed to load vet data.");
@@ -136,10 +154,10 @@ function BookingPage() {
   }, []); // Empty dependency array means this effect runs once when component mounts
 
   // Fetch available Vets for a selected slot
-  const fetchVetsBySlot = async (slotID: string) => {
+  const fetchVetsBySlot = async (slotId: number) => {
     try {
       setLoadingVets(true);
-      const response = await api.get(`/vet/available-vet/${slotID}`);
+      const response = await api.get(`/vet/available-vet/${slotId}`);
       setVets(response.data); // Update the vets list based on the slot
     } catch (error) {
       console.error("Error fetching available vets:", error);
@@ -150,11 +168,11 @@ function BookingPage() {
   };
 
   // Handle slot change to fetch vets
-  const handleSlotChange = (slotID: string) => {
-    setSelectedSlot(slotID);
+  const handleSlotChange = (slotId: number) => {
+    setSelectedSlot(slotId);
 
     // Fetch new vets for the selected slot
-    fetchVetsBySlot(slotID).then(() => {
+    fetchVetsBySlot(slotId).then(() => {
       // If the previously selected vet is still available in the new slot, retain it
       const currentVetId = form.getFieldValue("vet");
       if (!vets.find((vet) => vet.id === currentVetId)) {
@@ -165,8 +183,6 @@ function BookingPage() {
 
   // Handle vet change to fetch slot
   const handleVetChange = (vetId: number) => {
-    setSelectedVet(vetId);
-
     // Find the selected vet's name
     const selectedVetName = vets.find((vet) => vet.id === vetId)?.vetName;
 
@@ -174,6 +190,70 @@ function BookingPage() {
     form.setFieldsValue({ vet: vetId, vetName: selectedVetName });
 
     console.log("Selected Vet Name:", selectedVetName); // Debugging
+  };
+
+  const fetchUser = async () => {
+    try {
+      const response = await api.get("User/all-user", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      setUsers(response.data);
+      setError(null);
+    } catch (error: any) {
+      console.error("Failed to fetch user data:", error.message);
+      setError("Failed to fetch user data. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  // Hàm fetch booking từ API
+  const fetchBookings = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/booking/all-booking`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      setBookings(response.data);
+      setFilteredBookings(response.data); // Gán luôn danh sách booking ban đầu
+    } catch (error: any) {
+      console.error(error.message);
+      toast.error("Failed to fetch bookings.");
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Chạy khi component được mount
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  // Hàm tìm kiếm booking
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+    const filtered = bookings.filter(
+      (booking) =>
+        booking.bookingID.toString().toLowerCase().includes(term) ||
+        booking.customerName.toLowerCase().includes(term)
+    );
+    setFilteredBookings(filtered);
+  };
+
+  // Hàm mở dialog với chi tiết của booking đã chọn
+  const handleViewDetails = (booking: Booking) => {
+    setSelectedBooking(booking); // Lưu thông tin booking đã chọn
+    setIsDialogOpen(true); // Mở dialog
+  };
+
+  // Hàm đóng dialog
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedBooking(null);
   };
 
   const handleBooking = async (values: Booking) => {
@@ -241,38 +321,49 @@ function BookingPage() {
     }
   };
 
+  // Hàm xử lý mở modal
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    form.resetFields(); // Reset form sau khi đóng
+  };
   return (
-    <div className="mt-5">
-      <Header />
-      <div ref={bookingRef} id="booking" className="bg-white py-12 px-6">
-        <motion.div
-          initial={{ opacity: 0, x: -100 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1 }}
-          className="flex-1 mb-8 sm:mb-0"
-        >
-          <img
-            src="src/assets/images/undraw_medicine_b-1-ol.svg"
-            alt="Medicine Icon"
-            className="w-32 h-32 mx-auto"
+    <motion.div
+      className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4 }}
+    >
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold text-gray-100">Booking List</h2>
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search bookings..."
+            className="bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchTerm}
+            onChange={handleSearch}
           />
-        </motion.div>
+          <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+        </div>
 
-        <motion.div
-          className="max-w-4xl mx-auto bg-gray-50 shadow-lg rounded-lg p-8"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
+        <Button
+          type="primary"
+          icon={<MdAddBusiness />}
+          onClick={showModal}
+          className="bg-blue-600 text-white mb-4"
         >
-          <motion.div
-            className="text-center mb-8"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="text-3xl font-bold text-gray-800">Book a Service</h1>
-          </motion.div>
-
+          Add Booking
+        </Button>
+        <Modal
+          title="Add New Booking"
+          visible={isModalOpen}
+          onCancel={handleCancel}
+          footer={null} // Loại bỏ các nút mặc định của Modal
+        >
           <Form
             form={form}
             name="bookingForm"
@@ -285,6 +376,28 @@ function BookingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
+              {/* Customer Name - Select user từ danh sách */}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Form.Item
+                  label="Customer Name"
+                  name="customerId"
+                  rules={[
+                    { required: true, message: "Please select a customer" },
+                  ]}
+                >
+                  <Select showSearch placeholder="Select a customer">
+                    {users.map((user) => (
+                      <Select.Option key={user.userID} value={user.userID}>
+                        {user.userName}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </motion.div>
+
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -321,10 +434,13 @@ function BookingPage() {
                     onChange={() => calculateTota()}
                   >
                     {services.map((service) => (
-                      <Option key={service.serviceID} value={service.serviceID}>
+                      <Select.Option
+                        key={service.serviceID}
+                        value={service.serviceID}
+                      >
                         {service.serviceName} - ${service.price} (Duration:{" "}
                         {service.estimatedDuration} hours)
-                      </Option>
+                      </Select.Option>
                     ))}
                   </Select>
                 </Form.Item>
@@ -343,9 +459,9 @@ function BookingPage() {
                     value={selectedSlot}
                   >
                     {slots.map((slot) => (
-                      <Option key={slot.slotID} value={slot.slotID}>
+                      <Select.Option key={slot.slotID} value={slot.slotID}>
                         {slot.weekDate} ({slot.startTime} - {slot.endTime})
-                      </Option>
+                      </Select.Option>
                     ))}
                   </Select>
                 </Form.Item>
@@ -362,24 +478,25 @@ function BookingPage() {
                       Veterinarian
                     </span>
                   }
-                  name="vet"
+                  name="vet" // Đảm bảo 'name' đúng
+                  rules={[{ required: true, message: "Please select a vet" }]}
                 >
                   <Select
                     className="w-full p-0"
                     style={{ height: "50px" }}
                     loading={isLoadingVets}
                     onChange={handleVetChange}
-                    value={selectedVet}
+                    placeholder="Select a veterinarian"
                   >
-                    <Option key="none" value={null}>
+                    <Select.Option key="none" value={null}>
                       <div className="flex items-center gap-2">
                         <span>None</span> {/* Hiển thị văn bản 'None' */}
                       </div>
-                    </Option>
+                    </Select.Option>
                     {vets.map((vet) => (
-                      <Option key={vet.id} value={vet.id}>
+                      <Select.Option key={vet.id} value={vet.id}>
                         {vet.vetName}
-                      </Option>
+                      </Select.Option>
                     ))}
                   </Select>
                 </Form.Item>
@@ -440,13 +557,13 @@ function BookingPage() {
                     onChange={() => calculateTota()}
                   >
                     {distances.map((distance) => (
-                      <Option
+                      <Select.Option
                         key={distance.distanceID}
                         value={distance.distanceID}
                       >
                         {distance.district} - {distance.area} ($
-                        {distance.price.toLocaleString("vi-VN")})
-                      </Option>
+                        {distance.price})
+                      </Select.Option>
                     ))}
                   </Select>
                 </Form.Item>
@@ -517,7 +634,10 @@ function BookingPage() {
                 }
                 name="paymentType"
                 rules={[
-                  { required: true, message: "Please select a payment method" },
+                  {
+                    required: true,
+                    message: "Please select a payment method",
+                  },
                 ]}
               >
                 <Select
@@ -527,11 +647,11 @@ function BookingPage() {
                   placeholder="Select payment method"
                 >
                   {payments.map((item) => (
-                    <Option key={item.paymentID} value={item.paymentID}>
+                    <Select.Option key={item.paymentID} value={item.paymentID}>
                       <div className="flex items-center gap-2">
                         <span>{item.type}</span>
                       </div>
-                    </Option>
+                    </Select.Option>
                   ))}
                 </Select>
               </Form.Item>
@@ -543,7 +663,7 @@ function BookingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <h3>Total: {total.toLocaleString("vi-VN")} vnd</h3>{" "}
+              <h3>Total: {total.toLocaleString("vi-VN")} $</h3>{" "}
               {/* Định dạng số với dấu chấm phân tách hàng nghìn */}
             </motion.div>
 
@@ -561,12 +681,140 @@ function BookingPage() {
               </Button>
             </motion.div>
           </Form>
-        </motion.div>
+        </Modal>
       </div>
 
-      <Footer />
-    </div>
-  );
-}
+      {loading ? (
+        <div className="text-white">Loading...</div>
+      ) : error ? (
+        <div className="text-red-500">Error: {error}</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-700">
+            <thead>
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Booking ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Customer Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Total
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
 
-export default BookingPage;
+            <tbody className="divide divide-gray-700">
+              {filteredBookings.map((booking) => (
+                <motion.tr
+                  key={booking.bookingID}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                    {booking.bookingID}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                    {booking.customerName}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                    {booking.totalAmount?.toLocaleString("vi-VN")} vnd
+                  </td>
+
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        booking.bookingStatus === "Succeeded"
+                          ? "bg-green-100 text-green-800"
+                          : booking.bookingStatus === "Pending"
+                          ? "bg-yellow-100 text-yellow-400"
+                          : booking.bookingStatus === "Scheduled"
+                          ? "bg-blue-100 text-blue-800"
+                          : booking.bookingStatus === "Ongoing"
+                          ? "bg-orange-100 text-orange-800"
+                          : booking.bookingStatus === "Completed"
+                          ? "bg-teal-100 text-teal-800"
+                          : booking.bookingStatus === "Received_Money"
+                          ? "bg-purple-100 text-purple-800"
+                          : "bg-red-100 text-red-800" // Default màu đỏ cho các trạng thái khác
+                      }`}
+                    >
+                      {booking.bookingStatus}
+                    </span>
+                  </td>
+
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    {booking.bookingDate}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <button
+                      className="text-indigo-400 hover:text-indigo-300 mr-2"
+                      onClick={() => handleViewDetails(booking)} // Khi bấm vào nút Eye sẽ mở dialog
+                    >
+                      <Eye size={18} />
+                    </button>
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Dialog hiển thị chi tiết booking */}
+      {selectedBooking && (
+        <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Booking Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p>
+                <strong>Booking ID:</strong> {selectedBooking.bookingID}
+              </p>
+              <p>
+                <strong>Customer Name:</strong> {selectedBooking.customerName}
+              </p>
+              <p>
+                <strong>Service:</strong> {selectedBooking.serviceNameAtBooking}
+              </p>
+              <p>
+                <strong>Location:</strong> {selectedBooking.location}
+              </p>
+              <p>
+                <strong>Phone Number:</strong> {selectedBooking.phoneNumber}
+              </p>
+              <p>
+                <strong>Status:</strong> {selectedBooking.bookingStatus}
+              </p>
+              <p>
+                <strong>Booking Date:</strong> {selectedBooking.bookingDate}
+              </p>
+              <p>
+                <strong>Payment Type:</strong>{" "}
+                {selectedBooking.paymentTypeAtBooking}
+              </p>
+              <p>
+                <strong>Slot:</strong> {selectedBooking.slotStartTimeAtBooking}{" "}
+                - {selectedBooking.slotEndTimeAtBooking} (
+                {selectedBooking.slotWeekDateAtBooking})
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </motion.div>
+  );
+};
+export default OrdersTable;

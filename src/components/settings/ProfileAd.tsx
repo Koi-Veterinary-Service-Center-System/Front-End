@@ -1,19 +1,43 @@
 import { User } from "lucide-react";
 import SettingSection from "./SettingSection";
+import { useEffect, useState } from "react";
+import api from "@/configs/axios";
+import { Profile } from "@/types/info";
 
 const ProfileAd = () => {
+  const [profile, setProfile] = useState<Profile | null>(null);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+
+      try {
+        const response = await api.get("/User/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to request headers
+          },
+        });
+        setProfile(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
   return (
     <SettingSection icon={User} title={"Profile"}>
       <div className="flex flex-col sm:flex-row items-center mb-6">
         <img
-          src="src\assets\images\khoa.jpg"
+          src={profile?.imageURL}
           alt="Profile"
           className="rounded-full w-20 h-20 object-cover mr-4"
         />
 
         <div>
-          <h3 className="text-lg font-semibold text-gray-100">Dang Khoa</h3>
-          <p className="text-gray-400">dangkhoa13978@gmail.com</p>
+          <h3 className="text-lg font-semibold text-gray-100">
+            {profile?.firstName} {profile?.lastName}
+          </h3>
+          <p className="text-gray-400">{profile?.email}</p>
         </div>
       </div>
 

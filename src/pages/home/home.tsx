@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
@@ -10,7 +8,8 @@ import { QuestionCircleOutlined, CloseOutlined } from "@ant-design/icons";
 import Banner from "../../components/banner";
 import Footer from "../../components/Footer/footer";
 import Header from "../../components/Header/header";
-import "./home.scss";
+
+import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -114,40 +113,43 @@ function Home() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <Header />
       <Banner />
 
       <AnimatedSection>
-        <div className="category-section">
-          <motion.div className="category-arrows" variants={fadeInUp}>
-            <h3>Browse by category</h3>
-            <div className="category-narrow">
-              <button className="arrow-button left">
-                <i className="bx bx-left-arrow-alt"></i>
-              </button>
-              <button className="arrow-button right">
-                <i className="bx bx-right-arrow-alt"></i>
-              </button>
+        <div className="space-y-8 m-5">
+          <div className="flex justify-between items-center">
+            <h3 className="text-2xl font-bold">Browse by category</h3>
+            <div className="flex space-x-2">
+              <Button variant="outline" size="icon">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-          </motion.div>
-          <div className="category-container">
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((category, index) => (
               <motion.div
                 key={index}
-                className="category-card"
+                className="bg-white rounded-lg shadow-md overflow-hidden"
                 variants={fadeInUp}
               >
                 <img
                   src={category.image}
                   alt={category.name}
-                  className="category-image"
+                  className="w-full h-72 object-cover"
                 />
-                <div className="category-info">
-                  <h4>{category.name}</h4>
-                  <p>{category.products} products</p>
-                  <Link to="#" className="arrow-link">
-                    <span>→</span>
+                <div className="p-4">
+                  <h4 className="font-semibold text-lg">{category.name}</h4>
+                  <p className="text-gray-600">{category.products} products</p>
+                  <Link
+                    to="#"
+                    className="text-blue-500 hover:underline mt-2 inline-block"
+                  >
+                    View Category →
                   </Link>
                 </div>
               </motion.div>
@@ -157,9 +159,14 @@ function Home() {
       </AnimatedSection>
 
       <AnimatedSection>
-        <div className="veterinarian-section">
-          <motion.h2 variants={fadeInUp}>Veterinarian</motion.h2>
-          <div className="veterinarian-cards">
+        <div className="space-y-8 m-5">
+          <motion.h2
+            variants={fadeInUp}
+            className="text-3xl font-bold text-center"
+          >
+            Veterinarian
+          </motion.h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
                 name: "Richmond Loh",
@@ -180,12 +187,26 @@ function Home() {
                   "https://img.freepik.com/premium-photo/portrait-female-cute-asia-doctor-medical-coat-standing-isolated-white-background_1000819-2116.jpg?w=826",
               },
             ].map((vet, index) => (
-              <motion.div key={index} className="vet-card" variants={fadeInUp}>
-                <img src={vet.image} alt={vet.name} className="vet-image" />
-                <div className="vet-info">
-                  <h4>{vet.name}</h4>
-                  <p>{vet.experience}</p>
-                  <i className="heart-icon">❤</i>
+              <motion.div
+                key={index}
+                className="bg-white rounded-lg shadow-md overflow-hidden"
+                variants={fadeInUp}
+              >
+                <img
+                  src={vet.image}
+                  alt={vet.name}
+                  className="w-full h-96 object-cover"
+                />
+                <div className="p-4 relative">
+                  <h4 className="font-semibold text-lg">{vet.name}</h4>
+                  <p className="text-gray-600">{vet.experience}</p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-4 right-4"
+                  >
+                    <Heart className="h-5 w-5" />
+                  </Button>
                 </div>
               </motion.div>
             ))}
@@ -194,29 +215,40 @@ function Home() {
       </AnimatedSection>
 
       <AnimatedSection>
-        <div className="koi-service-section">
-          <div className="koi-service">
-            <motion.div className="koi-service-image" variants={fadeInUp}>
-              <img src="src/assets/images/homeimage.png" alt="Koi Service" />
-            </motion.div>
-            <motion.div className="koi-text" variants={fadeInUp}>
-              <h4>Koi Service</h4>
-              <h1>The smarter way to shop for your Koi</h1>
-              <p>
+        <div className="bg-blue-50 rounded-lg overflow-hidden">
+          <div className="flex flex-col lg:flex-row items-center">
+            <div className="lg:w-1/2">
+              <img
+                src="/src/assets/images/homeimage.png"
+                alt="Koi Service"
+                className="w-full h-auto"
+              />
+            </div>
+            <div className="lg:w-1/2 p-8 space-y-4">
+              <h4 className="text-blue-600 font-semibold">Koi Service</h4>
+              <h1 className="text-3xl font-bold">
+                The smarter way to shop for your Koi
+              </h1>
+              <p className="text-gray-600">
                 Lorem ipsum dolor sit amet consectetur. At et vehicula sodales
                 est proin turpis pellentesque sinulla a aliquam amet rhoncus
                 quisque eget sit.
               </p>
-              <button className="koi-button">Learn More</button>
-            </motion.div>
+              <Button>Learn More</Button>
+            </div>
           </div>
         </div>
       </AnimatedSection>
 
       <AnimatedSection>
-        <div className="news-blog-section">
-          <motion.h2 variants={fadeInUp}>News & Blog</motion.h2>
-          <div className="news-cards">
+        <div className="space-y-8 m-5">
+          <motion.h2
+            variants={fadeInUp}
+            className="text-3xl font-bold text-center"
+          >
+            News & Blog
+          </motion.h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
                 image:
@@ -235,12 +267,20 @@ function Home() {
                 title: "Cleaning Koi Pond Filters the Right Way",
               },
             ].map((news, index) => (
-              <motion.div key={index} className="news-card" variants={fadeInUp}>
-                <img src={news.image} alt={`News ${index + 1}`} />
-                <div className="news-info">
-                  <span className="news-tag">News</span>
-                  <p className="news-date">24 May, 2024</p>
-                  <h4>{news.title}</h4>
+              <motion.div
+                key={index}
+                className="bg-white rounded-lg shadow-md overflow-hidden"
+                variants={fadeInUp}
+              >
+                <img
+                  src={news.image}
+                  alt={`News ${index + 1}`}
+                  className="w-full h-80 object-cover"
+                />
+                <div className="p-4 space-y-2">
+                  <span className="text-blue-600 font-semibold">News</span>
+                  <p className="text-gray-500 text-sm">24 May, 2024</p>
+                  <h4 className="font-semibold text-lg"> {news.title}</h4>
                 </div>
               </motion.div>
             ))}
@@ -251,13 +291,13 @@ function Home() {
       <AnimatePresence>
         {isChatBoxVisible && (
           <motion.div
-            className="faq-chat-box"
+            className="fixed bottom-20 right-4 w-80 bg-white rounded-lg shadow-lg overflow-hidden"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
           >
-            <div className="faq-header">
-              <h4>Frequently Asked Questions</h4>
+            <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
+              <h4 className="font-semibold">Frequently Asked Questions</h4>
               <Button
                 type="text"
                 icon={<CloseOutlined />}
@@ -265,17 +305,17 @@ function Home() {
                 className="close-button"
               />
             </div>
-            <div className="faq-content">
+            <div className="p-4 max-h-96 overflow-y-auto">
               {faqs.map((faq, index) => (
                 <motion.div
                   key={index}
-                  className="faq-item"
+                  className="mb-4"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <h5>{faq.question}</h5>
-                  <p>{faq.answer}</p>
+                  <h5 className="font-semibold">{faq.question}</h5>
+                  <p className="text-gray-600 mt-1">{faq.answer}</p>
                 </motion.div>
               ))}
             </div>
@@ -283,13 +323,19 @@ function Home() {
         )}
       </AnimatePresence>
 
-      <FloatButton.Group shape="circle" style={{ insetInlineEnd: 24 }}>
+      {/* FloatButton Group */}
+      <FloatButton.Group
+        shape="circle"
+        className="fixed bottom-4 right-4 space-y-2"
+      >
+        {/* FAQ Button */}
         <FloatButton
           icon={<QuestionCircleOutlined />}
           type="primary"
-          style={{ insetInlineEnd: 94 }}
           onClick={toggleChatBox}
+          className="rounded-full"
         />
+        {/* Back to Top Button */}
         <FloatButton.BackTop visibilityHeight={0} />
       </FloatButton.Group>
 
