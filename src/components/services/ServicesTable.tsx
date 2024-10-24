@@ -1,5 +1,5 @@
 import api from "@/configs/axios";
-import { services } from "@/types/info";
+import { Profile, services } from "@/types/info";
 import { motion } from "framer-motion";
 import { Edit, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";

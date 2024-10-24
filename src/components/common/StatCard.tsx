@@ -1,6 +1,19 @@
 import { motion } from "framer-motion";
+import { IconType } from "react-icons"; // Import kiểu cho các icon
 
-const StatCard = ({ name, icon: Icon, value, color }) => {
+interface StatCardProps {
+  name: string;
+  icon: IconType; // Định nghĩa kiểu cho icon
+  value: string | number; // Kiểu dữ liệu cho value, có thể là string hoặc number
+  color?: string; // Màu sắc là tùy chọn
+}
+
+const StatCard: React.FC<StatCardProps> = ({
+  name,
+  icon: Icon,
+  value,
+  color,
+}) => {
   return (
     <motion.div
       className="bg-gray-800 bg-opacity-50 backdrop-blur-md overflow-hidden shadow-lg rounded-xl border"

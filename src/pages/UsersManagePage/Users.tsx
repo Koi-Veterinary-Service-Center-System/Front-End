@@ -1,6 +1,6 @@
 import { UserCheck, UserPlus, UsersIcon, UserX } from "lucide-react";
 import { motion } from "framer-motion";
-import HeaderAd from "@/components/common/header";
+import HeaderAd from "@/components/Header/headerAd";
 import StatCard from "@/components/common/StatCard";
 import UserActivityHeatmap from "@/components/users/UserActivityHeatmap";
 import UsersTable from "@/components/users/UsersTable";

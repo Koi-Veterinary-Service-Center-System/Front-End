@@ -1,4 +1,4 @@
-import HeaderAd from "@/components/common/header";
+import HeaderAd from "@/components/Header/headerAd";
 import OverviewCards from "@/components/analyics/OverviewCards";
 import RevenueChart from "@/components/analyics/RevenueChart";
 import ChannelPerformance from "@/components/analyics/ChannelPerformance";

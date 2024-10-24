@@ -13,7 +13,7 @@ import AllService from "./pages/AllService/allService";
 import ErrorBoundary from "./errorBoudary";
 import { registerLicense } from "@syncfusion/ej2-base";
 import "./index.css";
-import AnalyticsPage from "./pages/FeedbackMPage/FeedbackMPage";
+import AnalyticsPage from "./pages/FeedBack/FeedbackMPage";
 import SettingsPage from "./pages/settingpage/setting";
 import FishPrescription from "./pages/prescriptions/prescription";
 import { Toaster } from "sonner";

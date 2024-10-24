@@ -37,6 +37,8 @@ export type services = {
   description: string;
   price: number;
   estimatedDuration: number;
+  imageURL: string;
+  quantityPrice: number;
 };
 
 export type Distance = {
@@ -70,10 +72,19 @@ export type Booking = {
   location: string;
   note: string;
   initAmount: number;
+  isPaid: boolean;
+  hasPres: boolean;
+  paymentTypeAtBooking: string;
+  serviceNameAtBooking: string;
+  servicePriceAtBooking: string;
+  serviceQuantityPriceAtBooking: string;
+  slotStartTimeAtBooking: string;
+  slotEndTimeAtBooking: string;
+  slotWeekDateAtBooking: string;
   arisedMoney: number;
   bookingStatus: string;
   totalAmount: number;
-  meetURL: string | null;
+  meetURL: string;
   paymentID: number;
   paymentType: string;
   serviceID: number;

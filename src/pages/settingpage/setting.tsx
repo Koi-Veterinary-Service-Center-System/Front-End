@@ -1,4 +1,3 @@
-import HeaderAd from "@/components/common/header";
 import ConnectedAccounts from "@/components/settings/ConnectedAccounts";
 import DangerZone from "@/components/settings/DangerZone";
 import Notifications from "@/components/settings/Notifications";

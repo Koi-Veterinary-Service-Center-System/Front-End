@@ -1,6 +1,6 @@
 import { CheckCircle, Clock, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
-import HeaderAd from "@/components/common/header";
+import HeaderAd from "@/components/Header/headerAd";
 import StatCard from "@/components/common/StatCard";
 import OrdersTable from "@/components/BookingManager/BookingTable";
 import Sidebar from "@/components/Sidebar/sidebar";

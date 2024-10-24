@@ -47,8 +47,8 @@ type UserFormData = z.infer<typeof userSchema>;
 
 const UsersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -137,7 +137,7 @@ const UsersTable = () => {
     try {
       let response;
       if (isEditMode && currentUser) {
-        // Chỉ gửi role và userID cho API theo định dạng đường dẫn
+        // Update logic
         await api.patch(
           `/User/update-role-user/${currentUser.userID}/${data.role}`,
           {},
@@ -149,14 +149,14 @@ const UsersTable = () => {
         );
         toast.success("User role updated successfully");
       } else {
-        // Logic cho việc tạo mới user vẫn giữ nguyên
+        // Create new user logic
         const payload = {
           firstName: data.firstName,
           lastName: data.lastName,
           userName: data.userName,
           password: data.password,
           email: data.email,
-          gender: data.gender === "male", // true nếu là male, false nếu là female
+          gender: data.gender === "male", // Convert gender to boolean
           role: data.role,
         };
 
@@ -165,10 +165,9 @@ const UsersTable = () => {
         });
         toast.success(response.data);
       }
-
-      fetchUser();
+      fetchUser(); // Refresh user list after action
       setIsDialogOpen(false);
-      form.reset();
+      form.reset(); // Reset form after successful action
     } catch (error: any) {
       console.error("Operation failed:", error.response?.data || error.message);
       toast.error(error.response.data);
@@ -214,9 +213,26 @@ const UsersTable = () => {
             placeholder="Search users..."
             className="bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value.toLowerCase());
+              const filtered = users.filter(
+                (user) =>
+                  user.firstName
+                    .toLowerCase()
+                    .includes(e.target.value.toLowerCase()) ||
+                  user.lastName
+                    .toLowerCase()
+                    .includes(e.target.value.toLowerCase()) ||
+                  user.email
+                    .toLowerCase()
+                    .includes(e.target.value.toLowerCase())
+              );
+              setFilteredUsers(filtered);
+            }}
           />
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
         </div>
+
         <ShimmerButton onClick={handleAdd}>
           <UserPlus2 className="mr-2" />
           Add User

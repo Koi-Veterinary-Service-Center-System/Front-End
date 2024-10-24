@@ -11,6 +11,7 @@ import {
   Payment,
   Distance,
   Booking,
+  services,
 } from "../../types/info";
 import { toast } from "sonner";
 import { MdOutlineMedicalServices } from "react-icons/md";
@@ -30,10 +31,8 @@ function BookingPage() {
   const bookingRef = useRef(null);
 
   const [slots, setSlots] = useState<Slot[]>([]);
-  const [allSlots, setAllSlots] = useState<Slot[]>([]); // To keep all slots
-  const [services, setServices] = useState<Service[]>([]);
+  const [services, setServices] = useState<services[]>([]);
   const [vets, setVets] = useState<Vet[]>([]);
-  const [allVets, setAllVets] = useState<Vet[]>([]); // To keep all vets
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [selectedVet, setSelectedVet] = useState<number | null>(null);
 
@@ -41,12 +40,9 @@ function BookingPage() {
   const [isLoadingServices, setLoadingServices] = useState(false);
   const [isLoadingVets, setLoadingVets] = useState(false);
   const [isLoadingDistance, setLoadingDistance] = useState(false);
-  const [koiAndPools, setKoiAndPools] = useState<koiOrPool[]>([]);
-  const [isLoadingKoiAndPools, setLoadingKoiAndPools] = useState(false);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [distances, setDistances] = useState<Distance[]>([]);
   const [isLoadingPayment, setLoadingPayment] = useState(false);
-  const navigate = useNavigate();
 
   // Ant Design form hook
   const [form] = Form.useForm();
@@ -58,7 +54,6 @@ function BookingPage() {
         setLoadingSlots(true);
         const response = await api.get("/slot/all-slot");
         setSlots(response.data); // Assuming response data is the array of slots
-        setAllSlots(response.data); // Save all slots for filtering later
       } catch (error) {
         console.error("Error fetching slots:", error);
         toast.error("Failed to load slot data.");
@@ -95,7 +90,6 @@ function BookingPage() {
         setLoadingVets(true);
         const response = await api.get("/vet/all-vet");
         setVets(response.data); // Set all vets initially
-        setAllVets(response.data); // Save all vets for filtering later
       } catch (error) {
         console.error("Error fetching all vets:", error);
         toast.error("Failed to load vet data.");

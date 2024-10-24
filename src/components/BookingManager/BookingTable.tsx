@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Eye, UserPlus2, Waves, Fish } from "lucide-react";
+import { Search, Eye } from "lucide-react";
 import api from "@/configs/axios";
 import { toast } from "sonner";
 import {
@@ -14,47 +14,49 @@ import { MdOutlineMedicalServices } from "react-icons/md";
 import { FaLocationArrow } from "react-icons/fa";
 import { FaUserDoctor } from "react-icons/fa6";
 import { MdNoteAlt } from "react-icons/md";
-import { RiSecurePaymentFill } from "react-icons/ri";
-import { LuFish } from "react-icons/lu";
+import { RiSecurePaymentFill, RiSortNumberDesc } from "react-icons/ri";
 
 import {
   Booking,
   Distance,
-  koiOrPool,
   Payment,
   services,
   Slot,
   User,
   Vet,
 } from "@/types/info";
-import { Button, DatePicker, Form, Input, Modal, Select } from "antd";
+import {
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Select,
+} from "antd";
 import TextArea from "antd/es/input/TextArea";
 
 const OrdersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredBookings, setFilteredBookings] = useState<any[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedBooking, setSelectedBooking] = useState<any | null>(null); // Lưu trữ booking đã chọn để hiển thị chi tiết
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null); // Lưu trữ booking đã chọn để hiển thị chi tiết
   const [isModalOpen, setIsModalOpen] = useState(false); // Điều khiển trạng thái của dialog
   const [users, setUsers] = useState<User[]>([]);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [services, setServices] = useState<services[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const [vets, setVets] = useState<Vet[]>([]);
   const [total, setTotal] = useState(0);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
-  const [selectedVet, setSelectedVet] = useState<number | null>(null);
-  const [allSlots, setAllSlots] = useState<Slot[]>([]);
-  const [allVets, setAllVets] = useState<Vet[]>([]);
 
   const [isLoadingSlots, setLoadingSlots] = useState(false);
   const [isLoadingServices, setLoadingServices] = useState(false);
   const [isLoadingVets, setLoadingVets] = useState(false);
   const [isLoadingDistance, setLoadingDistance] = useState(false);
-  const [koiAndPools, setKoiAndPools] = useState<koiOrPool[]>([]);
-  const [isLoadingKoiAndPools, setLoadingKoiAndPools] = useState(false);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [distances, setDistances] = useState<Distance[]>([]);
   const [isLoadingPayment, setLoadingPayment] = useState(false);
@@ -68,7 +70,7 @@ const OrdersTable = () => {
         setLoadingSlots(true);
         const response = await api.get("/slot/all-slot");
         setSlots(response.data); // Assuming response data is the array of slots
-        setAllSlots(response.data); // Save all slots for filtering later
+        // setAllSlots(response.data); // Save all slots for filtering later
       } catch (error) {
         console.error("Error fetching slots:", error);
         toast.error("Failed to load slot data.");
@@ -105,7 +107,7 @@ const OrdersTable = () => {
         setLoadingVets(true);
         const response = await api.get("/vet/all-vet");
         setVets(response.data); // Set all vets initially
-        setAllVets(response.data); // Save all vets for filtering later
+        // setAllVets(response.data); // Save all vets for filtering later
       } catch (error) {
         console.error("Error fetching all vets:", error);
         toast.error("Failed to load vet data.");
@@ -131,23 +133,6 @@ const OrdersTable = () => {
       }
     };
     fetchDistance();
-  }, []);
-
-  //Handle fetch fish or Pool
-  useEffect(() => {
-    const fetchKoiOrPools = async () => {
-      try {
-        setLoadingKoiAndPools(true);
-        const response = await api.get("/koi-or-pool/all-customer-koi-pool");
-        setKoiAndPools(response.data);
-      } catch (error: any) {
-        console.log("Error fetching koi and pools: ", error);
-        toast.error("Failed to fetch Koi or Pools data"); // Hiển thị message mặc định nếu không có message từ API
-      } finally {
-        setLoadingKoiAndPools(false);
-      }
-    };
-    fetchKoiOrPools();
   }, []);
 
   //Fetch payment data
@@ -198,8 +183,6 @@ const OrdersTable = () => {
 
   // Handle vet change to fetch slot
   const handleVetChange = (vetId: number) => {
-    setSelectedVet(vetId);
-
     // Find the selected vet's name
     const selectedVetName = vets.find((vet) => vet.id === vetId)?.vetName;
 
@@ -261,17 +244,8 @@ const OrdersTable = () => {
     setFilteredBookings(filtered);
   };
 
-  const handleSearchUser = (searchTerm: string) => {
-    const filtered = users.filter(
-      (user) =>
-        user.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredUsers(filtered); // Cập nhật danh sách người dùng được lọc
-  };
-
   // Hàm mở dialog với chi tiết của booking đã chọn
-  const handleViewDetails = (booking: any) => {
+  const handleViewDetails = (booking: Booking) => {
     setSelectedBooking(booking); // Lưu thông tin booking đã chọn
     setIsDialogOpen(true); // Mở dialog
   };
@@ -282,14 +256,14 @@ const OrdersTable = () => {
     setSelectedBooking(null);
   };
 
-  const handleBooking = async (values: any) => {
+  const handleBooking = async (values: Booking) => {
     try {
       // Format the date to YYYY-MM-DD according to the system's default timezone
       const bookingDate = new Intl.DateTimeFormat("en-CA", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
-      }).format(values.pickupDate.toDate());
+      }).format(values.bookingDate.toDate());
 
       // Retrieve selected district's information
       const selectedDistrict = distances.find(
@@ -299,18 +273,16 @@ const OrdersTable = () => {
       // Combine user input location with selected district and area
       const fullLocation = `${values.location}, ${selectedDistrict?.district}, ${selectedDistrict?.area}`;
 
-      // Tạo dữ liệu booking
       const bookingData = {
-        customerId: values.customerId || "", // Thêm customerId từ form
         note: values.note || "",
-        koiOrPoolId: values.koiOrPoolId || null,
         vetName: form.getFieldValue("vetName") || "",
         initAmount: total,
         location: fullLocation, // Use the combined location here
-        slotId: values.slot || 0,
-        serviceId: values.serviceType || 0,
-        paymentId: values.paymentMethod || 0,
+        slotID: values.slotID || 0,
+        serviceId: values.serviceName || 0,
+        paymentId: values.paymentType || 0,
         bookingDate: bookingDate,
+        quantity: values.quantity,
       };
 
       console.log("Booking Data:", bookingData);
@@ -319,8 +291,8 @@ const OrdersTable = () => {
 
       if (response.status === 200 || response.status === 201) {
         toast.success("Booking successful!");
-        fetchBookings();
       }
+      window.location.href = "/process";
     } catch (error: any) {
       console.error("Booking error:", error);
       if (error.response && error.response.data) {
@@ -333,14 +305,14 @@ const OrdersTable = () => {
 
   const calculateTota = () => {
     const selectedService = services.find(
-      (service) => service.serviceID === form.getFieldValue("serviceType")
+      (service) => service.serviceID === form.getFieldValue("serviceName")
     );
     const selectedDistance = distances.find(
       (distance) => distance.distanceID === form.getFieldValue("district")
     );
 
     if (selectedService && selectedDistance) {
-      const initAmount = selectedService.price + selectedDistance.price; // Adjust based on requirements
+      const initAmount = selectedService.price + selectedDistance.price; // Tính tổng giá trị
       setTotal(initAmount);
     } else if (selectedService) {
       setTotal(selectedService.price);
@@ -377,6 +349,7 @@ const OrdersTable = () => {
           />
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
         </div>
+
         <Button
           type="primary"
           icon={<MdAddBusiness />}
@@ -431,7 +404,7 @@ const OrdersTable = () => {
               >
                 <Form.Item
                   label="Pickup Date"
-                  name="pickupDate"
+                  name="bookingDate"
                   rules={[{ required: true, message: "Please select a date" }]}
                 >
                   <DatePicker className="w-full p-2 shadow-sm" />
@@ -449,7 +422,7 @@ const OrdersTable = () => {
                       Type of Services
                     </span>
                   }
-                  name="serviceType"
+                  name="serviceName"
                   rules={[
                     { required: true, message: "Please select a service" },
                   ]}
@@ -477,7 +450,7 @@ const OrdersTable = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Form.Item label="Slot" name="slot">
+                <Form.Item label="Slot" name="slotID">
                   <Select
                     className="w-full p-0"
                     style={{ height: "50px" }}
@@ -603,42 +576,24 @@ const OrdersTable = () => {
                 <Form.Item
                   label={
                     <span className="flex items-center gap-2">
-                      <LuFish />
-                      Choose Fish Or Pool
+                      <RiSortNumberDesc />
+                      Quantity
                     </span>
                   }
-                  name="koiOrPoolId"
+                  name="quantity"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter a quantity", // Bắt lỗi khi trường bị bỏ trống
+                    },
+                    {
+                      type: "number",
+                      min: 1,
+                      message: "Quantity must be at least 1", // Bắt lỗi nếu người dùng nhập số nhỏ hơn 1
+                    },
+                  ]}
                 >
-                  <Select
-                    className="w-full p-0"
-                    style={{ height: "50px" }}
-                    loading={isLoadingKoiAndPools}
-                    placeholder="Select a fish or pool"
-                  >
-                    {/* Tùy chọn 'None' */}
-                    <Select.Option key="none" value={null}>
-                      <div className="flex items-center gap-2">
-                        <span>None</span> {/* Hiển thị văn bản 'None' */}
-                      </div>
-                    </Select.Option>
-
-                    {/* Các tùy chọn từ API */}
-                    {koiAndPools.map((item) => (
-                      <Select.Option
-                        key={item.koiOrPoolID}
-                        value={item.koiOrPoolID}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span>{item.name}</span>
-                          {item.isPool ? (
-                            <Waves className="text-cyan-400" />
-                          ) : (
-                            <Fish className="text-orange-500" />
-                          )}
-                        </div>
-                      </Select.Option>
-                    ))}
-                  </Select>
+                  <InputNumber min={1} className="w-full p-2 shadow-sm" />
                 </Form.Item>
               </motion.div>
             </motion.div>
@@ -677,7 +632,7 @@ const OrdersTable = () => {
                     Payment Method
                   </span>
                 }
-                name="paymentMethod"
+                name="paymentType"
                 rules={[
                   {
                     required: true,
@@ -832,7 +787,7 @@ const OrdersTable = () => {
                 <strong>Customer Name:</strong> {selectedBooking.customerName}
               </p>
               <p>
-                <strong>Service:</strong> {selectedBooking.serviceName}
+                <strong>Service:</strong> {selectedBooking.serviceNameAtBooking}
               </p>
               <p>
                 <strong>Location:</strong> {selectedBooking.location}
@@ -847,11 +802,13 @@ const OrdersTable = () => {
                 <strong>Booking Date:</strong> {selectedBooking.bookingDate}
               </p>
               <p>
-                <strong>Payment Type:</strong> {selectedBooking.paymentType}
+                <strong>Payment Type:</strong>{" "}
+                {selectedBooking.paymentTypeAtBooking}
               </p>
               <p>
-                <strong>Slot:</strong> {selectedBooking.slotStartTime} -{" "}
-                {selectedBooking.slotEndTime} ({selectedBooking.slotWeekDate})
+                <strong>Slot:</strong> {selectedBooking.slotStartTimeAtBooking}{" "}
+                - {selectedBooking.slotEndTimeAtBooking} (
+                {selectedBooking.slotWeekDateAtBooking})
               </p>
             </div>
           </DialogContent>

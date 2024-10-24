@@ -1,10 +1,10 @@
-import HeaderAd from "@/components/common/header";
 import StatCard from "@/components/common/StatCard";
 import Sidebar from "@/components/Sidebar/sidebar";
 import { motion } from "framer-motion";
 import { BarChart2, ShoppingBag, Users, Zap } from "lucide-react";
 import SalesOverviewChart from "./SalesOverviewChart";
 import CategoryDistributionChart from "./CategoryDistributionChart";
+import HeaderAd from "@/components/Header/headerAd";
 
 const OverviewPage = () => {
   return (

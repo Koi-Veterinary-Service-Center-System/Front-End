@@ -3,7 +3,7 @@ import Sidebar from "@/components/Sidebar/sidebar";
 import { motion } from "framer-motion";
 import { AlertTriangle, DollarSign, Package, TrendingUp } from "lucide-react";
 import CategoryDistributionChart from "../OverviewPage/CategoryDistributionChart";
-import HeaderAd from "@/components/common/header";
+import HeaderAd from "@/components/Header/headerAd";
 import ServicesTable from "@/components/services/ServicesTable";
 import SalesTrendChart from "@/components/services/SalesTrendChart";
 import { toast } from "sonner"; // Use sonner for toast notifications

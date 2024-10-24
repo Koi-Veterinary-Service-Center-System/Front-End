@@ -344,7 +344,7 @@ export default function Component() {
                           <span className="font-semibold text-gray-700">
                             Time:
                           </span>
-                          <p className="text-gray-900">{`${appointment.slotStartTime} - ${appointment.slotEndTime}`}</p>
+                          <p className="text-gray-900">{`${appointment.slotStartTimeAtBooking} - ${appointment.slotEndTimeAtBooking}`}</p>
                         </div>
                       </motion.div>
                       <motion.div
@@ -399,7 +399,7 @@ export default function Component() {
                           variant="secondary"
                           className="bg-blue-100 text-blue-700"
                         >
-                          {appointment.serviceName}
+                          {appointment.serviceNameAtBooking}
                         </Badge>
                       </motion.div>
                       <motion.div
@@ -429,7 +429,7 @@ export default function Component() {
                           setSelectedBookingID(
                             isOpen ? appointment.bookingID : null
                           );
-                          if (isOpen && appointment.hasPrescription) {
+                          if (isOpen && appointment.hasPres) {
                             fetchPrescription(
                               appointment.bookingID,
                               appointment.presRecID
@@ -445,7 +445,7 @@ export default function Component() {
                             className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300"
                           >
                             <FileText className="mr-2 h-4 w-4" />
-                            {appointment.hasPrescription
+                            {appointment.hasPres
                               ? "View Prescription"
                               : "Create Prescription"}
                           </Button>
@@ -453,12 +453,12 @@ export default function Component() {
                         <DialogContent className="sm:max-w-[425px]">
                           <DialogHeader>
                             <DialogTitle>
-                              {appointment.hasPrescription
+                              {appointment.hasPres
                                 ? "View/Edit Prescription"
                                 : "Create Prescription"}
                             </DialogTitle>
                             <DialogDescription>
-                              {appointment.hasPrescription
+                              {appointment.hasPres
                                 ? "View or edit the existing prescription."
                                 : "Enter the details for the new prescription. Click save when you're done."}
                             </DialogDescription>

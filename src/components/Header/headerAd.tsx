@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import api from "@/configs/axios"; // Đảm bảo bạn đã config axios
 
-export default function HeaderAd({ title }) {
+export default function HeaderAd({ title }: { title: string }) {
   const [userProfile, setUserProfile] = useState({
     userName: "",
     firstName: "",

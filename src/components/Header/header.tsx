@@ -1,7 +1,6 @@
-import { Button, Form, Input } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { profile } from "../../types/info";
+import { Profile } from "../../types/info";
 import { AnimatePresence, motion } from "framer-motion";
 import api from "../../configs/axios";
 import {
@@ -27,6 +26,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
 
 type Notification = {
   id: number;
@@ -37,11 +37,8 @@ type Notification = {
 function Header() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
-  const [profile, setProfile] = useState<profile | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setLoading] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const handleMouseEnter = () => setIsMenuOpen(true);
-  const handleMouseLeave = () => setIsMenuOpen(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 

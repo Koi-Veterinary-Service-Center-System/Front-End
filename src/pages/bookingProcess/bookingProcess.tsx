@@ -39,7 +39,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 
 const statusSteps = [
   {
@@ -148,7 +147,7 @@ const Process = () => {
 
   // Fetch all booking and calculate totals
   // Fetch all booking and calculate totals based on the user's role
-  const fetchBooking = async (userId: string) => {
+  const fetchBooking = async () => {
     try {
       // Determine the endpoint based on user role
       const endpoint =
@@ -161,14 +160,13 @@ const Process = () => {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        params: { userId },
       });
 
       // Set the bookings data
       const fetchedBookings = response.data;
       setBookings(fetchedBookings);
       console.log("Fetched Bookings:", fetchedBookings);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Fetch error:", error); // Log the entire error object
       const errorMessage =
         error.response?.data?.message || "Failed to fetch bookings";
@@ -190,7 +188,7 @@ const Process = () => {
 
       console.log("Profile fetched:", response.data);
       setProfile(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching profile:", error); // Log full error
       const errorMessage =
         error.response?.data?.message || "Failed to fetch profile data";
@@ -214,7 +212,7 @@ const Process = () => {
     fetchBooking();
   }, []);
 
-  const handlePayOnline = async (bookingID: Booking) => {
+  const handlePayOnline = async (bookingID: string) => {
     try {
       // Make the POST request to the API endpoint with bookingId as a query parameter
       const response = await api.post(`/payment/create-paymentUrl`, null, {
@@ -245,8 +243,8 @@ const Process = () => {
   };
 
   const handleUpdateStatus = async (
-    bookingID: Booking,
-    bookingStatus: Booking
+    bookingID: string,
+    bookingStatus: string
   ) => {
     try {
       // Make a PATCH request to the API endpoint
@@ -265,7 +263,7 @@ const Process = () => {
       } else {
         toast.error("Failed to update booking status.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating booking status:", error);
       toast.error(error.response.data);
     }
@@ -292,7 +290,7 @@ const Process = () => {
       toast.success(`Booking ${selectedBookingId} has been cancelled`);
       setIsCancelDialogOpen(false);
       fetchBooking(); // Refresh bookings after cancellation
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.response.data);
     }
   };
@@ -468,7 +466,7 @@ const Process = () => {
                     <div className="flex items-center mb-4">
                       <Avatar className="h-10 w-10 mr-3">
                         <AvatarImage
-                          src={booking.imageURL}
+                          src={booking.imageUrl}
                           alt={booking.vetName}
                           className="object-cover"
                         />
@@ -486,12 +484,13 @@ const Process = () => {
                     <div className="space-y-2">
                       <div className="flex items-center text-sm">
                         <CalendarIcon className="h-4 w-4 mr-2 text-gray-500" />
-                        <span>{booking.bookingDate}</span>
+                        <span>{booking.slotWeekDateAtBooking}</span>
                       </div>
                       <div className="flex items-center text-sm">
                         <ClockIcon className="h-4 w-4 mr-2 text-gray-500" />
                         <span>
-                          {booking.slotStartTime} - {booking.slotEndTime}
+                          {booking.slotStartTimeAtBooking} -{" "}
+                          {booking.slotEndTimeAtBooking}
                         </span>
                       </div>
                       <div className="flex items-center text-sm">
