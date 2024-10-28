@@ -10,9 +10,6 @@ import {
   Filter,
   Moon,
   Sun,
-  Store,
-  User,
-  ArrowLeft,
   AlertCircle,
   CalendarIcon,
   ClockIcon,
@@ -41,11 +38,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
+import { FaRegMoneyBillAlt } from "react-icons/fa";
 
 const statusOptions = [
   "Scheduled",
   "Ongoing",
   "Completed",
+  "Received_Money",
   "Succeeded",
   "Cancelled",
 ] as const;
@@ -56,6 +55,7 @@ const statusIcons: Record<Status, React.ElementType> = {
   Scheduled: AiOutlineSchedule,
   Ongoing: Users,
   Completed: BiCheckboxChecked,
+  Received_Money: FaRegMoneyBillAlt,
   Succeeded: DollarSign,
   Cancelled: AlertCircle,
 };
@@ -338,7 +338,7 @@ const History = () => {
                               <div className="flex items-center mb-4">
                                 <Avatar className="h-10 w-10 mr-3">
                                   <AvatarImage
-                                    src={booking.imageUrl}
+                                    src={booking.imageURL}
                                     alt={booking.vetName}
                                     className="object-cover"
                                   />

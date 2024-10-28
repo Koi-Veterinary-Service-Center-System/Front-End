@@ -3,13 +3,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
-import { FloatButton, Button } from "antd";
+import { FloatButton } from "antd";
 import { QuestionCircleOutlined, CloseOutlined } from "@ant-design/icons";
 import Banner from "../../components/banner";
 import Footer from "../../components/Footer/footer";
 import Header from "../../components/Header/header";
 
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import { Button } from "antd";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -60,30 +61,37 @@ function Home() {
     }
   }, [location.state]);
 
-  const categories = [
+  const blogPosts = [
     {
-      name: "Accessories",
-      products: 84,
+      title: "Essential Koi Health Checks",
+      description:
+        "Regular health checks are critical to ensure your koi remain healthy and vibrant throughout the year.",
       image:
-        "https://i.pinimg.com/564x/8f/b7/53/8fb75367b0cd9eaf008dc58e9520ff83.jpg",
+        "https://i.pinimg.com/564x/10/50/09/105009e291593ad674bc60faed37a5e8.jpg",
+      link: "/blogs/essential-health-checks",
     },
     {
-      name: "Food",
-      products: 64,
+      title: "Feeding Guide for Koi Fish",
+      description:
+        "Learn about the best food options and feeding schedules to keep your koi well-nourished and happy.",
       image:
-        "https://i.pinimg.com/564x/0c/c3/a2/0cc3a2106f506efb2aaeb216e950c8e7.jpg",
+        "https://images.squarespace-cdn.com/content/v1/4f6c8d6ae4b08696a7443c8b/1548090687880-RY1LAPWKOHJI1CVZKQVN/ke17ZwdGBToddI8pDm48kE6hjPJFwgE64QmK6sQ9p9F7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z5QPOohDIaIeljMHgDF5CVlOqpeNLcJ80NK65_fV7S1USH0LmvCxVfRNSLd3yuAuevWbKmE5m_0Anl3xjVzBd37zwMy-Jd4qnWKZiGmV5bqqQ/koi-feeding.jpg",
+      link: "/blogs/feeding-guide",
     },
     {
-      name: "Furniture",
-      products: 22,
+      title: "Setting up the Perfect Koi Pond",
+      description:
+        "A well-maintained pond is essential for koi fish to thrive. Learn the basics of pond setup and filtration.",
       image:
-        "https://i.pinimg.com/236x/d5/5b/37/d55b3785eb7c4489b58e67d25f223390.jpg",
+        "https://th.bing.com/th/id/OIP.UQLZNjhAK_qJQPD80aGfjAHaE8?rs=1&pid=ImgDetMain",
+      link: "/blogs/koi-pond-setup",
     },
     {
-      name: "Bags",
-      products: 16,
-      image:
-        "https://i.pinimg.com/564x/e6/8a/22/e68a2226770084e96215024e0599a049.jpg",
+      title: "Winter Care Tips for Koi",
+      description:
+        "Proper winter care ensures that your koi remain healthy and active even during the cold months.",
+      image: "https://i.ytimg.com/vi/dnG5ccMJuss/maxresdefault.jpg",
+      link: "/blogs/winter-care-tips",
     },
   ];
 
@@ -120,7 +128,7 @@ function Home() {
       <AnimatedSection>
         <div className="space-y-8 m-5">
           <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-bold">Browse by category</h3>
+            <h3 className="text-2xl font-bold">Veterinary Services Blog</h3>
             <div className="flex space-x-2">
               <Button variant="outline" size="icon">
                 <ChevronLeft className="h-4 w-4" />
@@ -131,25 +139,25 @@ function Home() {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categories.map((category, index) => (
+            {blogPosts.map((post, index) => (
               <motion.div
                 key={index}
                 className="bg-white rounded-lg shadow-md overflow-hidden"
                 variants={fadeInUp}
               >
                 <img
-                  src={category.image}
-                  alt={category.name}
+                  src={post.image}
+                  alt={post.title}
                   className="w-full h-72 object-cover"
                 />
                 <div className="p-4">
-                  <h4 className="font-semibold text-lg">{category.name}</h4>
-                  <p className="text-gray-600">{category.products} products</p>
+                  <h4 className="font-semibold text-lg">{post.title}</h4>
+                  <p className="text-gray-600">{post.description}</p>
                   <Link
-                    to="#"
+                    to={post.link}
                     className="text-blue-500 hover:underline mt-2 inline-block"
                   >
-                    View Category →
+                    Read More →
                   </Link>
                 </div>
               </motion.div>
@@ -195,7 +203,7 @@ function Home() {
                 <img
                   src={vet.image}
                   alt={vet.name}
-                  className="w-full h-96 object-cover"
+                  className="w-full h-96 object-contain"
                 />
                 <div className="p-4 relative">
                   <h4 className="font-semibold text-lg">{vet.name}</h4>
@@ -291,7 +299,7 @@ function Home() {
       <AnimatePresence>
         {isChatBoxVisible && (
           <motion.div
-            className="fixed bottom-20 right-4 w-80 bg-white rounded-lg shadow-lg overflow-hidden"
+            className="fixed bottom-24 right-8 w-80 bg-white rounded-lg shadow-lg overflow-hidden"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}

@@ -6,10 +6,6 @@ import { Booking, Profile } from "../../types/info";
 import {
   Moon,
   Sun,
-  MessageSquare,
-  Store,
-  User,
-  CalendarClock,
   CalendarIcon,
   ClockIcon,
   MapPinIcon,
@@ -17,7 +13,6 @@ import {
   CheckCircle2,
   Loader2,
   Activity,
-  ArrowLeft,
   Stethoscope,
   CheckCircle,
   XCircle,
@@ -25,7 +20,6 @@ import {
   DollarSign,
   Video,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -34,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { VscNotebook } from "react-icons/vsc";
 import { HiOutlineMail } from "react-icons/hi";
 import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
+import { TbMoneybag } from "react-icons/tb";
 const statusSteps = [
   {
     label: "Pending",
@@ -56,9 +51,9 @@ const statusSteps = [
     color: "bg-green-400",
   },
   {
-    label: "Completed",
-    icon: <CheckCircle2 className="h-4 w-4" />,
-    color: "bg-green-400",
+    label: "Received_Money",
+    icon: <TbMoneybag className="h-4 w-4" />,
+    color: "bg-green-200",
   },
 ];
 
@@ -291,7 +286,7 @@ const DetailBooking = () => {
                           <div className="flex items-center mb-4">
                             <Avatar className="h-16 w-16 mr-4 border-2 border-blue-500">
                               <AvatarImage
-                                src={booking.imageUrl}
+                                src={booking.imageURL}
                                 alt={booking.vetName}
                                 className="object-cover"
                               />

@@ -3,16 +3,17 @@ import { motion, useAnimation } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import Footer from "@/components/Footer/footer";
 import Header from "@/components/Header/header";
-import { Button } from "@/components/ui/button"; // Assuming the Service type is correctly defined
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/configs/axios";
 import { FaClock, FaDollarSign } from "react-icons/fa6";
-import { FaShoppingCart } from "react-icons/fa";
 import { Services } from "@/types/info";
 import { Link } from "react-router-dom";
+import { FaShoppingCart } from "react-icons/fa";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
 const containerVariants = {
@@ -25,50 +26,13 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-    },
-  },
-};
-
-const teamMembers = [
-  {
-    name: "Phuong An",
-    role: "Seller",
-    image: "src/assets/images/phuongAn.jpg",
-    color: "bg-yellow-400",
-  },
-  {
-    name: "Nhat Nguyen",
-    role: "Seller",
-    image: "src/assets/images/nhatNguyen.png",
-    color: "bg-teal-400",
-  },
-  {
-    name: "Chu Lu",
-    role: "Seller",
-    image: "src/assets/images/chu.png",
-    color: "bg-red-400",
-  },
-];
-
-const staggerChildren = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-    },
-  },
-};
-
-function AnimatedSection({ children }: { children: React.ReactNode }) {
+function AnimatedServiceCard({
+  service,
+  index,
+}: {
+  service: Services;
+  index: number;
+}) {
   const controls = useAnimation();
   const [ref, inView] = useInView({
     triggerOnce: true,
@@ -84,30 +48,77 @@ function AnimatedSection({ children }: { children: React.ReactNode }) {
   return (
     <motion.div
       ref={ref}
-      animate={controls}
+      variants={fadeInUp}
       initial="hidden"
-      variants={staggerChildren}
+      animate={controls}
+      custom={index}
+      className="bg-white rounded-lg shadow-lg overflow-hidden"
     >
-      {children}
+      <img
+        src={service.imageURL}
+        alt={service.serviceName}
+        className="w-full h-64 object-cover"
+      />
+      <div className="p-6">
+        <h2 className="text-2xl font-semibold mb-4 text-blue-700">
+          {service.serviceName}
+        </h2>
+        <p className="mb-6 text-gray-600">{service.description}</p>
+        <div className="space-y-4">
+          <div className="flex items-center text-gray-600">
+            <FaDollarSign className="mr-2 text-blue-500" />
+            <p>Price: ${service.price}</p>
+          </div>
+          <div className="flex items-center text-gray-600">
+            <FaShoppingCart className="mr-2 text-blue-500" />
+            <p>Quantity Price: ${service.quantityPrice}</p>
+          </div>
+          <div className="flex items-center text-gray-600">
+            <FaClock className="mr-2 text-blue-500" />
+            <p>Estimated Duration: {service.estimatedDuration} hours</p>
+          </div>
+        </div>
+        <div className="mt-6">
+          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+            <Link to="/booking">Request Appointment</Link>
+          </Button>
+        </div>
+      </div>
     </motion.div>
   );
 }
 
-export default function AllService() {
-  const [services, setServices] = useState<Services[]>([]); // Ensure it's typed correctly
-  const [isLoading, setLoading] = useState(false);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+function ServiceSkeleton() {
+  return (
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <Skeleton className="w-full h-64" />
+      <div className="p-6">
+        <Skeleton className="h-8 w-3/4 mb-4" />
+        <Skeleton className="h-4 w-full mb-2" />
+        <Skeleton className="h-4 w-5/6 mb-6" />
+        <div className="space-y-4">
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-4 w-3/5" />
+        </div>
+        <Skeleton className="h-10 w-full mt-6" />
+      </div>
+    </div>
+  );
+}
 
-  // Fetch services from API
+export default function AllService() {
+  const [services, setServices] = useState<Services[]>([]);
+  const [isLoading, setLoading] = useState(true);
+
   const fetchServices = async () => {
-    setLoading(true);
     try {
       const response = await api.get(`/service/all-service`);
       if (Array.isArray(response.data)) {
         setServices(response.data);
       } else {
         console.error("API response is not an array");
-        setServices([]); // Default to empty array if not in expected format
+        setServices([]);
       }
     } catch (error) {
       console.error("Error fetching services:", error);
@@ -133,75 +144,26 @@ export default function AllService() {
           Our Services
         </motion.h1>
 
-        {isLoading ? (
-          <p className="text-center text-gray-600">Loading services...</p>
-        ) : (
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 p-8"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {services.map((service, index) => (
-              <motion.div
-                key={service.serviceID}
-                variants={itemVariants}
-                className="bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105"
-                onHoverStart={() => setHoveredIndex(index)}
-                onHoverEnd={() => setHoveredIndex(null)}
-              >
-                <div className="relative">
-                  <img
-                    src={service.imageURL}
-                    alt={service.serviceName}
-                    className="w-full h-64 object-cover"
-                  />
-                  <motion.div
-                    className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: hoveredIndex === index ? 1 : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Button className="bg-white text-blue-600 hover:bg-blue-100">
-                      View Details
-                    </Button>
-                  </motion.div>
-                </div>
-                <div className="p-6">
-                  <h2 className="text-2xl font-semibold mb-4 text-blue-700">
-                    {service.serviceName}
-                  </h2>
-                  <p className="mb-6 text-gray-600">{service.description}</p>
-                  <div className="space-y-4">
-                    <div className="flex items-center text-gray-600">
-                      <FaDollarSign className="mr-2 text-blue-500" />
-                      <p>Price: ${service.price}</p>
-                    </div>
-                    <div className="flex items-center text-gray-600">
-                      <FaShoppingCart className="mr-2 text-blue-500" />
-                      <p>Quantity Price: ${service.quantityPrice}</p>
-                    </div>
-                    <div className="flex items-center text-gray-600">
-                      <FaClock className="mr-2 text-blue-500" />
-                      <p>
-                        Estimated Duration: {service.estimatedDuration} hours
-                      </p>
-                    </div>
-                  </div>
-                  <motion.div
-                    className="mt-6"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                      <Link to="/booking">Request Appointment</Link>
-                    </Button>
-                  </motion.div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 p-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {isLoading
+            ? Array.from({ length: 4 }).map((_, index) => (
+                <motion.div key={index} variants={fadeInUp}>
+                  <ServiceSkeleton />
+                </motion.div>
+              ))
+            : services.map((service, index) => (
+                <AnimatedServiceCard
+                  key={service.serviceID}
+                  service={service}
+                  index={index}
+                />
+              ))}
+        </motion.div>
 
         <motion.div
           className="text-center mb-16"

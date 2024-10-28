@@ -100,7 +100,7 @@ export type Booking = {
   vetName: string;
   vetEmail: string;
   koiOrPoolName: string;
-  imageUrl: string;
+  imageURL: string;
   quantity: number;
   district: string;
   bookingRecordNote: string;

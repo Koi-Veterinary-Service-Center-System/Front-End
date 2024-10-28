@@ -19,6 +19,7 @@ interface VetSlot {
   vetName: string;
   vetFirstName: string;
   vetLastName: string;
+  meetURL: string;
 }
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

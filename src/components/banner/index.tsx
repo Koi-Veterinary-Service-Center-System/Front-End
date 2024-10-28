@@ -13,30 +13,30 @@ import "swiper/css/effect-fade";
 
 const bannerData = [
   {
-    title: "Koi Shop",
-    subtitle: "If animals could talk, they'd talk about us!",
+    title: "Premium Koi Services",
+    subtitle: "Enhancing the beauty and health of your koi",
     description:
-      "At a vehicula est proin turpis pellentesque sinulla a aliquam amet rhoncus quisque eget sit",
+      "Experience the best care for your koi with our expert health checks, water treatment, and grooming services.",
     image: "src/assets/images/download.gif",
-    cta: { text: "Booking Service", link: "/booking" },
-    badge: { text: "New Arrivals", color: "bg-green-500" },
+    cta: { text: "Book a Service", link: "/booking" },
+    badge: { text: "Recommended", color: "bg-green-500" },
   },
   {
-    title: "Service For Koi",
-    subtitle: "Discover the beauty of rare koi varieties",
+    title: "Exotic Koi Grooming",
+    subtitle: "Transform your koi with top-tier grooming",
     description:
-      "Explore our collection of exotic koi fish, each with unique patterns and colors that will mesmerize you.",
+      "Keep your koi in pristine condition with our grooming services, designed for rare and exotic varieties.",
     image: "src/assets/images/image.png",
-    cta: { text: "View Service", link: "/exotic-koi" },
-    badge: { text: "Limited Stock", color: "bg-red-500" },
+    cta: { text: "Explore Grooming", link: "/exotic-koi" },
+    badge: { text: "New Service", color: "bg-red-500" },
   },
   {
-    title: "Koi Care Essentials",
-    subtitle: "Everything you need for happy, healthy koi",
+    title: "Koi Pond Maintenance",
+    subtitle: "Ensure a safe and healthy environment for your koi",
     description:
-      "From premium food to state-of-the-art filtration systems, we've got all your koi care needs covered.",
+      "We provide thorough cleaning, water quality testing, and filtration upgrades to keep your koi pond perfect.",
     image: "src/assets/images/774607e7ea99e5c29b9aa005f8e5c198.jpg",
-    cta: { text: "Shop Now", link: "/koi-care" },
+    cta: { text: "Maintain Your Pond", link: "/koi-maintenance" },
     badge: { text: "20% Off", color: "bg-blue-500" },
   },
 ];
