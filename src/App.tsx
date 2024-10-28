@@ -18,7 +18,6 @@ import SettingsPage from "./pages/settingpage/setting";
 import FishPrescription from "./pages/prescriptions/prescription";
 import { Toaster } from "sonner";
 import History from "./pages/History/history";
-import Process from "./pages/bookingProcess/bookingProcess";
 import AppointmentDetail from "./pages/Detail Appointment Page/detailAp";
 import ProfilePage from "./pages/profile/profile"; // Import your PrivateRoute component
 import PrivateRoute from "./Routes/PrivateRoute";
@@ -31,6 +30,7 @@ import VetCalendar from "./pages/SchedulerVet";
 import BookMPage from "./pages/BookingManagement/bookingM";
 import BookingRecord from "./pages/booking/bookingRecord";
 import BookingPage from "./pages/booking/Booking";
+import DetailBooking from "./pages/bookingProcess/DetailBooking";
 
 // Add your license key here
 registerLicense("Your_License_Key_Here");
@@ -104,10 +104,10 @@ function App() {
           }
         />
         <Route
-          path="/process"
+          path="/detailB"
           element={
             <PrivateRoute>
-              <Process />
+              <DetailBooking />
             </PrivateRoute>
           }
         />

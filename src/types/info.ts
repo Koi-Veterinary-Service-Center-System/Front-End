@@ -98,10 +98,12 @@ export type Booking = {
   phoneNumber: string;
   vetID: string;
   vetName: string;
+  vetEmail: string;
   koiOrPoolName: string;
   imageUrl: string;
   quantity: number;
   district: string;
+  bookingRecordNote: string;
 };
 
 export type User = {

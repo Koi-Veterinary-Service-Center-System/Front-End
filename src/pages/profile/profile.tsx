@@ -6,24 +6,15 @@ import { Button, Input } from "antd";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import {
-  ArrowLeft,
-  CalendarClock,
-  ChevronLeft,
-  MessageSquare,
-  Moon,
-  Store,
-  Sun,
-  User,
-} from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Profile } from "@/types/info";
+import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
 
 function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [activeMenuItem, setActiveMenuItem] = useState("dashboard");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const location = useLocation();
   const backgroundStyle = {
@@ -68,10 +59,6 @@ function ProfilePage() {
     fetchProfile();
   }, []);
 
-  const handleMenuItemClick = (menuItem: string) => {
-    setActiveMenuItem(menuItem);
-  };
-
   const handleDarkModeSwitch = () => {
     setIsDarkMode(!isDarkMode);
     document.body.classList.toggle("dark", !isDarkMode);
@@ -85,11 +72,6 @@ function ProfilePage() {
     return <div>Loading...</div>;
   }
 
-  const sidebarVariants = {
-    hidden: { x: -300 },
-    visible: { x: 0, transition: { type: "spring", stiffness: 100 } },
-  };
-
   const mainContentVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.5 } },
@@ -98,91 +80,7 @@ function ProfilePage() {
   return (
     <div className={`min-h-screen ${isDarkMode ? "dark" : ""}`}>
       <div className="flex">
-        <motion.aside
-          className="w-64 bg-gray-100 dark:bg-gray-800 h-screen sticky top-0"
-          initial="hidden"
-          animate="visible"
-          variants={sidebarVariants}
-        >
-          <div className="p-4">
-            <Link to="/" className="flex items-center space-x-2 text-primary">
-              <User className="h-6 w-6" />
-              <span className="text-xl font-bold">Profile</span>
-            </Link>
-          </div>
-          <nav className="mt-8">
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  to="/profile"
-                  className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "profile"
-                      ? "bg-blue-400 text-primary-foreground"
-                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
-                  }`}
-                  onClick={() => handleMenuItemClick("profile")}
-                >
-                  <User className="h-5 w-5" />
-                  <span>Your Profile</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/history"
-                  className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "history"
-                      ? "bg-blue-400 text-primary-foreground"
-                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
-                  }`}
-                  onClick={() => handleMenuItemClick("history")}
-                >
-                  <Store className="h-5 w-5" />
-                  <span>Service History</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/process"
-                  className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "process"
-                      ? "bg-blue-400 text-primary-foreground"
-                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
-                  }`}
-                  onClick={() => handleMenuItemClick("process")}
-                >
-                  <CalendarClock className="h-5 w-5" />
-                  <span>Service Process</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/message"
-                  className={`flex items-center space-x-2 p-2 ${
-                    activeMenuItem === "message"
-                      ? "bg-blue-400 text-primary-foreground"
-                      : "text-gray-700 dark:text-gray-200 hover:bg-blue-200 dark:hover:bg-blue-700"
-                  }`}
-                  onClick={() => handleMenuItemClick("message")}
-                >
-                  <MessageSquare className="h-5 w-5" />
-                  <span>Message</span>
-                </Link>
-              </li>
-            </ul>
-          </nav>
-          <div className="absolute bottom-6 left-6">
-            <Button
-              variant="default"
-              size="lg"
-              className="w-full shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white"
-              onClick={() => window.history.back()}
-              aria-label="Go back to previous page"
-            >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              Back
-            </Button>
-          </div>
-        </motion.aside>
+        <SlidebarProfile />
 
         <motion.main
           className="flex-1 bg-white dark:bg-gray-900"
