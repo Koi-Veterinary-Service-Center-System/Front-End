@@ -22,12 +22,12 @@ const bannerData = [
     badge: { text: "New Arrivals", color: "bg-green-500" },
   },
   {
-    title: "Exotic Koi",
+    title: "Service For Koi",
     subtitle: "Discover the beauty of rare koi varieties",
     description:
       "Explore our collection of exotic koi fish, each with unique patterns and colors that will mesmerize you.",
     image: "src/assets/images/image.png",
-    cta: { text: "View Collection", link: "/exotic-koi" },
+    cta: { text: "View Service", link: "/exotic-koi" },
     badge: { text: "Limited Stock", color: "bg-red-500" },
   },
   {
@@ -35,7 +35,7 @@ const bannerData = [
     subtitle: "Everything you need for happy, healthy koi",
     description:
       "From premium food to state-of-the-art filtration systems, we've got all your koi care needs covered.",
-    image: "src/assets/images/download(1).gif",
+    image: "src/assets/images/774607e7ea99e5c29b9aa005f8e5c198.jpg",
     cta: { text: "Shop Now", link: "/koi-care" },
     badge: { text: "20% Off", color: "bg-blue-500" },
   },

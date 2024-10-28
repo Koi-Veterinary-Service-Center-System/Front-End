@@ -31,7 +31,7 @@ export type koiOrPool = {
   customerId: string;
 };
 
-export type services = {
+export type Services = {
   serviceID: number;
   serviceName: string;
   description: string;

@@ -2,18 +2,13 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import api from "../../configs/axios";
-import { Booking, koiOrPool, profile } from "../../types/info";
+import { Booking, Profile } from "../../types/info";
 import {
-  Fish,
-  Pencil,
-  Trash2,
-  Waves,
   Calendar,
   Users,
   DollarSign,
   Search,
   Filter,
-  Plus,
   Download,
   Moon,
   Sun,
@@ -22,33 +17,43 @@ import {
   User,
   CalendarClock,
   ArrowLeft,
+  Eye,
+  AlertCircle,
 } from "lucide-react";
+import { AiOutlineSchedule } from "react-icons/ai";
+import { BiCheckboxChecked } from "react-icons/bi";
 import { VscFeedback } from "react-icons/vsc";
 import { CiViewList } from "react-icons/ci";
-import { Checkbox, Form, Input, Modal } from "antd";
-import TextArea from "antd/es/input/TextArea";
-import ModalDelete from "@/components/ModalDelete/ModalDelete/ModalDelete";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+const statusOptions = [
+  "Scheduled",
+  "Ongoing",
+  "Completed",
+  "Succeeded",
+  "Cancelled",
+] as const;
+type Status = (typeof statusOptions)[number]; // Create a type from statusOptions array
+
+// Map each status to an icon component
+const statusIcons: Record<Status, React.ElementType> = {
+  Scheduled: AiOutlineSchedule,
+  Ongoing: Users,
+  Completed: BiCheckboxChecked,
+  Succeeded: DollarSign,
+  Cancelled: AlertCircle,
+};
+
 const History = () => {
-  const [profile, setProfile] = useState<profile | null>(null);
-  const [koiOrPool, setKoiOrPool] = useState<koiOrPool[] | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [activeMenuItem, setActiveMenuItem] = useState("dashboard");
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentKoiOrPool, setCurrentKoiOrPool] = useState<koiOrPool | null>(
-    null
-  );
-  const [form] = Form.useForm();
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>([]); // Changed to array
-  const [totalFishKoi, setTotalFishKoi] = useState(0);
   const [totalBookings, setTotalBookings] = useState(0);
   const backgroundStyle = {
     backgroundImage: "url('src/assets/images/subtle-prism.png')", // Add the path to your image here
@@ -56,6 +61,7 @@ const History = () => {
     backgroundPosition: "center", // Centers the background
     backgroundRepeat: "no-repeat", // Ensures the image doesn't repeat
   };
+  const [activeStatus, setActiveStatus] = useState<Status>("Scheduled");
 
   // Fetch all booking and calculate totals
   const fetchBooking = async (userId?: string) => {
@@ -70,26 +76,6 @@ const History = () => {
       setBookings(fetchedBookings);
 
       setTotalBookings(fetchedBookings.length);
-    } catch (error: any) {
-      toast.info(error.response.data);
-    }
-  };
-
-  const fetchKoiOrPool = async (userId?: string) => {
-    try {
-      const response = await api.get(`/koi-or-pool/all-customer-koi-pool`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        params: { userId },
-      });
-
-      const fetchedKoiOrPool = response.data;
-      setKoiOrPool(fetchedKoiOrPool);
-
-      // Calculate the total count of fish and pools
-      const totalFishKoiCount = fetchedKoiOrPool.length;
-      setTotalFishKoi(totalFishKoiCount);
     } catch (error: any) {
       toast.info(error.response.data);
     }
@@ -114,7 +100,6 @@ const History = () => {
   // Call fetchBooking in useEffect
   useEffect(() => {
     fetchProfile();
-    fetchKoiOrPool();
     fetchBooking();
   }, []);
 
@@ -128,65 +113,6 @@ const History = () => {
 
   const handleMenuItemClick = (menuItem: string) => {
     setActiveMenuItem(menuItem);
-  };
-
-  const handleUpdateFishOrPool = (kOP: koiOrPool) => {
-    setCurrentKoiOrPool(kOP);
-    setIsModalOpen(true);
-    form.setFieldsValue(kOP);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    form.resetFields();
-  };
-
-  const handleFormSubmit = async (values: koiOrPool) => {
-    if (!currentKoiOrPool || !currentKoiOrPool.koiOrPoolID) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await api.put(
-        `/koi-or-pool/update-koiorpool/${currentKoiOrPool.koiOrPoolID}`,
-        values,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      toast.success("Successfully updated Koi or Pool!");
-      fetchKoiOrPool(profile?.userId);
-      form.resetFields();
-      setIsModalOpen(false);
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to update Koi or Pool";
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCloseModalDL = () => {
-    setIsDeleteModalOpen(false);
-  };
-
-  const handleOpenDeleteModal = (koiOrPoolID: string) => {
-    const selectedItem = koiOrPool?.find(
-      (kOP) => kOP.koiOrPoolID === koiOrPoolID
-    );
-    setCurrentKoiOrPool(selectedItem || null);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleDeleteSuccess = async () => {
-    setIsDeleteModalOpen(false);
-    fetchKoiOrPool();
-    toast.success("Successfully deleted Fish or Pool!");
   };
 
   const handleDarkModeSwitch = () => {
@@ -328,19 +254,48 @@ const History = () => {
                 Download PDF
               </Button>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Total Fish & Koi
-                  </CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+            <motion.div
+              className="space-y-8 mb-5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card className="justify-center align-middle">
+                <CardHeader>
+                  <CardTitle>Booking Status</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{totalFishKoi}</div>
+                  <nav className="flex flex-wrap gap-2">
+                    {statusOptions.map((status) => {
+                      const Icon = statusIcons[status];
+                      return (
+                        <motion.div
+                          key={status}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Button
+                            variant={
+                              activeStatus === status ? "default" : "outline"
+                            }
+                            onClick={() => setActiveStatus(status)}
+                            className={`flex items-center gap-2 ${
+                              activeStatus === status
+                                ? "bg-blue-500 text-white" // Blue background and white text for the active button
+                                : "hover:bg-blue-500 hover:text-white" // Hover effect for other buttons
+                            } transition-colors duration-200`}
+                          >
+                            <Icon className="h-4 w-4" />
+                            {status}
+                          </Button>
+                        </motion.div>
+                      );
+                    })}
+                  </nav>
                 </CardContent>
               </Card>
+            </motion.div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
@@ -434,134 +389,10 @@ const History = () => {
                   </table>
                 </CardContent>
               </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Your Fish And Pools</CardTitle>
-                  <div className="flex items-center space-x-2">
-                    <Plus className="h-4 w-4 text-muted-foreground" />
-                    <Filter className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {!koiOrPool || koiOrPool.length === 0 ? (
-                    <p>No fish or pools found.</p>
-                  ) : (
-                    <ul className="space-y-4">
-                      {koiOrPool.map((kOP) => (
-                        <li
-                          key={kOP.koiOrPoolID}
-                          className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4"
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
-                              {kOP.isPool ? (
-                                <Waves className="w-5 h-5 mr-2 text-blue-500" />
-                              ) : (
-                                <Fish className="w-5 h-5 mr-2 text-orange-500" />
-                              )}
-                              {kOP.name}
-                            </h3>
-                            <span className="text-sm font-medium px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                              {kOP.isPool ? "Pool" : "Koi"}
-                            </span>
-                          </div>
-                          <p className="text-gray-600 dark:text-gray-400 mb-4">
-                            {kOP.description}
-                          </p>
-                          <div className="flex justify-end space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleUpdateFishOrPool(kOP)}
-                              className="flex items-center"
-                            >
-                              <Pencil className="w-4 h-4 mr-1" />
-                              Update
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() =>
-                                handleOpenDeleteModal(kOP.koiOrPoolID)
-                              }
-                              className="flex items-center"
-                            >
-                              <Trash2 className="w-4 h-4 mr-1" />
-                              Delete
-                            </Button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </CardContent>
-              </Card>
             </div>
           </div>
         </main>
       </div>
-
-      <Modal
-        open={isModalOpen}
-        title="Update Koi Or Pool"
-        onCancel={handleCloseModal}
-        footer={null}
-      >
-        <Form form={form} layout="vertical" onFinish={handleFormSubmit}>
-          <Form.Item
-            label="Name Your Fish Or Pool"
-            name="name"
-            rules={[
-              { required: true, message: "Please input a name!" },
-              { min: 2, message: "Name must be at least 2 characters long!" },
-              { max: 50, message: "Name cannot exceed 50 characters!" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            label="Is this a Pool?"
-            name="isPool"
-            valuePropName="checked"
-          >
-            <Checkbox>Pool</Checkbox>
-          </Form.Item>
-
-          <Form.Item
-            label="Description"
-            name="description"
-            rules={[
-              { required: true, message: "Please provide a description!" },
-              {
-                min: 10,
-                message: "Description must be at least 10 characters!",
-              },
-              {
-                max: 500,
-                message: "Description cannot exceed 500 characters!",
-              },
-            ]}
-          >
-            <TextArea rows={4} />
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "Updating..." : "Update"}
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {isDeleteModalOpen && currentKoiOrPool && (
-        <ModalDelete
-          koiOrPoolID={currentKoiOrPool.koiOrPoolID}
-          onDeleteSuccess={handleDeleteSuccess}
-          onClose={handleCloseModalDL}
-        />
-      )}
 
       {error && <div className="text-red-500 mt-4">{error}</div>}
     </div>
