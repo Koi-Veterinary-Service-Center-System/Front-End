@@ -312,7 +312,6 @@ const History = () => {
                   </CardTitle>
                   <div className="flex items-center space-x-2">
                     <Search className="h-4 w-4 text-blue-500" />
-                    <Filter className="h-4 w-4 text-blue-500" />
                   </div>
                 </CardHeader>
                 <AnimatePresence>

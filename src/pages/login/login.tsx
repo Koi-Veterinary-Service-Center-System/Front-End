@@ -1,173 +1,283 @@
-import { Button, Form } from "antd";
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import Input from "antd/es/input/Input";
-
-import Header from "../../components/Header/header";
-import Footer from "../../components/Footer/footer";
-import { Link, useLocation, useNavigate } from "react-router-dom"; // Import useLocation
-import api from "../../configs/axios";
-
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Button, Form, Input } from "antd";
+import { LockOutlined, UserOutlined, MailOutlined } from "@ant-design/icons";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import api from "../../configs/axios";
+import Header from "@/components/Header/header";
 
-function Login() {
-  // Tạo ref để tham chiếu đến div login-container
+const Login = () => {
+  const [isResetPassword, setIsResetPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  //Handle Login google
-  const handleLoginGoogle = () => {
-    // This opens a new window or redirects the user for Google login
-    window.open("http://localhost:5155/api/User/google-login", "_self");
-  };
-
   useEffect(() => {
-    // Extract query parameters from the URL (after redirection from Google login)
     const queryParams = new URLSearchParams(location.search);
     const token = queryParams.get("token");
     const user = queryParams.get("user");
     const error = queryParams.get("error");
 
-    // Handle successful login
     if (token && user) {
       localStorage.setItem("token", token);
       localStorage.setItem("user", user);
-
       toast.success(`Welcome ${user}!`);
       navigate("/", { state: { loginSuccess: true } });
-    }
-    // Handle login failure, but only if the login process was initiated
-    else if (error) {
+    } else if (error) {
       toast.error("Google login failed.");
     }
   }, [location, navigate]);
 
-  // Handle Login
-  const handleLogin = async (values: string) => {
+  const handleLogin = async (values: {
+    username: string;
+    password: string;
+  }) => {
     try {
-      // Send request to the backend
       const response = await api.post("User/login", values);
-
-      // Extract token and user information
       const { token } = response.data;
-
-      // Save the token in localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(response.data));
-
-      // Show success message and navigate to homepage
-
       navigate("/", { state: { loginSuccess: true } });
     } catch (error) {
-      // Check if the error is due to invalid credentials
       if (error.response && error.response.status === 401) {
         toast.error("Invalid username or password. Please try again.");
       } else {
-        // Handle other types of errors (e.g., network errors)
         toast.error("An error occurred while logging in. Please try again.");
       }
     }
   };
 
+  const handleResetPassword = async (values: { email: string }) => {
+    try {
+      await api.post("User/reset-password", values);
+      toast.success("Password reset instructions sent to your email.");
+      setIsResetPassword(false);
+    } catch (error) {
+      toast.error("Failed to initiate password reset. Please try again.");
+    }
+  };
+
+  const handleLoginGoogle = () => {
+    window.open("http://localhost:5155/api/User/google-login", "_self");
+  };
+
+  const pageVariants = {
+    initial: { opacity: 0, y: 50 },
+    in: { opacity: 1, y: 0 },
+    out: { opacity: 0, y: -50 },
+  };
+
+  const pageTransition = {
+    type: "tween",
+    ease: "anticipate",
+    duration: 0.5,
+  };
+
   return (
-    <div
-      className="min-h-screen bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: "url('/src/assets/images/background_image.png')",
-      }}
-    >
+    <>
       <Header />
-      <div className="flex justify-center items-center w-[70%] mx-auto my-20 rounded-2xl shadow-lg bg-gray-100 p-8">
-        <div className="bg-[#FDF2E9] w-2/5 flex flex-col items-center justify-center py-8 px-6 rounded-xl opacity-70">
-          <h3 className="text-2xl font-bold mb-8">Sign in</h3>
-          <img
-            src="src/assets/images/banner_login.png"
-            alt="Koi"
-            className="w-4/5 rounded-lg"
-          />
-        </div>
-        <div className="bg-white w-3/5 py-16 px-12 shadow-md rounded-xl">
-          <h3 className="text-2xl font-bold mb-8">Sign in Account</h3>
-          <div className="flex flex-col items-center justify-center">
-            <Form onFinish={handleLogin} className="w-full">
-              <Form.Item
-                name="username"
-                rules={[
-                  { required: true, message: "Please input your username!" },
-                  {
-                    min: 4,
-                    message: "Username must be at least 4 characters long!",
-                  },
-                  { max: 20, message: "Username cannot exceed 20 characters!" },
-                  {
-                    pattern: /^[a-zA-Z0-9_]+$/,
-                    message:
-                      "Username can only contain letters, numbers, and underscores!",
-                  },
-                ]}
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-white p-4"
+      >
+        <div className="bg-white rounded-xl shadow-2xl overflow-hidden max-w-4xl w-full">
+          <div className="md:flex">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="md:w-1/2 bg-blue-200 p-8 text-white hidden md:block"
+            >
+              <h2 className="text-3xl font-bold mb-4 text-blue-800">
+                Welcome to KoiNe
+              </h2>
+              <p className="mb-6 text-blue-800">
+                Your health koi is our priority. Log in to access your medical
+                records and appointments.
+              </p>
+              <img
+                src="src\assets\images\banner-login.png"
+                alt="Medical care illustration"
+                className="rounded-lg"
+              />
+            </motion.div>
+
+            <div className="md:w-1/2 p-8 align-middle justify-center">
+              <motion.h3
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-2xl font-bold mb-6 text-blue-800"
               >
-                <Input
-                  placeholder="Username"
-                  className="mb-6 h-12 text-lg rounded-md"
-                  prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
-                />
-              </Form.Item>
-              <Form.Item
-                name="password"
-                rules={[
-                  { required: true, message: "Please input your password!" },
-                ]}
-              >
-                <Input.Password
-                  placeholder="Password"
-                  type="password"
-                  className="mb-6 h-12 text-lg rounded-md"
-                  prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
-                />
-              </Form.Item>
-              <Button
-                className="w-full bg-[#2a3c79] text-white h-12 text-lg rounded-md mb-6"
-                htmlType="submit"
-              >
-                Login
-              </Button>
-            </Form>
-            <p className="text-center text-gray-700 mt-4">
-              Don't have an account?{" "}
-              <Link to="/register" className="text-teal-500">
-                Register
-              </Link>
-            </p>
-            <div className="text-center text-gray-400 my-6 font-semibold">
-              OR
-            </div>
-            <div className="flex space-x-4">
-              <Button
-                className="w-1/2 h-12 text-lg rounded-md bg-white text-black border border-gray-200 hover:opacity-90"
-                onClick={handleLoginGoogle}
-              >
-                <img
-                  className="w-6 inline"
-                  src="src/assets/images/google.png"
-                  alt="Google icon"
-                />{" "}
-                Sign in with Google
-              </Button>
-              <Button className="w-1/2 h-12 text-lg rounded-md bg-blue-600 text-white hover:opacity-90">
-                <img
-                  className="w-6 inline"
-                  src="src/assets/images/facebook.png"
-                  alt="Facebook icon"
-                />{" "}
-                Sign in with Facebook
-              </Button>
+                {isResetPassword ? "Reset Password" : "Sign in to Your Account"}
+              </motion.h3>
+              {!isResetPassword ? (
+                <Form onFinish={handleLogin} layout="vertical">
+                  <Form.Item
+                    name="username"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your username!",
+                      },
+                      {
+                        min: 4,
+                        message: "Username must be at least 4 characters long!",
+                      },
+                      {
+                        max: 20,
+                        message: "Username cannot exceed 20 characters!",
+                      },
+                      {
+                        pattern: /^[a-zA-Z0-9_]+$/,
+                        message:
+                          "Username can only contain letters, numbers, and underscores!",
+                      },
+                    ]}
+                  >
+                    <Input
+                      prefix={<UserOutlined className="text-blue-500" />}
+                      placeholder="Username"
+                      size="large"
+                      className="border-blue-300 focus:border-blue-500"
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name="password"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your password!",
+                      },
+                    ]}
+                  >
+                    <Input.Password
+                      prefix={<LockOutlined className="text-blue-500" />}
+                      placeholder="Password"
+                      size="large"
+                      className="border-blue-300 focus:border-blue-500"
+                    />
+                  </Form.Item>
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      size="large"
+                      block
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Log in
+                    </Button>
+                  </Form.Item>
+                </Form>
+              ) : (
+                <Form onFinish={handleResetPassword} layout="vertical">
+                  <Form.Item
+                    name="email"
+                    rules={[
+                      { required: true, message: "Please input your email!" },
+                      {
+                        type: "email",
+                        message: "Please enter a valid email address!",
+                      },
+                    ]}
+                  >
+                    <Input
+                      prefix={<MailOutlined className="text-blue-500" />}
+                      placeholder="Email"
+                      size="large"
+                      className="border-blue-300 focus:border-blue-500"
+                    />
+                  </Form.Item>
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      size="large"
+                      block
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Reset Password
+                    </Button>
+                  </Form.Item>
+                </Form>
+              )}
+              <div className="mt-4 text-center">
+                {isResetPassword ? (
+                  <Button
+                    type="link"
+                    onClick={() => setIsResetPassword(false)}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    Back to Login
+                  </Button>
+                ) : (
+                  <Button
+                    type="link"
+                    onClick={() => setIsResetPassword(true)}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    Forgot Password?
+                  </Button>
+                )}
+              </div>
+              {!isResetPassword && (
+                <>
+                  <div className="mt-6 text-center text-blue-800 font-semibold">
+                    OR
+                  </div>
+                  <div className="mt-4 space-y-3">
+                    <Button
+                      onClick={handleLoginGoogle}
+                      icon={
+                        <img
+                          src="src\assets\images\google.png"
+                          alt="Google"
+                          className="mr-2 h-6 w-6"
+                        />
+                      }
+                      size="large"
+                      block
+                      className="border-blue-300 text-blue-600 hover:border-blue-500 hover:text-blue-700"
+                    >
+                      Sign in with Google
+                    </Button>
+                    <Button
+                      icon={
+                        <img
+                          src="src\assets\images\facebook.png"
+                          alt="Facebook"
+                          className="mr-2 h-6 w-6"
+                        />
+                      }
+                      size="large"
+                      block
+                      className="bg-blue-600 text-white hover:bg-blue-700"
+                    >
+                      Sign in with Facebook
+                    </Button>
+                  </div>
+                  <div className="mt-6 text-center text-blue-800">
+                    Don't have an account?{" "}
+                    <Link
+                      to="/register"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Register
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
-      </div>
-      <Footer />
-    </div>
+      </motion.div>
+    </>
   );
-}
+};
 
 export default Login;

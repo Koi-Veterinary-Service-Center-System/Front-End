@@ -223,7 +223,14 @@ function Home() {
       </AnimatedSection>
 
       <AnimatedSection>
-        <div className="bg-blue-50 rounded-lg overflow-hidden">
+        <div
+          className="bg-blue-50 rounded-lg overflow-hidden"
+          style={{
+            backgroundImage: `url('src/assets/images/waves.png')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
           <div className="flex flex-col lg:flex-row items-center">
             <div className="lg:w-1/2">
               <img

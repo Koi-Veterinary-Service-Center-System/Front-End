@@ -177,48 +177,77 @@ function BookingPage() {
 
   const handleBooking = async (values: Booking) => {
     try {
-      // Format the date to YYYY-MM-DD according to the system's default timezone
+      // Format ngày đặt
       const bookingDate = new Intl.DateTimeFormat("en-CA", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
       }).format(values.bookingDate.toDate());
 
-      // Retrieve selected district's information
+      // Lấy thông tin quận/huyện từ khoảng cách đã chọn
       const selectedDistrict = distances.find(
         (distance) => distance.distanceID === values.district
       );
 
-      // Combine user input location with selected district and area
+      // Kết hợp thông tin vị trí
       const fullLocation = `${values.location}, ${selectedDistrict?.district}, ${selectedDistrict?.area}`;
 
+      // Chuẩn bị dữ liệu booking
       const bookingData = {
         note: values.note || "",
         vetName: form.getFieldValue("vetName") || "",
         initAmount: total,
-        location: fullLocation, // Use the combined location here
+        location: fullLocation,
         slotID: values.slotID || 0,
         serviceId: values.serviceName || 0,
-        paymentId: values.paymentType || 0,
+        paymentId: values.paymentType || 0, // Lấy paymentId dạng số
         bookingDate: bookingDate,
         quantity: values.quantity,
       };
 
       console.log("Booking Data:", bookingData);
 
+      // Gọi API booking
       const response = await api.post("/booking/create-booking", bookingData);
 
       if (response.status === 200 || response.status === 201) {
         toast.success("Booking successful!");
+
+        // Kiểm tra nếu paymentId là 2 (tương ứng với VNPAY)
+        if (values.paymentType === 2) {
+          await handlePayOnline(response.data.bookingID); // Gọi API thanh toán
+        } else {
+          window.location.href = "/history"; // Chuyển về trang lịch sử nếu không phải VNPAY
+        }
       }
-      window.location.href = "/history";
     } catch (error: any) {
       console.error("Booking error:", error);
+
       if (error.response && error.response.data) {
-        toast.info(error.response.data); // Hiển thị message từ response body
+        console.log("Server Error:", error.response.data);
+        toast.info(JSON.stringify(error.response.data)); // Hiển thị lỗi chi tiết
       } else {
-        toast.error("Failed to booking"); // Hiển thị message mặc định nếu không có message từ API
+        toast.error("Failed to book the service.");
       }
+    }
+  };
+
+  const handlePayOnline = async (bookingID: string) => {
+    try {
+      // Gọi API tạo URL thanh toán
+      const response = await api.post(`/payment/create-paymentUrl`, null, {
+        params: { bookingID },
+      });
+
+      if (response.status === 200 && response.data.paymentUrl) {
+        window.location.href = response.data.paymentUrl; // Điều hướng đến URL thanh toán
+      } else {
+        console.error("Failed to retrieve payment URL.");
+        toast.error("Failed to initiate payment.");
+      }
+    } catch (error) {
+      console.error("Payment initiation error:", error);
+      toast.error("An error occurred while initiating the payment.");
     }
   };
 
@@ -524,6 +553,7 @@ function BookingPage() {
                   style={{ height: "50px" }}
                   loading={isLoadingPayment}
                   placeholder="Select payment method"
+                  onChange={(value) => form.setFieldValue("paymentType", value)} // Lưu ID thay vì tên
                 >
                   {payments.map((item) => (
                     <Option key={item.paymentID} value={item.paymentID}>

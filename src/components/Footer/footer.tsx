@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import {
   FaFacebookF,
@@ -41,7 +40,7 @@ const SocialIcon = ({ Icon, url, hoverColor, label }) => (
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-100 py-12 font-sans">
+    <footer className="bg-white py-12 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Company Info */}
