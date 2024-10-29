@@ -3,24 +3,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Calendar as CalendarIcon,
-  MoreVertical,
-  Video,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import api from "@/configs/axios";
 import { Link } from "react-router-dom";
-
-interface VetSlot {
-  slotID: number;
-  slotStartTime: string;
-  slotEndTime: string;
-  weekDate: string;
-  vetID: string;
-  vetName: string;
-  vetFirstName: string;
-  vetLastName: string;
-  meetURL: string;
-}
+import { VetSlots } from "@/types/info";
+import { motion } from "framer-motion";
+import { FaCircle } from "react-icons/fa";
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const timeSlots = [
@@ -36,7 +24,7 @@ const timeSlots = [
 
 export default function VetCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 10));
-  const [events, setEvents] = useState<VetSlot[]>([]);
+  const [events, setEvents] = useState<VetSlots[]>([]);
 
   useEffect(() => {
     const fetchVet = async () => {
@@ -58,7 +46,7 @@ export default function VetCalendar() {
         };
 
         const data = response.data
-          .map((item: VetSlot) => {
+          .map((item: VetSlots) => {
             if (!item.slotStartTime || !item.slotEndTime) {
               console.warn(
                 `Missing slot times for item with ID: ${item.slotID}`
@@ -87,14 +75,14 @@ export default function VetCalendar() {
               vetName: `${item.vetFirstName} ${item.vetLastName}`,
               startTime,
               endTime,
-              slotStartTime: item.slotStartTime,
-              slotEndTime: item.slotEndTime,
+              slotStartTime: startTime,
+              slotEndTime: endTime,
               meetURL: item.meetURL,
             };
           })
           .filter(Boolean);
 
-        setEvents(data as VetSlot[]);
+        setEvents(data as VetSlots[]);
       } catch (error) {
         console.error("Error fetching schedule data:", error);
       }
@@ -139,14 +127,20 @@ export default function VetCalendar() {
 
   const getEventForSlot = (day: Date, time: string) => {
     const [timeHour] = time.split(" ");
-    const hour = parseInt(timeHour);
-    const event = events.find(
+    const hour =
+      parseInt(timeHour) +
+      (time.includes("PM") && parseInt(timeHour) !== 12 ? 12 : 0);
+
+    return events.find(
       (event) =>
         event.startTime.getDate() === day.getDate() &&
-        event.startTime.getHours() ===
-          (time.includes("PM") && hour !== 12 ? hour + 12 : hour)
+        event.startTime.getHours() === hour
     );
-    return event;
+  };
+
+  const flashingVariants = {
+    visible: { opacity: 1 },
+    hidden: { opacity: 0 },
   };
 
   return (
@@ -162,61 +156,44 @@ export default function VetCalendar() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.5 }}
       >
-        <div className="bg-blue-600 text-white p-4 md:p-6">
-          <h1 className="text-2xl md:text-3xl font-bold mb-4">Calendar</h1>
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+        <div className="bg-blue-600 text-white p-4">
+          <h1 className="text-2xl font-bold mb-4">Calendar</h1>
+          <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+              <button
                 onClick={handlePrevWeek}
                 className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200"
               >
-                <ChevronLeft className="w-6 h-6" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
                 onClick={handleNextWeek}
                 className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200"
               >
-                <ChevronRight className="w-6 h-6" />
-              </motion.button>
-              <span className="text-xl md:text-2xl font-semibold">
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              <span className="text-xl font-semibold">
                 {formatDate(currentDate)}
               </span>
             </div>
-            <div className="flex items-center space-x-2">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200"
-              >
-                <CalendarIcon className="w-6 h-6" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200"
-              >
-                <MoreVertical className="w-6 h-6" />
-              </motion.button>
-            </div>
+            <button className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200">
+              <CalendarIcon className="w-5 h-5" />
+            </button>
           </div>
         </div>
         <div className="overflow-x-auto">
           <div className="min-w-[800px]">
             <div className="grid grid-cols-8 bg-blue-50">
-              <div className="p-4 border-r border-blue-100"></div>
+              <div className="p-3 border-r border-blue-100"></div>
               {getDaysOfWeek().map((day, index) => (
                 <div
                   key={index}
-                  className="p-4 text-center border-r border-blue-100 last:border-r-0"
+                  className="p-3 text-center border-r border-blue-100 last:border-r-0"
                 >
                   <div className="font-medium text-blue-800">
                     {daysOfWeek[day.getDay()]}
                   </div>
-                  <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-xl font-bold text-blue-600">
                     {day.getDate()}
                   </div>
                 </div>
@@ -225,53 +202,64 @@ export default function VetCalendar() {
             <div className="grid grid-cols-8">
               {timeSlots.map((time, timeIndex) => (
                 <React.Fragment key={timeIndex}>
-                  <div className="p-4 border-r border-b border-blue-100 text-sm text-blue-600 font-medium">
+                  <div className="p-3 border-r border-b border-blue-100 text-sm text-blue-600 font-medium">
                     {time}
                   </div>
                   {getDaysOfWeek().map((day, dayIndex) => {
                     const event = getEventForSlot(day, time);
                     return (
-                      <motion.div
+                      <div
                         key={`${timeIndex}-${dayIndex}`}
-                        className="border-r border-b border-blue-100 last:border-r-0 relative p-4"
-                        whileHover={{ scale: 1.05 }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 10,
-                        }}
+                        className="border-r border-b border-blue-100 last:border-r-0 relative p-2"
                       >
                         {event && (
-                          <motion.div
-                            className="absolute inset-1 bg-blue-200 border border-blue-300 rounded-lg p-2 shadow-md"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 * (timeIndex + dayIndex) }}
-                          >
-                            <Link to="/detail" className="block mb-2">
+                          <div className="bg-blue-200 border border-blue-300 rounded p-1 text-xs">
+                            <Link to="/detail" className="block mb-1">
                               <div className="font-semibold text-blue-800">
                                 {event.vetName}
                               </div>
-                              <div className="text-xs text-blue-600">
-                                {event.slotStartTime} - {event.slotEndTime}
+                              <div className="text-blue-600">
+                                {event.slotStartTime.toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}{" "}
+                                -{" "}
+                                {event.slotEndTime.toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
                               </div>
                             </Link>
-                            <a
-                              href={event.meetURL}
+
+                            <Link
+                              to={event.meetURL}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center justify-center bg-blue-500 text-white text-xs py-1 px-2 rounded hover:bg-blue-600 transition-colors duration-200"
+                              className="flex items-center justify-center bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 transition-colors duration-200"
                             >
                               <img
                                 src="https://static.vecteezy.com/system/resources/previews/022/101/036/original/google-meet-logo-transparent-free-png.png"
                                 alt="Google Meet"
-                                className="w-9 h-9 mr-1"
+                                className="h-8 mr-2"
                               />
                               Join Meet
-                            </a>
-                          </motion.div>
+                              {event.meetURL && (
+                                <motion.div
+                                  variants={flashingVariants}
+                                  animate={{ opacity: [1, 0, 1] }}
+                                  transition={{
+                                    duration: 1,
+                                    repeat: Infinity,
+                                    ease: "linear",
+                                  }}
+                                >
+                                  <FaCircle className="text-red-600 ml-2" />
+                                </motion.div>
+                              )}
+                            </Link>
+                          </div>
                         )}
-                      </motion.div>
+                      </div>
                     );
                   })}
                 </React.Fragment>
