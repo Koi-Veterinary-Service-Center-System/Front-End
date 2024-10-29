@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import api from "../../configs/axios";
@@ -124,29 +123,62 @@ const DetailBooking = () => {
   // Fetch all booking and calculate totals based on the user's role
   const fetchBooking = async () => {
     try {
-      // Determine the endpoint based on user role
-      const endpoint =
-        profile?.role === "Staff"
-          ? `/booking/all-booking`
-          : `/booking/view-booking-process`;
-
-      // Fetch bookings from the determined endpoint
-      const response = await api.get(endpoint, {
+      // Gọi API với endpoint /booking/view-booking-process
+      let response = await api.get(`/booking/view-booking-process`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-      // Set the bookings data
-      const fetchedBookings = response.data;
-      setBookings(fetchedBookings);
-      console.log("Fetched Bookings:", fetchedBookings);
-    } catch (error: unknown) {
-      console.error("Fetch error:", error); // Log the entire error object
-      const errorMessage =
-        error.response?.data?.message || "Failed to fetch bookings";
-      console.log("Error message:", errorMessage);
-      setError(errorMessage);
+      let fetchedBookings = response.data;
+      console.log("Fetched Bookings (Process):", fetchedBookings);
+
+      // Nếu có booking nào có status là "Succeeded" hoặc "Cancelled"
+      const hasHistoryStatus = fetchedBookings.some((booking: Booking) =>
+        ["Succeeded", "Cancelled"].includes(booking.bookingStatus)
+      );
+
+      // Nếu có, chuyển sang endpoint "/booking/view-booking-history"
+      if (hasHistoryStatus) {
+        response = await api.get(`/booking/view-booking-history`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        fetchedBookings = response.data;
+        console.log("Fetched Bookings (History):", fetchedBookings);
+      }
+
+      setBookings(fetchedBookings); // Cập nhật bookings
+    } catch (error: any) {
+      console.error("Fetch error:", error);
+
+      // Nếu gặp lỗi 404 từ endpoint đầu tiên, thử gọi endpoint thứ hai
+      if (error.response && error.response.status === 404) {
+        try {
+          const response = await api.get(`/booking/view-booking-history`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+
+          const fetchedBookings = response.data;
+          console.log("Fallback to History Bookings:", fetchedBookings);
+          setBookings(fetchedBookings); // Cập nhật bookings với dữ liệu lịch sử
+        } catch (historyError: any) {
+          console.error("History Fetch Error:", historyError);
+          const errorMessage =
+            historyError.response?.data?.message || "Failed to fetch bookings.";
+          setError(errorMessage);
+          toast.error(errorMessage);
+        }
+      } else {
+        const errorMessage =
+          error.response?.data?.message || "Failed to fetch bookings.";
+        setError(errorMessage);
+        toast.error(errorMessage);
+      }
     }
   };
 
@@ -200,6 +232,8 @@ const DetailBooking = () => {
         return "bg-yellow-100 text-yellow-800";
       case "cancelled":
         return "bg-red-100 text-red-800";
+      case "succeeded":
+        return "bg-green-100 text-green-800";
       case "scheduled":
         return "bg-blue-100 text-blue-800";
       case "ongoing":
@@ -264,7 +298,11 @@ const DetailBooking = () => {
                   transition={{ duration: 0.5 }}
                 >
                   <Card className="overflow-hidden col-span-full bg-gradient-to-br from-blue-50 to-white border-blue-200 shadow-lg">
-                    <StatusComponent currentStatus={booking.bookingStatus} />
+                    {!["Succeeded", "Cancelled"].includes(
+                      booking.bookingStatus
+                    ) && (
+                      <StatusComponent currentStatus={booking.bookingStatus} />
+                    )}
                     <CardHeader className="pb-4 bg-blue-500 text-white">
                       <div className="flex justify-between items-center">
                         <CardTitle className="text-xl font-bold flex items-center">
@@ -439,9 +477,21 @@ const DetailBooking = () => {
                 </motion.div>
               ))
             ) : (
-              <p className="text-gray-500 dark:text-gray-400">
-                No bookings available.
-              </p>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="flex flex-col items-center justify-center h-64"
+              >
+                <img
+                  src="src/assets/images/The Sad Snowman - Falling Apart.png"
+                  alt="No bookings"
+                  className="w-32 h-32 mb-4"
+                />
+                <p className="text-gray-500 dark:text-gray-400">
+                  No bookings found for this status.
+                </p>
+              </motion.div>
             )}
           </div>
         </main>

@@ -311,20 +311,6 @@ export default function Component() {
                         whileHover={{ scale: 1.05 }}
                         className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
                       >
-                        <Fish className="mr-3 h-6 w-6 text-blue-500" />
-                        <div>
-                          <span className="font-semibold text-gray-700">
-                            Koi/Pool:
-                          </span>
-                          <p className="text-gray-900">
-                            {appointment.koiOrPoolName}
-                          </p>
-                        </div>
-                      </motion.div>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
-                      >
                         <Calendar className="mr-3 h-6 w-6 text-blue-500" />
                         <div>
                           <span className="font-semibold text-gray-700">

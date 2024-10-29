@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Calendar, Clock, FishIcon, Home } from "lucide-react";
+import { Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link, useParams } from "react-router-dom";
 import { SiProcesswire } from "react-icons/si";
@@ -16,13 +16,6 @@ export default function PaymentSuccessful() {
 
   // Debugging: log bookingID to ensure it’s being read correctly
   console.log("Booking ID from URL:", bookingID);
-
-  const bookingDetails = {
-    service: "An Check-up",
-    date: "April 21, 2024",
-    time: "2:30 PM",
-    petName: "Goldie",
-  };
 
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.8 },
@@ -134,7 +127,7 @@ export default function PaymentSuccessful() {
                     size="sm"
                   >
                     <SiProcesswire className="mr-2 h-4 w-4 transition-transform group-hover:rotate-180" />
-                    <Link to="/process" className="flex items-center text-sm">
+                    <Link to="/history" className="flex items-center text-sm">
                       Return to Booking
                     </Link>
                   </Button>

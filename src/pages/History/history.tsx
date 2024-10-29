@@ -59,8 +59,6 @@ const statusIcons: Record<Status, React.ElementType> = {
   Succeeded: DollarSign,
   Cancelled: AlertCircle,
 };
-// Constants for pagination
-const ITEMS_PER_PAGE = 5;
 
 const History = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -78,18 +76,6 @@ const History = () => {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
     null
   );
-  const [currentPage, setCurrentPage] = useState(1); // Manage the current page
-
-  const totalPages = Math.ceil(bookings.length / ITEMS_PER_PAGE); // Calculate total pages
-
-  // Handle pagination
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
-
-  // Calculate the range of items to show on the current page
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentItems = bookings.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   // Fetch all booking and calculate totals
   // Fetch bookings based on active status
