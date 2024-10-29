@@ -284,11 +284,14 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
               ))
             ) : (
               <tr>
-                <td
-                  colSpan={6}
-                  className="px-6 py-4 text-center text-sm text-gray-400"
-                >
-                  No services found
+                <td colSpan={6} className="px-6 py-4 text-center">
+                  <div className="flex justify-center items-center">
+                    <img
+                      src="src/assets/images/No-Messages-1--Streamline-Bruxelles.png"
+                      alt="No Messages"
+                      className="object-contain w-1/2 h-1/2 max-w-xs max-h-64"
+                    />
+                  </div>
                 </td>
               </tr>
             )}

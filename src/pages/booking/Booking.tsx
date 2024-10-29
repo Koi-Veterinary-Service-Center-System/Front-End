@@ -7,7 +7,6 @@ import api from "../../configs/axios";
 import {
   Slot,
   Vet,
-  koiOrPool,
   Payment,
   Distance,
   Booking,
@@ -212,7 +211,7 @@ function BookingPage() {
       if (response.status === 200 || response.status === 201) {
         toast.success("Booking successful!");
       }
-      window.location.href = "/process";
+      window.location.href = "/history";
     } catch (error: any) {
       console.error("Booking error:", error);
       if (error.response && error.response.data) {

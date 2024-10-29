@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import api from "../../configs/axios";
 import { Booking, Profile } from "../../types/info";
@@ -59,6 +59,8 @@ const statusIcons: Record<Status, React.ElementType> = {
   Succeeded: DollarSign,
   Cancelled: AlertCircle,
 };
+// Constants for pagination
+const ITEMS_PER_PAGE = 5;
 
 const History = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -76,6 +78,18 @@ const History = () => {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
     null
   );
+  const [currentPage, setCurrentPage] = useState(1); // Manage the current page
+
+  const totalPages = Math.ceil(bookings.length / ITEMS_PER_PAGE); // Calculate total pages
+
+  // Handle pagination
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  // Calculate the range of items to show on the current page
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const currentItems = bookings.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   // Fetch all booking and calculate totals
   // Fetch bookings based on active status
@@ -262,14 +276,15 @@ const History = () => {
               </h2>
             </div>
             <motion.div
-              className="space-y-8 mb-5"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Card className="w-full max-w-4xl mx-auto">
+              <Card className="w-full max-w-4xl mx-auto mb-8">
                 <CardHeader>
-                  <CardTitle>Booking Status</CardTitle>
+                  <CardTitle className="text-blue-600 dark:text-blue-400">
+                    Booking Status
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2 justify-center">
@@ -288,8 +303,8 @@ const History = () => {
                             onClick={() => handleStatusClick(status)}
                             className={`flex items-center gap-2 ${
                               activeStatus === status
-                                ? "bg-primary text-primary-foreground"
-                                : "hover:bg-primary hover:text-primary-foreground"
+                                ? "bg-blue-500 text-white"
+                                : "hover:bg-blue-100 hover:text-blue-500"
                             }`}
                           >
                             <Icon className="h-4 w-4" />
@@ -306,168 +321,197 @@ const History = () => {
             <div className="grid grid-cols-1 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Bookings</CardTitle>
+                  <CardTitle className="text-blue-600 dark:text-blue-400">
+                    Bookings
+                  </CardTitle>
                   <div className="flex items-center space-x-2">
-                    <Search className="h-4 w-4 text-muted-foreground" />
-                    <Filter className="h-4 w-4 text-muted-foreground" />
+                    <Search className="h-4 w-4 text-blue-500" />
+                    <Filter className="h-4 w-4 text-blue-500" />
                   </div>
                 </CardHeader>
-                <div className="grid grid-cols-1 gap-6">
-                  {/* Filter bookings by activeStatus before rendering */}
-                  {bookings.filter(
-                    (booking) => booking.bookingStatus === activeStatus
-                  ).length > 0 ? (
-                    bookings
-                      .filter(
-                        (booking) => booking.bookingStatus === activeStatus
-                      )
-                      .map((booking) => (
-                        <Card
-                          key={booking.bookingID}
-                          className="overflow-hidden col-span-full"
-                        >
-                          <CardHeader className="pb-4">
-                            <div className="flex justify-between items-center">
-                              <CardTitle className="text-lg">
-                                {booking.serviceName}
-                              </CardTitle>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <Link to="/detailB">
-                              <div className="flex items-center mb-4">
-                                <Avatar className="h-10 w-10 mr-3">
-                                  <AvatarImage
-                                    src={booking.imageURL}
-                                    alt={booking.vetName}
-                                    className="object-cover"
-                                  />
-                                  <AvatarFallback>
-                                    {booking.vetName.charAt(0)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <p className="font-semibold">
-                                    {booking.vetName}
-                                  </p>
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    Veterinarian
-                                  </p>
+                <AnimatePresence>
+                  <div className="grid grid-cols-1 gap-6">
+                    {/* Filter bookings by activeStatus before rendering */}
+                    {bookings.filter(
+                      (booking) => booking.bookingStatus === activeStatus
+                    ).length > 0 ? (
+                      bookings
+                        .filter(
+                          (booking) => booking.bookingStatus === activeStatus
+                        )
+                        .map((booking) => (
+                          <motion.div
+                            key={booking.bookingID}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <Card className="mb-4 overflow-hidden border-l-4 border-blue-500">
+                              <CardHeader className="pb-2">
+                                <div className="flex justify-between items-center">
+                                  <CardTitle className="text-lg text-blue-600">
+                                    {booking.serviceName}
+                                  </CardTitle>
                                 </div>
-                              </div>
-                            </Link>
+                              </CardHeader>
+                              <CardContent>
+                                <Link to="/detailB" className="block mb-4">
+                                  <div className="flex items-center">
+                                    <Avatar className="h-10 w-10 mr-3">
+                                      <AvatarImage
+                                        src={booking.imageURL}
+                                        alt={booking.vetName}
+                                        className="object-cover"
+                                      />
+                                      <AvatarFallback>
+                                        {booking.vetName.charAt(0)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <p className="font-semibold text-blue-600">
+                                        {booking.vetName}
+                                      </p>
+                                      <p className="text-sm text-blue-400">
+                                        Veterinarian
+                                      </p>
+                                    </div>
+                                  </div>
+                                </Link>
 
-                            <div className="space-y-2">
-                              <div className="flex items-center text-sm">
-                                <CalendarIcon className="h-4 w-4 mr-2 text-gray-500" />
-                                <span>{booking.slotWeekDateAtBooking}</span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <ClockIcon className="h-4 w-4 mr-2 text-gray-500" />
-                                <span>
-                                  {booking.slotStartTimeAtBooking} -{" "}
-                                  {booking.slotEndTimeAtBooking}
-                                </span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <MapPinIcon className="h-4 w-4 mr-2 text-gray-500" />
-                                <span>{booking.location}</span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <CreditCardIcon className="h-4 w-4 mr-2 text-gray-500" />
-                                <span>
-                                  {(
-                                    booking.initAmount + booking.arisedMoney
-                                  ).toLocaleString("vi-VN")}
-                                  vnd
-                                </span>
-                              </div>
-                            </div>
-                          </CardContent>
-                          <CardFooter className="flex justify-between">
-                            {/* Check if booking status is Succeeded or Cancelled */}
-                            {["Succeeded", "Cancelled"].includes(
-                              booking.bookingStatus
-                            ) ? (
-                              <Link to={`/feedback/${booking.bookingID}`}>
-                                <VscFeedback className="text-blue-500" />
-                              </Link>
-                            ) : (
-                              <>
-                                {/* Confirm to Success Button */}
-                                {[
-                                  "Scheduled",
-                                  "Ongoing",
-                                  "Completed",
-                                  "Received_Money",
-                                ].includes(booking.bookingStatus) && (
-                                  <Button
-                                    className="bg-blue-400"
-                                    variant="outline"
-                                    onClick={() =>
-                                      handleUpdateStatus(
-                                        booking.bookingID,
-                                        "Success"
-                                      )
-                                    }
-                                    disabled={[
-                                      "Pending",
+                                <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                                  <div className="flex items-center">
+                                    <CalendarIcon className="h-4 w-4 mr-2 text-blue-500" />
+                                    <span>{booking.slotWeekDateAtBooking}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <ClockIcon className="h-4 w-4 mr-2 text-blue-500" />
+                                    <span>
+                                      {booking.slotStartTimeAtBooking} -{" "}
+                                      {booking.slotEndTimeAtBooking}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <MapPinIcon className="h-4 w-4 mr-2 text-blue-500" />
+                                    <span>{booking.location}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <CreditCardIcon className="h-4 w-4 mr-2 text-blue-500" />
+                                    <span>
+                                      {(
+                                        booking.initAmount + booking.arisedMoney
+                                      ).toLocaleString("vi-VN")}
+                                      vnd
+                                    </span>
+                                  </div>
+                                </div>
+                              </CardContent>
+                              <CardFooter className="flex justify-between">
+                                {/* Check if booking status is Succeeded or Cancelled */}
+                                {["Succeeded", "Cancelled"].includes(
+                                  booking.bookingStatus
+                                ) ? (
+                                  <Link to={`/feedback/${booking.bookingID}`}>
+                                    <Button
+                                      variant="outline"
+                                      className="text-blue-500 hover:bg-blue-100"
+                                    >
+                                      <VscFeedback className="mr-2" />
+                                      Feedback
+                                    </Button>
+                                  </Link>
+                                ) : (
+                                  <>
+                                    {/* Confirm to Success Button */}
+                                    {[
                                       "Scheduled",
                                       "Ongoing",
                                       "Completed",
-                                    ].includes(booking.bookingStatus)}
-                                  >
-                                    Confirm to Success
-                                  </Button>
-                                )}
+                                      "Received_Money",
+                                    ].includes(booking.bookingStatus) && (
+                                      <Button
+                                        className="bg-blue-500 text-white hover:bg-blue-600"
+                                        variant="outline"
+                                        onClick={() =>
+                                          handleUpdateStatus(
+                                            booking.bookingID,
+                                            "Success"
+                                          )
+                                        }
+                                        disabled={[
+                                          "Pending",
+                                          "Scheduled",
+                                          "Ongoing",
+                                          "Completed",
+                                        ].includes(booking.bookingStatus)}
+                                      >
+                                        Confirm to Success
+                                      </Button>
+                                    )}
 
-                                {/* Cancel Booking Button */}
-                                <Dialog
-                                  open={isCancelDialogOpen}
-                                  onOpenChange={setIsCancelDialogOpen}
-                                >
-                                  <DialogTrigger asChild>
-                                    <Button
-                                      variant="destructive"
-                                      onClick={() =>
-                                        openCancelDialog(booking.bookingID)
-                                      }
-                                      disabled={[
-                                        "Ongoing",
-                                        "Completed",
-                                        "Received_Money",
-                                      ].includes(booking.bookingStatus)}
+                                    {/* Cancel Booking Button */}
+                                    <Dialog
+                                      open={isCancelDialogOpen}
+                                      onOpenChange={setIsCancelDialogOpen}
                                     >
-                                      Cancel Booking
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent>
-                                    <DialogHeader>
-                                      <DialogTitle>Cancel Booking</DialogTitle>
-                                    </DialogHeader>
-                                    <p>
-                                      Are you sure you want to cancel this
-                                      booking?
-                                    </p>
-                                    <Button
-                                      className="mt-4 w-full bg-red-600"
-                                      onClick={handleCancelBooking}
-                                    >
-                                      Confirm Cancel
-                                    </Button>
-                                  </DialogContent>
-                                </Dialog>
-                              </>
-                            )}
-                          </CardFooter>
-                        </Card>
-                      ))
-                  ) : (
-                    <p className="text-gray-500 dark:text-gray-400">
-                      No bookings available.
-                    </p>
-                  )}
-                </div>
+                                      <DialogTrigger asChild>
+                                        <Button
+                                          variant="destructive"
+                                          onClick={() =>
+                                            openCancelDialog(booking.bookingID)
+                                          }
+                                          disabled={[
+                                            "Ongoing",
+                                            "Completed",
+                                            "Received_Money",
+                                          ].includes(booking.bookingStatus)}
+                                        >
+                                          Cancel Booking
+                                        </Button>
+                                      </DialogTrigger>
+                                      <DialogContent>
+                                        <DialogHeader>
+                                          <DialogTitle>
+                                            Cancel Booking
+                                          </DialogTitle>
+                                        </DialogHeader>
+                                        <p>
+                                          Are you sure you want to cancel this
+                                          booking?
+                                        </p>
+                                        <Button
+                                          className="mt-4 w-full bg-red-600"
+                                          onClick={handleCancelBooking}
+                                        >
+                                          Confirm Cancel
+                                        </Button>
+                                      </DialogContent>
+                                    </Dialog>
+                                  </>
+                                )}
+                              </CardFooter>
+                            </Card>
+                          </motion.div>
+                        ))
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="flex flex-col items-center justify-center h-64"
+                      >
+                        <img
+                          src="src\assets\images\The Sad Snowman - Falling Apart.png"
+                          alt="No bookings"
+                          className="w-32 h-32 mb-4"
+                        />
+                        <p className="text-gray-500 dark:text-gray-400">
+                          No bookings found for this status.
+                        </p>
+                      </motion.div>
+                    )}
+                  </div>
+                </AnimatePresence>
               </Card>
             </div>
           </div>

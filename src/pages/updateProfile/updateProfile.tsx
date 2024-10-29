@@ -162,7 +162,7 @@ function UpdateProfile() {
       fetchProfile();
       navigate("/profile", { state: { updateProfileSuccess: true } });
     } catch (error) {
-      toast.error("Failed to update profile.");
+      toast.error(error.response.data);
     } finally {
       setLoading(false);
     }

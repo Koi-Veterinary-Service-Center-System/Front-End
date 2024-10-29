@@ -250,7 +250,11 @@ function NotificationsPopover({ notifications, clearNotifications }) {
         </div>
         {notifications.length === 0 ? (
           <p className="text-center text-muted-foreground">
-            No new notifications
+            <img
+              src="src\assets\images\No-Mail-1--Streamline-Bruxelles.png"
+              alt=""
+              className="w-full h-60"
+            />
           </p>
         ) : (
           <ScrollArea className="h-[300px]">
