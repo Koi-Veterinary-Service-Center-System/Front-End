@@ -235,7 +235,7 @@ export default function VetCalendar() {
                               to={event.meetURL}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center justify-center bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-600 transition-colors duration-200"
+                              className="flex items-center justify-center bg-blue-100 text-black py-1 px-2 rounded hover:bg-blue-600 transition-colors duration-200"
                             >
                               <img
                                 src="https://static.vecteezy.com/system/resources/previews/022/101/036/original/google-meet-logo-transparent-free-png.png"

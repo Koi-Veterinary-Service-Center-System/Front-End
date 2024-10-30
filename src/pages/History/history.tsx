@@ -97,7 +97,7 @@ const History = () => {
       setBookings(fetchedBookings); // Update the bookings state
     } catch (error: any) {
       setBookings([]); // Reset bookings on error
-      toast.error(error.response?.data || "Failed to fetch bookings.");
+      toast.info(error.response?.data || "Failed to fetch bookings.");
     }
   };
 
@@ -135,36 +135,6 @@ const History = () => {
   const handleDarkModeSwitch = () => {
     setIsDarkMode(!isDarkMode);
     document.body.classList.toggle("dark", !isDarkMode);
-  };
-
-  const handlePayOnline = async (bookingID: string) => {
-    try {
-      // Make the POST request to the API endpoint with bookingId as a query parameter
-      const response = await api.post(`/payment/create-paymentUrl`, null, {
-        params: { bookingID },
-      });
-
-      // If the request is successful, process the response
-      if (response.status === 200 && response.data.paymentUrl) {
-        window.location.href = response.data.paymentUrl; // Redirect to the payment URL
-
-        // After redirecting for payment, we can't automatically check for status,
-        // so we will add a listener or refresh bookings manually on return
-
-        // Wait for the user to come back and then refresh bookings
-        // Note: This requires the user to return back to the page after payment
-        window.onfocus = () => {
-          fetchBookingsByStatus(); // Refresh bookings to get the latest status
-          window.onfocus = null; // Remove the event listener after fetching once
-        };
-      } else {
-        console.error("Failed to retrieve payment URL.");
-        toast.error("Failed to initiate payment.");
-      }
-    } catch (error) {
-      console.error("Payment initiation error:", error);
-      toast.error("An error occurred while initiating the payment.");
-    }
   };
 
   const handleUpdateStatus = async (
@@ -216,7 +186,7 @@ const History = () => {
       setIsCancelDialogOpen(false);
       fetchBookingsByStatus(); // Refresh bookings after cancellation
     } catch (error: any) {
-      toast.error(error.response.data);
+      toast.warning(error.response.data);
     }
   };
 

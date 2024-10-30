@@ -26,8 +26,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { VscNotebook } from "react-icons/vsc";
 import { HiOutlineMail } from "react-icons/hi";
+import { BsCashCoin, BsCreditCard2Back } from "react-icons/bs";
 import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
 import { TbMoneybag } from "react-icons/tb";
+import { SiGooglemeet } from "react-icons/si";
 const statusSteps = [
   {
     label: "Pending",
@@ -350,6 +352,18 @@ const DetailBooking = () => {
                             variants={iconVariants}
                             initial="hidden"
                             animate="visible"
+                            transition={{ delay: 0.9 }}
+                          >
+                            <Stethoscope className="h-5 w-5 mr-3 text-blue-500" />
+                            <span className="text-gray-700">
+                              Service at Booking: {booking.serviceNameAtBooking}
+                            </span>
+                          </motion.div>
+                          <motion.div
+                            className="flex items-center text-sm"
+                            variants={iconVariants}
+                            initial="hidden"
+                            animate="visible"
                             transition={{ delay: 0.2 }}
                           >
                             <CalendarIcon className="h-5 w-5 mr-3 text-blue-500" />
@@ -389,9 +403,10 @@ const DetailBooking = () => {
                             animate="visible"
                             transition={{ delay: 0.5 }}
                           >
-                            <Video className="h-5 w-5 mr-3 text-blue-500" />
-                            <span className="text-gray-700">
-                              {booking.meetURL ? (
+                            {booking.paymentTypeAtBooking === "VNPay" &&
+                            booking.meetURL ? (
+                              <>
+                                <SiGooglemeet className="h-5 w-5 mr-3 text-blue-500" />
                                 <a
                                   href={booking.meetURL}
                                   target="_blank"
@@ -400,10 +415,12 @@ const DetailBooking = () => {
                                 >
                                   Join Meeting
                                 </a>
-                              ) : (
-                                "No meeting URL available"
-                              )}
-                            </span>
+                              </>
+                            ) : (
+                              <span className="text-gray-700">
+                                No meeting URL
+                              </span>
+                            )}
                           </motion.div>
                         </div>
                         <div className="space-y-4">
@@ -454,6 +471,23 @@ const DetailBooking = () => {
                               )}
                             </span>
                           </motion.div>
+
+                          <motion.div
+                            className="flex items-center text-sm"
+                            variants={iconVariants}
+                            initial="hidden"
+                            animate="visible"
+                            transition={{ delay: 1.0 }}
+                          >
+                            {booking.paymentTypeAtBooking === "VNPay" ? (
+                              <BsCreditCard2Back className="h-5 w-5 mr-3 text-blue-500" />
+                            ) : (
+                              <BsCashCoin className="h-5 w-5 mr-3 text-green-500" />
+                            )}
+                            <span className="text-gray-700">
+                              Payment Type: {booking.paymentTypeAtBooking}
+                            </span>
+                          </motion.div>
                           <motion.div
                             className="flex items-center text-sm"
                             variants={iconVariants}
@@ -464,10 +498,7 @@ const DetailBooking = () => {
                             <CreditCardIcon className="h-5 w-5 mr-3 text-blue-500" />
                             <span className="text-gray-700 font-semibold">
                               Total:{" "}
-                              {(
-                                booking.initAmount + booking.arisedMoney
-                              ).toLocaleString("vi-VN")}{" "}
-                              vnd
+                              {booking.totalAmount.toLocaleString("vi-VN")} vnd
                             </span>
                           </motion.div>
                         </div>

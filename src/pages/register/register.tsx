@@ -52,10 +52,10 @@ const Register = () => {
               className="md:w-1/2 bg-blue-300 p-8 text-white hidden md:block"
             >
               <h2 className="text-3xl font-bold mb-4 text-blue-800">
-                Welcome to MediCare
+                Welcome to KoiNe
               </h2>
               <p className="mb-6 text-blue-800">
-                Join our community and take control of your health journey.
+                Join our community and take control of your koi health journey.
               </p>
               <img
                 src="src\assets\images\banner-login.png"

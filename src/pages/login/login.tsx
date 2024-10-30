@@ -90,7 +90,7 @@ const Login = () => {
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="md:w-1/2 bg-blue-200 p-8 text-white hidden md:block"
+              className="md:w-1/2 bg-blue-100 p-8 text-white hidden md:block"
             >
               <h2 className="text-3xl font-bold mb-4 text-blue-800">
                 Welcome to KoiNe

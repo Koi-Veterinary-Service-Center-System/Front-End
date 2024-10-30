@@ -10,7 +10,7 @@ import {
   Payment,
   Distance,
   Booking,
-  services,
+  Services,
 } from "../../types/info";
 import { toast } from "sonner";
 import { MdOutlineMedicalServices } from "react-icons/md";
@@ -21,7 +21,7 @@ import { RiSecurePaymentFill } from "react-icons/ri";
 import { RiSortNumberDesc } from "react-icons/ri";
 import { motion } from "framer-motion";
 import TextArea from "antd/es/input/TextArea";
-import { useNavigate } from "react-router-dom";
+import moment from "moment";
 
 const { Option } = Select;
 
@@ -30,7 +30,7 @@ function BookingPage() {
   const bookingRef = useRef(null);
 
   const [slots, setSlots] = useState<Slot[]>([]);
-  const [services, setServices] = useState<services[]>([]);
+  const [services, setServices] = useState<Services[]>([]);
   const [vets, setVets] = useState<Vet[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [selectedVet, setSelectedVet] = useState<number | null>(null);
@@ -322,7 +322,12 @@ function BookingPage() {
                   name="bookingDate"
                   rules={[{ required: true, message: "Please select a date" }]}
                 >
-                  <DatePicker className="w-full p-2 shadow-sm" />
+                  <DatePicker
+                    className="w-full p-2 shadow-sm"
+                    disabledDate={(current) =>
+                      current && current < moment().endOf("day")
+                    }
+                  />
                 </Form.Item>
               </motion.div>
 
