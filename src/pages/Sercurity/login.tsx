@@ -39,17 +39,13 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(response.data));
       navigate("/", { state: { loginSuccess: true } });
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        toast.error("Invalid username or password. Please try again.");
-      } else {
-        toast.error("An error occurred while logging in. Please try again.");
-      }
+      toast.error("Invalid username or password. Please try again.");
     }
   };
 
   const handleResetPassword = async (values: { email: string }) => {
     try {
-      await api.post("User/reset-password", values);
+      await api.post("/User/request-password-reset", values);
       toast.success("Password reset instructions sent to your email.");
       setIsResetPassword(false);
     } catch (error) {

@@ -7,7 +7,6 @@ import {
   Users,
   DollarSign,
   Search,
-  Filter,
   Moon,
   Sun,
   AlertCircle,

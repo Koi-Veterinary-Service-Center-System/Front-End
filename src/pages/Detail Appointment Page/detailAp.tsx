@@ -51,7 +51,7 @@ import { FaUserDoctor } from "react-icons/fa6";
 import { RiServiceLine } from "react-icons/ri";
 import { GiCirclingFish } from "react-icons/gi";
 import { HiOutlineStatusOnline } from "react-icons/hi";
-import BookingRecord from "../booking/bookingRecord";
+import BookingRecord from "../Booking/bookingRecord";
 
 const prescriptionSchema = z.object({
   diseaseName: z.string().min(1, "Disease name is required"),
