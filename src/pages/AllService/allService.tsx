@@ -1,48 +1,38 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import Footer from "@/components/Footer/footer";
 import Header from "@/components/Header/header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import api from "@/configs/axios";
+import { FaClock, FaDollarSign } from "react-icons/fa6";
+import { Services } from "@/types/info";
+import { Link } from "react-router-dom";
+import { FaShoppingCart } from "react-icons/fa";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
-const teamMembers = [
-  {
-    name: "Phuong An",
-    role: "Seller",
-    image: "src/assets/images/phuongAn.jpg",
-    color: "bg-yellow-400",
-  },
-  {
-    name: "Nhat Nguyen",
-    role: "Seller",
-    image: "src/assets/images/nhatNguyen.png",
-    color: "bg-teal-400",
-  },
-  {
-    name: "Chu Lu",
-    role: "Seller",
-    image: "src/assets/images/chu.png",
-    color: "bg-red-400",
-  },
-];
-
-const staggerChildren = {
+const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.2,
+      staggerChildren: 0.1,
     },
   },
 };
 
-function AnimatedSection({ children }) {
+function AnimatedServiceCard({
+  service,
+  index,
+}: {
+  service: Services;
+  index: number;
+}) {
   const controls = useAnimation();
   const [ref, inView] = useInView({
     triggerOnce: true,
@@ -58,16 +48,89 @@ function AnimatedSection({ children }) {
   return (
     <motion.div
       ref={ref}
-      animate={controls}
+      variants={fadeInUp}
       initial="hidden"
-      variants={staggerChildren}
+      animate={controls}
+      custom={index}
+      className="bg-white rounded-lg shadow-lg overflow-hidden"
     >
-      {children}
+      <img
+        src={service.imageURL}
+        alt={service.serviceName}
+        className="w-full h-64 object-cover"
+      />
+      <div className="p-6">
+        <h2 className="text-2xl font-semibold mb-4 text-blue-700">
+          {service.serviceName}
+        </h2>
+        <p className="mb-6 text-gray-600">{service.description}</p>
+        <div className="space-y-4">
+          <div className="flex items-center text-gray-600">
+            <FaDollarSign className="mr-2 text-blue-500" />
+            <p>Price: ${service.price}</p>
+          </div>
+          <div className="flex items-center text-gray-600">
+            <FaShoppingCart className="mr-2 text-blue-500" />
+            <p>Quantity Price: ${service.quantityPrice}</p>
+          </div>
+          <div className="flex items-center text-gray-600">
+            <FaClock className="mr-2 text-blue-500" />
+            <p>Estimated Duration: {service.estimatedDuration} hours</p>
+          </div>
+        </div>
+        <div className="mt-6">
+          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+            <Link to="/booking">Request Appointment</Link>
+          </Button>
+        </div>
+      </div>
     </motion.div>
   );
 }
 
+function ServiceSkeleton() {
+  return (
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <Skeleton className="w-full h-64" />
+      <div className="p-6">
+        <Skeleton className="h-8 w-3/4 mb-4" />
+        <Skeleton className="h-4 w-full mb-2" />
+        <Skeleton className="h-4 w-5/6 mb-6" />
+        <div className="space-y-4">
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-4 w-3/5" />
+        </div>
+        <Skeleton className="h-10 w-full mt-6" />
+      </div>
+    </div>
+  );
+}
+
 export default function AllService() {
+  const [services, setServices] = useState<Services[]>([]);
+  const [isLoading, setLoading] = useState(true);
+
+  const fetchServices = async () => {
+    try {
+      const response = await api.get(`/service/all-service`);
+      if (Array.isArray(response.data)) {
+        setServices(response.data);
+      } else {
+        console.error("API response is not an array");
+        setServices([]);
+      }
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <Header />
@@ -81,100 +144,26 @@ export default function AllService() {
           Our Services
         </motion.h1>
 
-        <AnimatedSection>
-          <h2 className="text-4xl font-bold text-center mb-12 text-blue-700">
-            Our Team
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            {teamMembers.map((member, index) => (
-              <Card
-                key={index}
-                className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
-              >
-                <CardContent className="p-0">
-                  <div className={`relative w-full pt-[100%] ${member.color}`}>
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="absolute inset-0 w-full h-full object-cover rounded-t-lg filter"
-                    />
-                  </div>
-                  <div className="p-6 text-center bg-white">
-                    <h3 className="text-xl font-semibold text-gray-800">
-                      {member.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 mt-2">{member.role}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </AnimatedSection>
-
-        <AnimatedSection>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
-            {[
-              {
-                title: "Pond Subsurface Suction",
-                description:
-                  "Our advanced pond subsurface suction technique allows for efficient cleaning and maintenance of your fish pond, ensuring a healthy environment for your aquatic pets.",
-                image: "src/assets/images/fish-tank-service-1024x536.jpg",
-              },
-              {
-                title: "Pond Fish Pathology",
-                description:
-                  "Our expert veterinarians specialize in pond fish pathology, providing comprehensive diagnoses and treatment plans for various fish diseases and conditions.",
-                image: "src/assets/images/woman-with-koi-pond.jpg",
-              },
-              {
-                title: "Aquatic Telemedicine Consult",
-                description:
-                  "Get expert advice from our fish veterinarians through our convenient telemedicine consultations. We can assess your fish's health and provide guidance remotely.",
-                image:
-                  "src/assets/images/Water-Treatment-Jessie-Sanders-Fish-Vetranarian-1024x683.jpg",
-              },
-              {
-                title: "Aquatic Veterinary Consult",
-                description:
-                  "Our in-person aquatic veterinary consultations offer comprehensive examinations and personalized care plans for your fish, ensuring their optimal health and well-being.",
-                image: "src/assets/images/fish-online-training.jpg",
-              },
-              {
-                title: "Fish Surgery",
-                description:
-                  "Our skilled veterinarians perform delicate fish surgeries using state-of-the-art techniques and equipment, addressing a wide range of fish health issues.",
-                image: "src/assets/images/fish-Surgery.jpg",
-              },
-              {
-                title: "Advanced Fish Surgery",
-                description:
-                  "From minor procedures to complex operations, our fish surgery services are designed to improve the health and quality of life for your aquatic pets.",
-                image: "src/assets/images/Fish-Surgery-1.jpg",
-              },
-            ].map((service, index) => (
-              <motion.div
-                key={index}
-                variants={fadeInUp}
-                className="bg-white rounded-lg shadow-lg overflow-hidden"
-              >
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="w-full h-96 object-cover"
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 p-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {isLoading
+            ? Array.from({ length: 4 }).map((_, index) => (
+                <motion.div key={index} variants={fadeInUp}>
+                  <ServiceSkeleton />
+                </motion.div>
+              ))
+            : services.map((service, index) => (
+                <AnimatedServiceCard
+                  key={service.serviceID}
+                  service={service}
+                  index={index}
                 />
-                <div className="p-6">
-                  <h2 className="text-2xl font-semibold mb-4 text-blue-700">
-                    {service.title}
-                  </h2>
-                  <p className="mb-6 text-gray-600">{service.description}</p>
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                    Request Appointment
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </AnimatedSection>
+              ))}
+        </motion.div>
 
         <motion.div
           className="text-center mb-16"

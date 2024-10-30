@@ -31,7 +31,7 @@ export type koiOrPool = {
   customerId: string;
 };
 
-export type services = {
+export type Services = {
   serviceID: number;
   serviceName: string;
   description: string;
@@ -48,7 +48,7 @@ export type Distance = {
   price: number;
 };
 
-export type vetSlots = {
+export type VetSlots = {
   isBook: boolean;
   slotID: number;
   slotStartTime: string; // Set as string for any valid time format
@@ -58,6 +58,7 @@ export type vetSlots = {
   vetName: string; // Set as string for dynamic vet names
   vetFirstName: string; // Set as string for dynamic first names
   vetLastName: string; // Set as string for dynamic last names
+  meetURL: string;
 };
 
 export type Payment = {
@@ -98,10 +99,12 @@ export type Booking = {
   phoneNumber: string;
   vetID: string;
   vetName: string;
+  vetEmail: string;
   koiOrPoolName: string;
-  imageUrl: string;
+  imageURL: string;
   quantity: number;
   district: string;
+  bookingRecordNote: string;
 };
 
 export type User = {

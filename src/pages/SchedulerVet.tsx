@@ -3,23 +3,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Calendar as CalendarIcon,
-  MoreVertical,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import api from "@/configs/axios";
 import { Link } from "react-router-dom";
-
-// Cấu trúc dữ liệu 'vetSlots' dựa trên dữ liệu API trả về
-interface VetSlot {
-  slotID: number;
-  slotStartTime: string;
-  slotEndTime: string;
-  weekDate: string;
-  vetID: string;
-  vetName: string;
-  vetFirstName: string;
-  vetLastName: string;
-}
+import { VetSlots } from "@/types/info";
+import { motion } from "framer-motion";
+import { FaCircle } from "react-icons/fa";
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const timeSlots = [
@@ -34,8 +23,8 @@ const timeSlots = [
 ];
 
 export default function VetCalendar() {
-  const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 10)); // January 10, 2024
-  const [events, setEvents] = useState<VetSlot[]>([]);
+  const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 10));
+  const [events, setEvents] = useState<VetSlots[]>([]);
 
   useEffect(() => {
     const fetchVet = async () => {
@@ -45,8 +34,6 @@ export default function VetCalendar() {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-
-        console.log("API Response:", response.data); // Ghi log để kiểm tra dữ liệu
 
         const dayOfWeekMap: Record<string, number> = {
           Sunday: 0,
@@ -59,12 +46,12 @@ export default function VetCalendar() {
         };
 
         const data = response.data
-          .map((item: VetSlot) => {
+          .map((item: VetSlots) => {
             if (!item.slotStartTime || !item.slotEndTime) {
               console.warn(
                 `Missing slot times for item with ID: ${item.slotID}`
               );
-              return null; // Bỏ qua nếu thiếu dữ liệu thời gian
+              return null;
             }
 
             const eventDate = new Date(currentDate);
@@ -88,14 +75,14 @@ export default function VetCalendar() {
               vetName: `${item.vetFirstName} ${item.vetLastName}`,
               startTime,
               endTime,
-              slotStartTime: item.slotStartTime,
-              slotEndTime: item.slotEndTime,
+              slotStartTime: startTime,
+              slotEndTime: endTime,
+              meetURL: item.meetURL,
             };
           })
-          .filter(Boolean); // Bỏ qua các giá trị null
+          .filter(Boolean);
 
-        setEvents(data as VetSlot[]); // Kiểu xác định cho dữ liệu
-        console.log(data);
+        setEvents(data as VetSlots[]);
       } catch (error) {
         console.error("Error fetching schedule data:", error);
       }
@@ -140,19 +127,25 @@ export default function VetCalendar() {
 
   const getEventForSlot = (day: Date, time: string) => {
     const [timeHour] = time.split(" ");
-    const hour = parseInt(timeHour);
-    const event = events.find(
+    const hour =
+      parseInt(timeHour) +
+      (time.includes("PM") && parseInt(timeHour) !== 12 ? 12 : 0);
+
+    return events.find(
       (event) =>
         event.startTime.getDate() === day.getDate() &&
-        event.startTime.getHours() ===
-          (time.includes("PM") && hour !== 12 ? hour + 12 : hour)
+        event.startTime.getHours() === hour
     );
-    return event;
+  };
+
+  const flashingVariants = {
+    visible: { opacity: 1 },
+    hidden: { opacity: 0 },
   };
 
   return (
     <motion.div
-      className="min-h-screen bg-gradient-to-br from-blue-100 to-white p-8"
+      className="min-h-screen bg-gradient-to-br from-blue-100 to-white p-4 md:p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -163,101 +156,116 @@ export default function VetCalendar() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.5 }}
       >
-        <div className="bg-blue-600 text-white p-6">
-          <h1 className="text-3xl font-bold mb-4">Calendar</h1>
+        <div className="bg-blue-600 text-white p-4">
+          <h1 className="text-2xl font-bold mb-4">Calendar</h1>
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+              <button
                 onClick={handlePrevWeek}
                 className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200"
               >
-                <ChevronLeft className="w-6 h-6" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
                 onClick={handleNextWeek}
                 className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200"
               >
-                <ChevronRight className="w-6 h-6" />
-              </motion.button>
-              <span className="text-2xl font-semibold">
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              <span className="text-xl font-semibold">
                 {formatDate(currentDate)}
               </span>
             </div>
-            <div className="flex items-center space-x-2">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200"
-              >
-                <CalendarIcon className="w-6 h-6" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200"
-              >
-                <MoreVertical className="w-6 h-6" />
-              </motion.button>
-            </div>
+            <button className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition-colors duration-200">
+              <CalendarIcon className="w-5 h-5" />
+            </button>
           </div>
         </div>
-        <div className="grid grid-cols-8 bg-blue-50">
-          <div className="p-4 border-r border-blue-100"></div>
-          {getDaysOfWeek().map((day, index) => (
-            <div
-              key={index}
-              className="p-4 text-center border-r border-blue-100 last:border-r-0"
-            >
-              <div className="font-medium text-blue-800">
-                {daysOfWeek[day.getDay()]}
-              </div>
-              <div className="text-2xl font-bold text-blue-600">
-                {day.getDate()}
-              </div>
+        <div className="overflow-x-auto">
+          <div className="min-w-[800px]">
+            <div className="grid grid-cols-8 bg-blue-50">
+              <div className="p-3 border-r border-blue-100"></div>
+              {getDaysOfWeek().map((day, index) => (
+                <div
+                  key={index}
+                  className="p-3 text-center border-r border-blue-100 last:border-r-0"
+                >
+                  <div className="font-medium text-blue-800">
+                    {daysOfWeek[day.getDay()]}
+                  </div>
+                  <div className="text-xl font-bold text-blue-600">
+                    {day.getDate()}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-8">
-          {timeSlots.map((time, timeIndex) => (
-            <React.Fragment key={timeIndex}>
-              <div className="p-4 border-r border-b border-blue-100 text-sm text-blue-600 font-medium">
-                {time}
-              </div>
-              {getDaysOfWeek().map((day, dayIndex) => {
-                const event = getEventForSlot(day, time);
-                return (
-                  <motion.div
-                    key={`${timeIndex}-${dayIndex}`}
-                    className="border-r border-b border-blue-100 last:border-r-0 relative p-4"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 10 }}
-                  >
-                    {event && (
-                      <motion.div
-                        className="absolute inset-1 bg-blue-200 border border-blue-300 rounded-lg p-2 shadow-md"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 * (timeIndex + dayIndex) }}
+            <div className="grid grid-cols-8">
+              {timeSlots.map((time, timeIndex) => (
+                <React.Fragment key={timeIndex}>
+                  <div className="p-3 border-r border-b border-blue-100 text-sm text-blue-600 font-medium">
+                    {time}
+                  </div>
+                  {getDaysOfWeek().map((day, dayIndex) => {
+                    const event = getEventForSlot(day, time);
+                    return (
+                      <div
+                        key={`${timeIndex}-${dayIndex}`}
+                        className="border-r border-b border-blue-100 last:border-r-0 relative p-2"
                       >
-                        <Link to="/detail" className="block">
-                          <div className="font-semibold text-blue-800">
-                            {event.vetName}
+                        {event && (
+                          <div className="bg-blue-200 border border-blue-300 rounded p-1 text-xs">
+                            <Link to="/detail" className="block mb-1">
+                              <div className="font-semibold text-blue-800">
+                                {event.vetName}
+                              </div>
+                              <div className="text-blue-600">
+                                {event.slotStartTime.toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}{" "}
+                                -{" "}
+                                {event.slotEndTime.toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </div>
+                            </Link>
+
+                            <Link
+                              to={event.meetURL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center justify-center bg-blue-100 text-black py-1 px-2 rounded hover:bg-blue-600 transition-colors duration-200"
+                            >
+                              <img
+                                src="https://static.vecteezy.com/system/resources/previews/022/101/036/original/google-meet-logo-transparent-free-png.png"
+                                alt="Google Meet"
+                                className="h-8 mr-2"
+                              />
+                              Join Meet
+                              {event.meetURL && (
+                                <motion.div
+                                  variants={flashingVariants}
+                                  animate={{ opacity: [1, 0, 1] }}
+                                  transition={{
+                                    duration: 1,
+                                    repeat: Infinity,
+                                    ease: "linear",
+                                  }}
+                                >
+                                  <FaCircle className="text-red-600 ml-2" />
+                                </motion.div>
+                              )}
+                            </Link>
                           </div>
-                          <div className="text-xs text-blue-600">
-                            {event.slotStartTime} - {event.slotEndTime}
-                          </div>
-                        </Link>
-                      </motion.div>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </React.Fragment>
-          ))}
+                        )}
+                      </div>
+                    );
+                  })}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
         </div>
       </motion.div>
       <motion.div

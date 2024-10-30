@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/scrollToTop";
 import Home from "./pages/home/home";
-import Register from "./pages/register/register";
-import Login from "./pages/login/login";
+import Register from "./pages/Sercurity/register";
+import Login from "./pages/Sercurity/login";
 import UpdateProfile from "./pages/updateProfile/updateProfile";
 import AdminDashbroad from "./pages/adminDashbroad/adminDashbroad";
 import OverviewPage from "./pages/OverviewPage/overView";
@@ -17,8 +17,7 @@ import AnalyticsPage from "./pages/FeedBack/FeedbackMPage";
 import SettingsPage from "./pages/settingpage/setting";
 import FishPrescription from "./pages/prescriptions/prescription";
 import { Toaster } from "sonner";
-import History from "./pages/History/history";
-import Process from "./pages/bookingProcess/bookingProcess";
+import History from "./pages/Booking/history";
 import AppointmentDetail from "./pages/Detail Appointment Page/detailAp";
 import ProfilePage from "./pages/profile/profile"; // Import your PrivateRoute component
 import PrivateRoute from "./Routes/PrivateRoute";
@@ -28,9 +27,11 @@ import ContactUs from "./pages/Contact Us/contactUs";
 import PaymentSuccessful from "./pages/SuccessPayment/paymentSuccess";
 import PaymentFailed from "./pages/FailedPayment/failedPayment";
 import VetCalendar from "./pages/SchedulerVet";
-import BookMPage from "./pages/BookingManagement/bookingM";
-import BookingRecord from "./pages/booking/bookingRecord";
-import BookingPage from "./pages/booking/Booking";
+import BookMPage from "./pages/Booking/bookingM";
+import BookingRecord from "./pages/Booking/bookingRecord";
+import BookingPage from "./pages/Booking/Booking";
+import DetailBooking from "./pages/Booking/DetailBooking";
+import ChangePassword from "./pages/Sercurity/ChangePassword";
 
 // Add your license key here
 registerLicense("Your_License_Key_Here");
@@ -50,6 +51,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ChangePassword />} />
         <Route path="/services" element={<AllService />} />
         <Route path="/service" element={<Service />} />
         <Route path="/about-us" element={<AboutUs />} />
@@ -104,10 +106,10 @@ function App() {
           }
         />
         <Route
-          path="/process"
+          path="/detailB"
           element={
             <PrivateRoute>
-              <Process />
+              <DetailBooking />
             </PrivateRoute>
           }
         />

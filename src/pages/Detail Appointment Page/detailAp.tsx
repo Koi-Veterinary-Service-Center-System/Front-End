@@ -51,7 +51,7 @@ import { FaUserDoctor } from "react-icons/fa6";
 import { RiServiceLine } from "react-icons/ri";
 import { GiCirclingFish } from "react-icons/gi";
 import { HiOutlineStatusOnline } from "react-icons/hi";
-import BookingRecord from "../booking/bookingRecord";
+import BookingRecord from "../Booking/bookingRecord";
 
 const prescriptionSchema = z.object({
   diseaseName: z.string().min(1, "Disease name is required"),
@@ -304,20 +304,6 @@ export default function Component() {
                           </span>
                           <p className="text-gray-900">
                             {appointment.customerName}
-                          </p>
-                        </div>
-                      </motion.div>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
-                      >
-                        <Fish className="mr-3 h-6 w-6 text-blue-500" />
-                        <div>
-                          <span className="font-semibold text-gray-700">
-                            Koi/Pool:
-                          </span>
-                          <p className="text-gray-900">
-                            {appointment.koiOrPoolName}
                           </p>
                         </div>
                       </motion.div>
