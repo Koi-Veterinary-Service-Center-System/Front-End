@@ -6,10 +6,8 @@ import Header from "@/components/Header/header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/configs/axios";
-import { FaClock, FaDollarSign } from "react-icons/fa6";
-import { Services } from "@/types/info";
+import { FaClock, FaDollarSign, FaShoppingCart } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { FaShoppingCart } from "react-icons/fa";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -25,6 +23,16 @@ const containerVariants = {
     },
   },
 };
+
+interface Services {
+  serviceID: string;
+  serviceName: string;
+  description: string;
+  price: number;
+  quantityPrice: number;
+  estimatedDuration: number;
+  imageURL: string;
+}
 
 function AnimatedServiceCard({
   service,
@@ -54,11 +62,22 @@ function AnimatedServiceCard({
       custom={index}
       className="bg-white rounded-lg shadow-lg overflow-hidden"
     >
-      <img
-        src={service.imageURL}
-        alt={service.serviceName}
-        className="w-full h-64 object-cover"
-      />
+      <div className="relative group">
+        <img
+          src={service.imageURL}
+          alt={service.serviceName}
+          className="w-full h-64 object-cover"
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Link
+            to={`/detail-service/${service.serviceID}`}
+            className="bg-white text-blue-700 px-4 py-2 rounded-md font-semibold hover:bg-blue-100 transition-colors duration-300"
+            aria-label={`View details for ${service.serviceName}`}
+          >
+            View Details
+          </Link>
+        </div>
+      </div>
       <div className="p-6">
         <h2 className="text-2xl font-semibold mb-4 text-blue-700">
           {service.serviceName}
@@ -107,7 +126,7 @@ function ServiceSkeleton() {
   );
 }
 
-export default function AllService() {
+export default function Component() {
   const [services, setServices] = useState<Services[]>([]);
   const [isLoading, setLoading] = useState(true);
 
@@ -172,7 +191,7 @@ export default function AllService() {
           transition={{ delay: 0.5 }}
         >
           <img
-            src="src/assets/images/good-water-quality-in-fish-tank-1024x536.jpg"
+            src="/placeholder.svg?height=536&width=1024"
             alt="USDA Service Center"
             className="mx-auto mb-4 rounded-lg shadow-lg"
           />

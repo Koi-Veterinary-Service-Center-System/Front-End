@@ -368,7 +368,7 @@ const DetailBooking = () => {
                           >
                             <CalendarIcon className="h-5 w-5 mr-3 text-blue-500" />
                             <span className="text-gray-700">
-                              {booking.slotWeekDateAtBooking}
+                              {booking.bookingDate}
                             </span>
                           </motion.div>
                           <motion.div
@@ -380,6 +380,7 @@ const DetailBooking = () => {
                           >
                             <ClockIcon className="h-5 w-5 mr-3 text-blue-500" />
                             <span className="text-gray-700">
+                              {booking.slotWeekDateAtBooking}{" "}
                               {booking.slotStartTimeAtBooking} -{" "}
                               {booking.slotEndTimeAtBooking}
                             </span>

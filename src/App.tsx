@@ -6,10 +6,10 @@ import Login from "./pages/Sercurity/login";
 import UpdateProfile from "./pages/updateProfile/updateProfile";
 import AdminDashbroad from "./pages/adminDashbroad/adminDashbroad";
 import OverviewPage from "./pages/OverviewPage/overView";
-import Service from "./pages/ServicePage/service";
+import Service from "./pages/Services Page/service";
 import UsersPage from "./pages/UsersManagePage/Users";
 import SchedulesMPage from "./pages/SchedulesMPage/SchedulesMPage";
-import AllService from "./pages/AllService/allService";
+import AllService from "./pages/Services Page/allService";
 import ErrorBoundary from "./errorBoudary";
 import { registerLicense } from "@syncfusion/ej2-base";
 import "./index.css";
@@ -32,6 +32,7 @@ import BookingRecord from "./pages/Booking/bookingRecord";
 import BookingPage from "./pages/Booking/Booking";
 import DetailBooking from "./pages/Booking/DetailBooking";
 import ChangePassword from "./pages/Sercurity/ChangePassword";
+import DetailService from "./pages/Services Page/DetailService";
 
 // Add your license key here
 registerLicense("Your_License_Key_Here");
@@ -56,6 +57,7 @@ function App() {
         <Route path="/service" element={<Service />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/detail-service/:serviceId" element={<DetailService />} />
         {/* Private Routes */}
         <Route
           path="/profile"
