@@ -42,17 +42,34 @@ function BookingPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [distances, setDistances] = useState<Distance[]>([]);
   const [isLoadingPayment, setLoadingPayment] = useState(false);
+  const [allSlots, setAllSlots] = useState<Slot[]>([]);
 
   // Ant Design form hook
   const [form] = Form.useForm();
 
+  const handleDateChange = (date) => {
+    if (!date) {
+      setSlots(allSlots); // Khôi phục tất cả slots nếu không có ngày được chọn
+      return;
+    }
+
+    const dayOfWeek = date.day();
+
+    const filteredSlots = allSlots.filter((slot) => {
+      const slotDay = moment(slot.weekDate, "dddd").day();
+      return slotDay === dayOfWeek;
+    });
+
+    setSlots(filteredSlots);
+  };
   // Fetch Slots
   useEffect(() => {
     const fetchSlots = async () => {
       try {
         setLoadingSlots(true);
         const response = await api.get("/slot/all-slot");
-        setSlots(response.data); // Assuming response data is the array of slots
+        setSlots(response.data); // Hiển thị slots
+        setAllSlots(response.data); // Lưu trữ slots ban đầu
       } catch (error) {
         console.error("Error fetching slots:", error);
         toast.error("Failed to load slot data.");
@@ -327,6 +344,7 @@ function BookingPage() {
                     disabledDate={(current) =>
                       current && current < moment().endOf("day")
                     }
+                    onChange={handleDateChange} // Gọi hàm handleDateChange khi chọn ngày
                   />
                 </Form.Item>
               </motion.div>

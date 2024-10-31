@@ -75,6 +75,11 @@ const History = () => {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
     null
   );
+  const [cancelBookingInfo, setCancelBookingInfo] = useState({
+    bankName: "",
+    customerBankNumber: "",
+    customerBankAccountName: "",
+  });
 
   // Fetch all booking and calculate totals
   // Fetch bookings based on active status
@@ -168,13 +173,23 @@ const History = () => {
     setIsCancelDialogOpen(true);
   };
 
+  // Hàm để cập nhật thông tin Form
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setCancelBookingInfo((prevInfo) => ({
+      ...prevInfo,
+      [name]: value,
+    }));
+  };
+
+  // Cập nhật hàm handleCancelBooking
   const handleCancelBooking = async () => {
     if (!selectedBookingId) return;
 
     try {
       await api.patch(
         `/booking/cancel-booking/${selectedBookingId}`,
-        {},
+        cancelBookingInfo,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -431,8 +446,57 @@ const History = () => {
                                         </DialogHeader>
                                         <p>
                                           Are you sure you want to cancel this
-                                          booking?
+                                          booking? Please provide your bank
+                                          information for any refunds.
                                         </p>
+
+                                        {/* Form điền thông tin */}
+                                        <form>
+                                          <div className="mb-4">
+                                            <label className="block text-gray-700">
+                                              Bank Name:
+                                            </label>
+                                            <input
+                                              type="text"
+                                              name="bankName"
+                                              value={cancelBookingInfo.bankName}
+                                              onChange={handleInputChange}
+                                              className="w-full p-2 border border-gray-300 rounded mt-2"
+                                              required
+                                            />
+                                          </div>
+                                          <div className="mb-4">
+                                            <label className="block text-gray-700">
+                                              Bank Account Number:
+                                            </label>
+                                            <input
+                                              type="text"
+                                              name="customerBankNumber"
+                                              value={
+                                                cancelBookingInfo.customerBankNumber
+                                              }
+                                              onChange={handleInputChange}
+                                              className="w-full p-2 border border-gray-300 rounded mt-2"
+                                              required
+                                            />
+                                          </div>
+                                          <div className="mb-4">
+                                            <label className="block text-gray-700">
+                                              Bank Account Holder's Name:
+                                            </label>
+                                            <input
+                                              type="text"
+                                              name="customerBankAccountName"
+                                              value={
+                                                cancelBookingInfo.customerBankAccountName
+                                              }
+                                              onChange={handleInputChange}
+                                              className="w-full p-2 border border-gray-300 rounded mt-2"
+                                              required
+                                            />
+                                          </div>
+                                        </form>
+
                                         <Button
                                           className="mt-4 w-full bg-red-600"
                                           onClick={handleCancelBooking}

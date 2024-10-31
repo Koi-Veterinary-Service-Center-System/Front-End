@@ -433,10 +433,13 @@ const DetailBooking = () => {
                           >
                             <VscNotebook className="h-5 w-5 mr-3 text-blue-500" />
                             <span className="text-gray-700">
-                              {booking.bookingRecordNote ||
-                                "No notes available"}
+                              {booking.bookingStatus === "Succeed" ||
+                              booking.bookingStatus === "Cancelled"
+                                ? booking.bookingRecordNote
+                                : booking.note}
                             </span>
                           </motion.div>
+
                           <motion.div
                             className="flex items-center text-sm"
                             variants={iconVariants}
@@ -497,8 +500,27 @@ const DetailBooking = () => {
                           >
                             <CreditCardIcon className="h-5 w-5 mr-3 text-blue-500" />
                             <span className="text-gray-700 font-semibold">
+                              Initamount:{" "}
+                              {booking?.initAmount != null
+                                ? booking.initAmount.toLocaleString("vi-VN")
+                                : "0"}{" "}
+                              vnd
+                            </span>
+                          </motion.div>
+                          <motion.div
+                            className="flex items-center text-sm"
+                            variants={iconVariants}
+                            initial="hidden"
+                            animate="visible"
+                            transition={{ delay: 0.8 }}
+                          >
+                            <CreditCardIcon className="h-5 w-5 mr-3 text-blue-500" />
+                            <span className="text-gray-700 font-semibold">
                               Total:{" "}
-                              {booking.totalAmount.toLocaleString("vi-VN")} vnd
+                              {booking?.totalAmount != null
+                                ? booking.totalAmount.toLocaleString("vi-VN")
+                                : "0"}{" "}
+                              vnd
                             </span>
                           </motion.div>
                         </div>
