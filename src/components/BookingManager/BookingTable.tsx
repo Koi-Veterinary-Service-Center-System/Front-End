@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, XCircle } from "lucide-react";
 import api from "@/configs/axios";
 import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -35,6 +36,13 @@ import {
   Select,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
+import { Label } from "@/components/ui/label";
+import {
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const OrdersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,6 +68,10 @@ const OrdersTable = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [distances, setDistances] = useState<Distance[]>([]);
   const [isLoadingPayment, setLoadingPayment] = useState(false);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [refundPercent, setRefundPercent] = useState("");
+  const [cancelReason, setCancelReason] = useState("");
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
   const [form] = Form.useForm();
 
@@ -330,6 +342,45 @@ const OrdersTable = () => {
     setIsModalOpen(false);
     form.resetFields(); // Reset form sau khi đóng
   };
+
+  const handleCancelBooking = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsCancelDialogOpen(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!selectedBooking) return;
+
+    try {
+      const response = await api.post(
+        `/booking/cancel-booking/${selectedBooking.bookingID}`,
+        {
+          refundPercent: parseInt(refundPercent),
+          reason: cancelReason,
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Booking cancelled successfully");
+        // Update the booking status in the local state
+        setFilteredBookings((prevBookings) =>
+          prevBookings.map((booking) =>
+            booking.bookingID === selectedBooking.bookingID
+              ? { ...booking, bookingStatus: "Cancelled" }
+              : booking
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      toast.error("Failed to cancel booking");
+    } finally {
+      setIsCancelDialogOpen(false);
+      setRefundPercent("");
+      setCancelReason("");
+    }
+  };
+
   return (
     <motion.div
       className="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl p-6 border border-blue-200 mb-8"
@@ -764,6 +815,15 @@ const OrdersTable = () => {
                     >
                       <Eye size={18} />
                     </button>
+                    {booking.bookingStatus !== "Cancelled" && (
+                      <button
+                        className="text-red-600 hover:text-red-800"
+                        onClick={() => handleCancelBooking(booking)}
+                        aria-label="Cancel booking"
+                      >
+                        <XCircle size={18} />
+                      </button>
+                    )}
                   </td>
                 </motion.tr>
               ))}
@@ -814,6 +874,61 @@ const OrdersTable = () => {
           </DialogContent>
         </Dialog>
       )}
+      {/* View Booking Details Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-blue-800">Booking Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-gray-700">
+            {/* ... (previous booking details content) */}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Booking Dialog */}
+      <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-blue-800">Cancel Booking</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-gray-700">
+            <div>
+              <Label htmlFor="refundPercent">Refund Percentage</Label>
+              <Select onValueChange={setRefundPercent} value={refundPercent}>
+                <SelectTrigger id="refundPercent">
+                  <SelectValue placeholder="Select refund percentage" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">0%</SelectItem>
+                  <SelectItem value="25">25%</SelectItem>
+                  <SelectItem value="50">50%</SelectItem>
+                  <SelectItem value="75">75%</SelectItem>
+                  <SelectItem value="100">100%</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="cancelReason">Reason for Cancellation</Label>
+              <Input
+                id="cancelReason"
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Enter reason for cancellation"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsCancelDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmCancel}>Confirm Cancellation</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };

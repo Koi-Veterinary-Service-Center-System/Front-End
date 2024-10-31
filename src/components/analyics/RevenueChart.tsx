@@ -12,9 +12,14 @@ import {
 } from "recharts";
 import api from "@/configs/axios";
 
+interface FeedbackData {
+  serviceName: string;
+  rate: number;
+}
+
 const FeedbackChart = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState("This Month");
-  const [feedbackData, setFeedbackData] = useState([]);
+  const [feedbackData, setFeedbackData] = useState<FeedbackData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -26,9 +31,8 @@ const FeedbackChart = () => {
       });
 
       const transformedData = response.data.map((item: any) => ({
-        name: item.customerName,
+        serviceName: item.serviceName,
         rate: item.rate,
-        comments: item.comments,
       }));
 
       setFeedbackData(transformedData);
@@ -75,7 +79,7 @@ const FeedbackChart = () => {
           <ResponsiveContainer>
             <AreaChart data={feedbackData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E0E7FF" />
-              <XAxis dataKey="name" stroke="#4B5563" />
+              <XAxis dataKey="serviceName" stroke="#4B5563" />
               <YAxis stroke="#4B5563" domain={[0, 5]} />
               <Tooltip
                 contentStyle={{

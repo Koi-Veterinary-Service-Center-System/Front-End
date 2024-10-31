@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   PieChart,
@@ -7,21 +8,43 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-
-const categoryData = [
-  { name: "Electronics", value: 4500 },
-  { name: "Clothing", value: 3200 },
-  { name: "Home & Garden", value: 2800 },
-  { name: "Books", value: 2100 },
-  { name: "Sports & Outdoors", value: 1900 },
-];
+import api from "@/configs/axios";
 
 const COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B"];
 
 const CategoryDistributionChart = () => {
+  const [categoryData, setCategoryData] = useState<
+    { name: string; value: number }[]
+  >([]);
+
+  // Fetch data from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await api.get("/service/all-service", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        // Format data for the chart
+        const formattedData = response.data.map((service: any) => ({
+          name: service.serviceName,
+          value: service.price, // Adjust this based on the data you want to display
+        }));
+
+        setCategoryData(formattedData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <motion.div
-      className="bg-gradient-to-br from-blue-50 to-white  backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
+      className="bg-gradient-to-br from-blue-50 to-white backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
@@ -65,4 +88,5 @@ const CategoryDistributionChart = () => {
     </motion.div>
   );
 };
+
 export default CategoryDistributionChart;
