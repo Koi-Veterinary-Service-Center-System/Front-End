@@ -32,7 +32,6 @@ import {
 import { User } from "@/types/info";
 import ShimmerButton from "../ui/shimmer-button";
 
-// Define schema using zod
 const userSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
@@ -56,16 +55,19 @@ const UsersTable = () => {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
       case "Staff":
-        return "bg-red-800 text-red-100";
+        return "bg-red-100 text-red-800";
       case "Manager":
-        return "bg-yellow-800 text-yellow-100";
+        return "bg-yellow-100 text-yellow-800";
       case "Customer":
-        return "bg-green-800 text-green-100";
+        return "bg-green-100 text-green-800";
       case "Vet":
-        return "bg-blue-800 text-blue-100";
+        return "bg-blue-100 text-blue-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -117,27 +119,22 @@ const UsersTable = () => {
   const handleEdit = (user: User) => {
     setCurrentUser(user);
     setIsEditMode(true);
-
-    // Reset the form with the user's data
     form.reset({
       firstName: user.firstName,
       lastName: user.lastName,
       userName: user.userName,
-      password: "", // Keep this blank for security, or prompt the user to enter a new one
+      password: "",
       email: user.email,
-      gender: user.gender ? "male" : "female", // Assuming gender is stored as boolean (true for male)
+      gender: user.gender ? "male" : "female",
       role: user.role,
     });
-
     setIsDialogOpen(true);
   };
 
   const handleSubmit = async (data: UserFormData) => {
     setLoading(true);
     try {
-      let response;
       if (isEditMode && currentUser) {
-        // Update logic
         await api.patch(
           `/User/update-role-user/${currentUser.userID}/${data.role}`,
           {},
@@ -149,25 +146,23 @@ const UsersTable = () => {
         );
         toast.success("User role updated successfully");
       } else {
-        // Create new user logic
         const payload = {
           firstName: data.firstName,
           lastName: data.lastName,
           userName: data.userName,
           password: data.password,
           email: data.email,
-          gender: data.gender === "male", // Convert gender to boolean
+          gender: data.gender === "male",
           role: data.role,
         };
-
-        response = await api.post(`/User/create-user`, payload, {
+        const response = await api.post(`/User/create-user`, payload, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         toast.success(response.data);
       }
-      fetchUser(); // Refresh user list after action
+      fetchUser();
       setIsDialogOpen(false);
-      form.reset(); // Reset form after successful action
+      form.reset();
     } catch (error: any) {
       console.error("Operation failed:", error.response?.data || error.message);
       toast.error(error.response.data);
@@ -200,18 +195,18 @@ const UsersTable = () => {
 
   return (
     <motion.div
-      className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
+      className="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl p-6 border border-blue-200"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
     >
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-100">Users</h2>
+        <h2 className="text-xl font-semibold text-blue-800">Users</h2>
         <div className="relative">
           <input
             type="text"
             placeholder="Search users..."
-            className="bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-white text-gray-800 placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-300"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value.toLowerCase());
@@ -240,9 +235,9 @@ const UsersTable = () => {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] bg-white">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
+            <DialogTitle className="text-2xl font-bold text-blue-800">
               {isEditMode ? "Edit User" : "Add New User"}
             </DialogTitle>
           </DialogHeader>
@@ -251,9 +246,7 @@ const UsersTable = () => {
               onSubmit={form.handleSubmit(handleSubmit)}
               className="space-y-6"
             >
-              {/* Form Fields */}
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                {/* First Name */}
                 <FormField
                   control={form.control}
                   name="firstName"
@@ -397,10 +390,15 @@ const UsersTable = () => {
                   type="button"
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-100"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={loading}>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                >
                   {loading
                     ? isEditMode
                       ? "Saving..."
@@ -416,31 +414,31 @@ const UsersTable = () => {
       </Dialog>
 
       {error ? (
-        <div className="text-red-400 text-sm mb-4">{error}</div>
+        <div className="text-red-600 text-sm mb-4">{error}</div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead>
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-700">
+            <tbody className="bg-white divide-y divide-gray-200">
               {filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
                   <motion.tr
@@ -450,14 +448,14 @@ const UsersTable = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
+                      <div className="flex  items-center">
                         <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-400 to-blue-500 flex items-center justify-center text-white font-semibold">
+                          <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold">
                             {user.firstName.charAt(0)}
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-100">
+                          <div className="text-sm font-medium text-gray-900">
                             {user.firstName} {user.lastName}
                           </div>
                         </div>
@@ -465,7 +463,7 @@ const UsersTable = () => {
                     </td>
 
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-300">{user.email}</div>
+                      <div className="text-sm text-gray-500">{user.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -478,20 +476,20 @@ const UsersTable = () => {
                     </td>
 
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-800 text-green-100 ">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                         Active
                       </span>
                     </td>
 
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <button
-                        className="text-indigo-400 hover:text-indigo-300 mr-2"
+                        className="text-blue-600 hover:text-blue-900 mr-2"
                         onClick={() => handleEdit(user)}
                       >
                         Edit
                       </button>
                       <button
-                        className="text-red-400 hover:text-red-300"
+                        className="text-red-600 hover:text-red-900"
                         onClick={() => {
                           setUserToDelete(user);
                           setIsDeleteModalOpen(true);
@@ -506,7 +504,7 @@ const UsersTable = () => {
                 <tr>
                   <td
                     colSpan={5}
-                    className="px-6 py-4 text-center text-sm text-gray-400"
+                    className="px-6 py-4 text-center text-sm text-gray-500"
                   >
                     No users found.
                   </td>
@@ -519,28 +517,28 @@ const UsersTable = () => {
 
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-gray-800 rounded-lg p-6 w-96 border border-gray-700">
+          <div className="bg-white rounded-lg p-6 w-96 border border-gray-200">
             <div className="flex items-center mb-4">
               <div className="text-red-600 mr-3">
                 <AlertCircle className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900">
                 Deactivate account
               </h3>
             </div>
-            <p className="text-sm text-gray-300 mb-6">
+            <p className="text-sm text-gray-500 mb-6">
               Are you sure you want to delete this account? All of this data
               will be permanently removed. This action cannot be undone.
             </p>
             <div className="flex justify-end">
               <button
-                className="bg-gray-700 text-white px-4 py-2 rounded mr-2 hover:bg-gray-600"
+                className="bg-gray-200 text-gray-800 px-4 py-2 rounded mr-2 hover:bg-gray-300"
                 onClick={() => setIsDeleteModalOpen(false)}
               >
                 Cancel
               </button>
               <button
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500"
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
                 onClick={handleDeleteUser}
                 disabled={loading}
               >

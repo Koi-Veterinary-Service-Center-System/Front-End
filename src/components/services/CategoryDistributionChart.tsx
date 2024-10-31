@@ -8,33 +8,32 @@ import {
   Legend,
 } from "recharts";
 
-// Updated data for Koi fish veterinary services
-const koiServiceData = [
-  { name: "Health Assessments", value: 4500 },
-  { name: "Water Quality Testing", value: 3200 },
-  { name: "Parasite Treatment", value: 2800 },
-  { name: "Nutrition Consultation", value: 2100 },
-  { name: "Injury Care", value: 1900 },
+const categoryData = [
+  { name: "Electronics", value: 4500 },
+  { name: "Clothing", value: 3200 },
+  { name: "Home & Garden", value: 2800 },
+  { name: "Books", value: 2100 },
+  { name: "Sports & Outdoors", value: 1900 },
 ];
 
 const COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B"];
 
-const KoiServiceDistributionChart = () => {
+const CategoryDistributionChart = () => {
   return (
     <motion.div
-      className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
+      className="bg-gradient-to-br from-blue-50 to-white  backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
     >
-      <h2 className="text-lg font-medium mb-4 text-gray-100">
-        Koi Fish Veterinary Service Distribution
+      <h2 className="text-lg font-medium mb-4 text-blue-700">
+        Category Distribution
       </h2>
       <div className="h-80">
         <ResponsiveContainer width={"100%"} height={"100%"}>
           <PieChart>
             <Pie
-              data={koiServiceData}
+              data={categoryData}
               cx={"50%"}
               cy={"50%"}
               labelLine={false}
@@ -45,7 +44,7 @@ const KoiServiceDistributionChart = () => {
                 `${name} ${(percent * 100).toFixed(0)}%`
               }
             >
-              {koiServiceData.map((entry, index) => (
+              {categoryData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
@@ -66,5 +65,4 @@ const KoiServiceDistributionChart = () => {
     </motion.div>
   );
 };
-
-export default KoiServiceDistributionChart;
+export default CategoryDistributionChart;

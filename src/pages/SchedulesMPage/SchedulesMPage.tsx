@@ -1,14 +1,16 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Edit, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button, Modal, Form, Select, TimePicker } from "antd";
 import { format, addDays, startOfWeek, subWeeks, addWeeks } from "date-fns";
+import dayjs from "dayjs";
+import { toast } from "sonner";
 import api from "@/configs/axios";
 import Sidebar from "@/components/Sidebar/sidebar";
 import HeaderAd from "@/components/Header/headerAd";
-import { toast } from "sonner";
 import { Vet } from "@/types/info";
-import dayjs from "dayjs";
 
 interface Slot {
   id: string;
@@ -34,7 +36,6 @@ export default function SchedulePage() {
     addDays(currentWeekStart, i)
   );
 
-  // Fetch vets and slots when component mounts
   const fetchVet = async () => {
     try {
       const response = await api.get(`/vet/all-vet`, {
@@ -62,8 +63,8 @@ export default function SchedulePage() {
         day: slot.weekDate,
         task: `${slot.vetFirstName} ${slot.vetLastName}`,
         vetId: slot.vetId,
-        startTime: new Date(`1970-01-01T${slot.slotStartTime}`), // Chuyển đổi thành Date
-        endTime: new Date(`1970-01-01T${slot.slotEndTime}`), // Chuyển đổi thành Date
+        startTime: new Date(`1970-01-01T${slot.slotStartTime}`),
+        endTime: new Date(`1970-01-01T${slot.slotEndTime}`),
       }));
 
       setSlots(formattedSlots);
@@ -87,16 +88,9 @@ export default function SchedulePage() {
     };
 
     try {
-      const response = await api.post("/vetslot/add-vetslot", newSlotData, {
+      await api.post("/vetslot/add-vetslot", newSlotData, {
         headers: { "Content-Type": "application/json" },
       });
-      setSlots([
-        ...slots,
-        {
-          ...currentSlot,
-          id: newSlotData.slotID.toString(),
-        } as Slot,
-      ]);
       setIsModalOpen(false);
       toast.success("Slot added successfully!");
       fetchSlots();
@@ -117,7 +111,6 @@ export default function SchedulePage() {
 
       toast.success("Deleted slot successfully!");
       fetchSlots();
-      setSlots(slots.filter((slot) => slot.id !== slotId));
     } catch (error: any) {
       console.error(
         "Error deleting vet slot:",
@@ -142,14 +135,6 @@ export default function SchedulePage() {
 
       toast.success("Updated slot successfully!");
       fetchSlots();
-      setSlots((prevSlots) =>
-        prevSlots.map((slot) =>
-          slot.id === updatedSlot.slotID.toString()
-            ? { ...slot, ...updatedSlot }
-            : slot
-        )
-      );
-
       setIsModalOpen(false);
     } catch (error: any) {
       console.error(
@@ -192,7 +177,7 @@ export default function SchedulePage() {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-gradient-to-br from-blue-50 to-white text-blue-900 overflow-hidden">
       <Sidebar />
       <div className="flex-1 overflow-auto relative z-10">
         <HeaderAd title="Schedules Assigned for Vets" />
@@ -203,14 +188,20 @@ export default function SchedulePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <h2 className="text-3xl font-bold text-gray-100">
+            <h2 className="text-3xl font-bold text-blue-800">
               Weekly Schedule
             </h2>
             <div className="flex items-center space-x-4">
-              <Button onClick={handlePreviousWeek}>
+              <Button
+                onClick={handlePreviousWeek}
+                className="bg-blue-100 text-blue-800 hover:bg-blue-200"
+              >
                 <ChevronLeft className="h-4 w-4 mr-2" /> Previous Week
               </Button>
-              <Button onClick={handleNextWeek}>
+              <Button
+                onClick={handleNextWeek}
+                className="bg-blue-100 text-blue-800 hover:bg-blue-200"
+              >
                 Next Week <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
@@ -224,13 +215,13 @@ export default function SchedulePage() {
             {weekDays.map((day) => (
               <div
                 key={day.toISOString()}
-                className="col-span-1 bg-gray-800 border-gray-700 shadow-lg hover:shadow-xl transition-shadow duration-300"
+                className="col-span-1 bg-white border border-blue-200 shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg overflow-hidden"
               >
-                <div className="bg-gray-700 rounded-t-lg p-4">
-                  <h3 className="text-center text-xl font-bold">
+                <div className="bg-blue-100 p-4">
+                  <h3 className="text-center text-xl font-bold text-blue-800">
                     {format(day, "EEEE")}
                   </h3>
-                  <p className="text-center text-sm text-gray-300">
+                  <p className="text-center text-sm text-blue-600">
                     {format(day, "MMM d")}
                   </p>
                 </div>
@@ -240,15 +231,19 @@ export default function SchedulePage() {
                     .map((slot) => (
                       <div
                         key={`${slot.id}-${format(day, "yyyy-MM-dd")}`}
-                        className="mb-3 p-3 bg-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                        className="mb-3 p-3 bg-blue-50 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
                       >
                         <div className="flex justify-between items-center">
-                          <span className="font-medium text-gray-100">
+                          <span className="font-medium text-blue-800">
                             {slot.task} - {format(slot.startTime, "HH:mm")} to{" "}
                             {format(slot.endTime, "HH:mm")}
                           </span>
                           <div className="flex space-x-2">
-                            <Button type="link" onClick={() => openModal(slot)}>
+                            <Button
+                              type="link"
+                              onClick={() => openModal(slot)}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button
@@ -257,6 +252,7 @@ export default function SchedulePage() {
                               onClick={() =>
                                 handleDeleteSlot(slot.vetId, slot.id)
                               }
+                              className="text-red-600 hover:text-red-800"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -266,7 +262,7 @@ export default function SchedulePage() {
                     ))}
                   <Button
                     type="dashed"
-                    className="w-full mt-2"
+                    className="w-full mt-2 border-blue-300 text-blue-600 hover:text-blue-800 hover:border-blue-400"
                     onClick={() =>
                       openModal({
                         id: "",
@@ -275,6 +271,7 @@ export default function SchedulePage() {
                         vetId: "",
                         startTime: new Date(),
                         endTime: new Date(),
+                        weekDate: "",
                       })
                     }
                   >
@@ -320,7 +317,6 @@ export default function SchedulePage() {
                 ))}
               </Select>
             </Form.Item>
-
             <Form.Item
               label="Start Time"
               name="startTime"
