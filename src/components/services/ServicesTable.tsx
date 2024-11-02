@@ -145,6 +145,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
     form.reset(service);
     setIsEditMode(true);
     setImageFile(null); // Reset the selected image file for edit
+    setImageURL(service.imageURL || ""); // Set existing image URL if available
     setIsDialogOpen(true);
   };
 
@@ -152,6 +153,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setImageFile(e.target.files[0]);
+      setImageURL(URL.createObjectURL(e.target.files[0])); // Set preview URL
     }
   };
 
@@ -173,13 +175,12 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
     try {
       let uploadedImageUrl = imageURL;
 
-      // If there's an image file, upload it to Firebase
+      // Upload only if there's a new image file
       if (imageFile) {
         uploadedImageUrl = await uploadFileToFirebase(imageFile);
-        setImageURL(uploadedImageUrl);
       }
 
-      // Include the imageURL in the payload
+      // Include the imageURL in the payload, whether new or existing
       const payload = {
         ...data,
         imageURL: uploadedImageUrl,
@@ -207,7 +208,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
       setIsDialogOpen(false);
       form.reset();
       setImageFile(null);
-      setImageURL("");
+      setImageURL(""); // Reset image URL after submit
       fetchServices(); // Refresh the list of services after adding/updating
     } catch (error: any) {
       console.error("Operation failed:", error.response?.data || error.message);

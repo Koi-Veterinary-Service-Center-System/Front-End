@@ -47,7 +47,7 @@ const Service = () => {
         );
       } catch (error) {
         console.error("Error fetching data:", error);
-        toast.error("Failed to load data.");
+        toast.info(error.response.data);
       } finally {
         setLoadingServices(false);
       }

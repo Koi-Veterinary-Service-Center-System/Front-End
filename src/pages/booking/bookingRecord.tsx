@@ -7,40 +7,51 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import api from "@/configs/axios"; // Ensure you have axios properly configured
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import api from "@/configs/axios";
 
 interface KoiVetBookingProps {
-  bookingID: string; // Nhận bookingID từ component cha
-  serviceFee?: number; // Có thể có hoặc không
-  note?: string; // Có thể có hoặc không
-  onClose: () => void; // Callback để đóng Dialog sau khi hoàn thành form
+  bookingID: string;
+  arisedQuantity?: number;
+  note?: string;
+  onClose: () => void;
 }
+
+// Define Zod schema for validation
+const bookingSchema = z.object({
+  arisedQuantity: z
+    .number({ required_error: "Arised quantity is required" })
+    .min(1, "Arised quantity must be at least 1"),
+  note: z.string().optional(),
+});
+
+type BookingFormData = z.infer<typeof bookingSchema>;
 
 export default function BookingRecord({
   bookingID,
-  serviceFee: initialServiceFee,
+  arisedQuantity: initialArisedQuantity,
   note: initialNote = "",
-  onClose, // Nhận prop onClose để đóng Dialog
+  onClose,
 }: KoiVetBookingProps) {
-  const [loading, setLoading] = useState(false); // For loading state
-  const [error, setError] = useState<string | null>(null); // Error state
-  const [currentBookingID, setCurrentBookingID] = useState(bookingID); // Gán bookingID từ props
-  const [serviceFee, setServiceFee] = useState<number | undefined>(
-    initialServiceFee
-  ); // State để quản lý serviceFee
-  const [note, setNote] = useState<string>(initialNote); // State để quản lý note
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentBookingID, setCurrentBookingID] = useState(bookingID);
+
+  const form = useForm<BookingFormData>({
+    resolver: zodResolver(bookingSchema),
+    defaultValues: {
+      arisedQuantity: initialArisedQuantity,
+      note: initialNote,
+    },
+  });
 
   useEffect(() => {
-    // Mỗi khi bookingID thay đổi, cập nhật state
     setCurrentBookingID(bookingID);
   }, [bookingID]);
 
-  const handleCompleteBooking = async () => {
-    if (!currentBookingID || serviceFee === undefined || serviceFee <= 0) {
-      setError("Please fill out all required fields.");
-      return;
-    }
-
+  const handleCompleteBooking = async (data: BookingFormData) => {
     setLoading(true);
     setError(null);
 
@@ -49,13 +60,11 @@ export default function BookingRecord({
         "/bookingRecord/create-bookingRecord/auto-completed-booking",
         {
           bookingID: currentBookingID,
-          arisedMoney: serviceFee,
-          note: note,
+          arisedQuantity: data.arisedQuantity,
+          note: data.note,
         }
       );
       console.log("Booking completed successfully:", response.data);
-
-      // Sau khi thành công, gọi onClose để đóng Dialog
       onClose();
     } catch (error: any) {
       setError(error.response ? error.response.data : "An error occurred");
@@ -104,56 +113,62 @@ export default function BookingRecord({
           />
         </motion.div>
 
-        <motion.div variants={itemVariants}>
-          <Label
-            htmlFor="serviceFee"
-            className="flex items-center space-x-2 text-lg mb-2 text-blue-700"
-          >
-            <FaMoneyBillWave className="text-green-500" />
-            <span>Service Fee</span>
-          </Label>
-          <Input
-            id="serviceFee"
-            type="number"
-            value={serviceFee}
-            onChange={(e) => setServiceFee(Number(e.target.value))} // Cập nhật giá trị serviceFee
-            placeholder="Enter service fee"
-            className="text-lg bg-white bg-opacity-70"
-          />
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <Label
-            htmlFor="note"
-            className="flex items-center space-x-2 text-lg mb-2 text-blue-700"
-          >
-            <MdNoteAlt className="text-yellow-500" />
-            <span>Vet Notes</span>
-          </Label>
-          <Textarea
-            id="note"
-            value={note}
-            onChange={(e) => setNote(e.target.value)} // Cập nhật giá trị note
-            placeholder="Enter notes"
-            className="text-lg min-h-[100px] bg-white bg-opacity-70"
-          />
-        </motion.div>
-
-        {error && (
-          <motion.div className="text-red-500" variants={itemVariants}>
-            {error}
+        <form onSubmit={form.handleSubmit(handleCompleteBooking)}>
+          <motion.div variants={itemVariants}>
+            <Label
+              htmlFor="arisedQuantity"
+              className="flex items-center space-x-2 text-lg mb-2 text-blue-700"
+            >
+              <FaMoneyBillWave className="text-green-500" />
+              <span>Service Fee</span>
+            </Label>
+            <Input
+              id="arisedQuantity"
+              type="number"
+              {...form.register("arisedQuantity", { valueAsNumber: true })}
+              placeholder="Enter arised quantity"
+              className="text-lg bg-white bg-opacity-70"
+            />
+            <p className="text-red-500 mt-1">
+              {form.formState.errors.arisedQuantity?.message}
+            </p>
           </motion.div>
-        )}
 
-        <motion.div variants={itemVariants}>
-          <Button
-            onClick={handleCompleteBooking}
-            className="bg-blue-500 text-white w-full"
-            disabled={loading}
-          >
-            {loading ? "Processing..." : "Complete Booking"}
-          </Button>
-        </motion.div>
+          <motion.div variants={itemVariants}>
+            <Label
+              htmlFor="note"
+              className="flex items-center space-x-2 text-lg mb-2 text-blue-700"
+            >
+              <MdNoteAlt className="text-yellow-500" />
+              <span>Vet Notes</span>
+            </Label>
+            <Textarea
+              id="note"
+              {...form.register("note")}
+              placeholder="Enter notes"
+              className="text-lg min-h-[100px] bg-white bg-opacity-70"
+            />
+            <p className="text-red-500 mt-1">
+              {form.formState.errors.note?.message}
+            </p>
+          </motion.div>
+
+          {error && (
+            <motion.div className="text-red-500" variants={itemVariants}>
+              {error}
+            </motion.div>
+          )}
+
+          <motion.div variants={itemVariants}>
+            <Button
+              type="submit"
+              className="bg-blue-500 text-white w-full"
+              disabled={loading}
+            >
+              {loading ? "Processing..." : "Complete Booking"}
+            </Button>
+          </motion.div>
+        </form>
       </CardContent>
     </Card>
   );

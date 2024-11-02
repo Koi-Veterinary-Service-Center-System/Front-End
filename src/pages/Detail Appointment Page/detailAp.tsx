@@ -10,6 +10,9 @@ import {
   PhoneCall,
   Loader2,
   Home,
+  DollarSign,
+  XCircle,
+  CheckCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -402,6 +405,74 @@ export default function Component() {
                         >
                           {appointment.bookingStatus}
                         </Badge>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
+                      >
+                        <DollarSign className="mr-3 h-6 w-6 text-blue-500" />
+                        <div>
+                          <span className="font-semibold text-gray-700">
+                            Payment Status {appointment.paymentTypeAtBooking}
+                          </span>
+                          <p className="text-gray-900">
+                            {appointment.isPaid ? (
+                              <span className="text-green-600 flex items-center">
+                                <CheckCircle className="mr-1" /> Paid
+                              </span>
+                            ) : (
+                              <span className="text-red-600 flex items-center">
+                                <XCircle className="mr-1" /> Unpaid
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
+                      >
+                        <FileText className="mr-3 h-6 w-6 text-blue-500" />
+                        <div>
+                          <span className="font-semibold text-gray-700">
+                            Prescription:
+                          </span>
+                          <p className="text-gray-900">
+                            {appointment.hasPres
+                              ? "Available"
+                              : "Not Available"}
+                          </p>
+                        </div>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
+                      >
+                        <DollarSign className="mr-3 h-6 w-6 text-blue-500" />
+                        <div>
+                          <span className="font-semibold text-gray-700">
+                            Initial Amount:
+                          </span>
+                          <p className="text-gray-900">
+                            {appointment.initAmount.toLocaleString()} VND
+                          </p>
+                        </div>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center bg-blue-50 p-4 rounded-lg shadow"
+                      >
+                        <DollarSign className="mr-3 h-6 w-6 text-blue-500" />
+                        <div>
+                          <span className="font-semibold text-gray-700">
+                            Total Amount:
+                          </span>
+                          <p className="text-gray-900">
+                            {appointment.totalAmount
+                              ? `${appointment.totalAmount.toLocaleString()} VND`
+                              : "0 vnd"}
+                          </p>
+                        </div>
                       </motion.div>
                     </div>
                     <div className="flex justify-end space-x-4 mt-6">

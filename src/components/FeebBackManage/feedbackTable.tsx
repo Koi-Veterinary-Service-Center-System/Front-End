@@ -41,10 +41,10 @@ const FeedbackTable = () => {
               : feedback
           )
         );
-        fetchFeedbackData();
+        toast.success("Feedback visibility updated successfully!");
       }
     } catch (error) {
-      toast.error(error.response.data);
+      toast.error(error.response?.data || "Failed to update visibility");
     }
   };
 
@@ -65,6 +65,15 @@ const FeedbackTable = () => {
 
       {loading ? (
         <div className="text-blue-600">Loading feedback...</div>
+      ) : feedbacks.length === 0 ? (
+        <div className="flex flex-col items-center justify-center">
+          <img
+            src="/src/assets/images/No-Messages-1--Streamline-Bruxelles.png"
+            alt="No Feedback"
+            className="w-32 h-32 object-contain mb-4"
+          />
+          <p className="text-muted-foreground">No Feedback found</p>
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-blue-200">
