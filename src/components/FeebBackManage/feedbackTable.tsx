@@ -1,14 +1,14 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import api from "../../configs/axios"; // Make sure this path is correct
-import { Eye, EyeOff } from "lucide-react"; // Import both icons
+import { Eye, EyeOff } from "lucide-react";
 import { Feedback } from "@/types/info";
+import { toast } from "sonner";
 
 const FeedbackTable = () => {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch feedback data from API
   const fetchFeedbackData = async () => {
     setLoading(true);
     try {
@@ -21,7 +21,6 @@ const FeedbackTable = () => {
     }
   };
 
-  // Function to handle visibility toggle
   const handleToggleVisibility = async (
     feedbackID: number,
     currentStatus: boolean
@@ -30,12 +29,11 @@ const FeedbackTable = () => {
       const response = await api.put(
         `/Feedback/show-hide-feedback/${feedbackID}`,
         {
-          isVisible: !currentStatus, // Toggle visibility
+          isVisible: !currentStatus,
         }
       );
 
       if (response.status === 200) {
-        // Optionally, update local state immediately for better UX
         setFeedbacks((prevFeedbacks) =>
           prevFeedbacks.map((feedback) =>
             feedback.feedbackID === feedbackID
@@ -43,59 +41,56 @@ const FeedbackTable = () => {
               : feedback
           )
         );
-
-        // Fetch updated feedback data
-        fetchFeedbackData(); // Refresh feedback data to ensure the UI reflects changes
+        fetchFeedbackData();
       }
     } catch (error) {
-      console.error("Failed to update feedback visibility:", error);
+      toast.error(error.response.data);
     }
   };
 
-  // Fetch feedback data on component mount
   useEffect(() => {
     fetchFeedbackData();
   }, []);
 
   return (
     <motion.div
-      className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700 mb-8"
+      className="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl p-6 border border-blue-200 mb-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4 }}
     >
-      <h2 className="text-xl font-semibold text-gray-100 mb-4">
+      <h2 className="text-xl font-semibold text-blue-800 mb-4">
         Feedback List
       </h2>
 
       {loading ? (
-        <div className="text-white">Loading feedback...</div>
+        <div className="text-blue-600">Loading feedback...</div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead>
+          <table className="min-w-full divide-y divide-blue-200">
+            <thead className="bg-blue-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider">
                   Feedback ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider">
                   Customer Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider">
                   Rating
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider">
                   Comments
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider">
                   Visibility
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide divide-gray-700">
+            <tbody className="bg-white divide-y divide-blue-100">
               {feedbacks.map((feedback) => (
                 <motion.tr
                   key={feedback.feedbackID}
@@ -103,19 +98,19 @@ const FeedbackTable = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {feedback.feedbackID}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {feedback.customerName}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {feedback.rate}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {feedback.comments}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         feedback.isVisible
@@ -126,7 +121,7 @@ const FeedbackTable = () => {
                       {feedback.isVisible ? "Visible" : "Hidden"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <button
                       onClick={() =>
                         handleToggleVisibility(
@@ -134,14 +129,13 @@ const FeedbackTable = () => {
                           feedback.isVisible
                         )
                       }
-                      className="text-indigo-400 hover:text-indigo-300"
+                      className="text-blue-600 hover:text-blue-800"
                     >
                       {feedback.isVisible ? (
                         <Eye size={18} />
                       ) : (
                         <EyeOff size={18} />
-                      )}{" "}
-                      {/* Conditional rendering */}
+                      )}
                     </button>
                   </td>
                 </motion.tr>

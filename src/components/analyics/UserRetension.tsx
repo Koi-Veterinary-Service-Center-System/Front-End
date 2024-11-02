@@ -43,35 +43,38 @@ const UserRetention = () => {
 
   return (
     <motion.div
-      className="bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-lg shadow-lg rounded-xl p-6 border border-gray-700"
+      className="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl p-6 border border-blue-200 mb-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
     >
-      <h2 className="text-xl font-semibold text-gray-100 mb-4">FeedBack</h2>
+      <h2 className="text-xl font-semibold text-blue-800 mb-4">FeedBack</h2>
       {loading ? (
-        <p className="text-gray-100">Loading...</p>
+        <p className="text-blue-100">Loading...</p>
       ) : error ? (
         <p className="text-blue-500">{error}</p>
       ) : (
         <div style={{ width: "100%", height: 300 }}>
           <ResponsiveContainer>
             <LineChart data={feedbackData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="name" stroke="#9CA3AF" />
-              <YAxis stroke="#9CA3AF" domain={[0, 5]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E0E7FF" />
+              <XAxis dataKey="name" stroke="#4B5563" />
+              <YAxis stroke="#4B5563" domain={[0, 5]} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "rgba(31, 41, 55, 0.8)",
-                  borderColor: "#4B5563",
+                  backgroundColor: "rgba(255, 255, 255, 0.8)",
+                  borderColor: "#93C5FD",
+                  color: "#1E40AF",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                 }}
-                itemStyle={{ color: "#E5E7EB" }}
+                itemStyle={{ color: "#1E40AF" }}
               />
               <Legend />
               <Line
                 type="monotone"
                 dataKey="rate"
-                stroke="#8B5CF6"
+                stroke="#3B82F6"
                 strokeWidth={2}
               />
             </LineChart>

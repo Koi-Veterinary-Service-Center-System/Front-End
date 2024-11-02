@@ -22,12 +22,12 @@ const bannerData = [
     badge: { text: "Recommended", color: "bg-green-500" },
   },
   {
-    title: "Exotic Koi Grooming",
+    title: "Specialized Koi Care Services",
     subtitle: "Transform your koi with top-tier grooming",
     description:
       "Keep your koi in pristine condition with our grooming services, designed for rare and exotic varieties.",
     image: "src/assets/images/image.png",
-    cta: { text: "Explore Grooming", link: "/exotic-koi" },
+    cta: { text: "View Services", link: "/services" },
     badge: { text: "New Service", color: "bg-red-500" },
   },
   {
@@ -36,7 +36,7 @@ const bannerData = [
     description:
       "We provide thorough cleaning, water quality testing, and filtration upgrades to keep your koi pond perfect.",
     image: "src/assets/images/774607e7ea99e5c29b9aa005f8e5c198.jpg",
-    cta: { text: "Maintain Your Pond", link: "/koi-maintenance" },
+    cta: { text: "Contact us", link: "/contact-us" },
     badge: { text: "20% Off", color: "bg-blue-500" },
   },
 ];
@@ -128,16 +128,7 @@ export default function EnhancedBanner() {
           </SwiperSlide>
         ))}
       </Swiper>
-      <div className="absolute bottom-4 left-4 z-20 flex items-center space-x-2">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setIsAutoplay(!isAutoplay)}
-          aria-label={isAutoplay ? "Pause autoplay" : "Start autoplay"}
-        >
-          {isAutoplay ? "⏸" : "▶"}
-        </Button>
-      </div>
+      <div className="absolute bottom-4 left-4 z-20 flex items-center space-x-2"></div>
       <div className="swiper-button-prev !text-white"></div>
       <div className="swiper-button-next !text-white"></div>
     </div>

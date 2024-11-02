@@ -1,17 +1,18 @@
 import api from "@/configs/axios";
 import { Profile, services } from "@/types/info";
 import { motion } from "framer-motion";
-import { Edit, Search, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
 import {
+  Edit,
+  Search,
+  Trash2,
   PlusCircle,
   Briefcase,
   FileText,
   DollarSign,
   Clock,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,7 +35,6 @@ interface ServicesTableProps {
   onAddSuccess: () => void;
 }
 
-// Zod schema for form validation
 const serviceSchema = z.object({
   serviceName: z.string().min(1, "Please input the service name!"),
   description: z.string().min(1, "Please input the description!"),
@@ -57,30 +57,11 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
   const [currentService, setCurrentService] = useState<services | null>(null);
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false); // Để xác định chế độ
+  const [isEditMode, setIsEditMode] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteServiceID, setDeleteServiceID] = useState<number | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const token = localStorage.getItem("token");
 
-      try {
-        const response = await api.get("/User/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token to request headers
-          },
-        });
-        setProfile(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    fetchProfile();
-  }, []);
-
-  // Setup react-hook-form with Zod schema validation
   const form = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
@@ -91,7 +72,23 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
     },
   });
 
-  // Search function
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await api.get("/User/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setProfile(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
@@ -101,7 +98,6 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
     setFilteredServices(filtered);
   };
 
-  // Fetch services from API
   const fetchServices = async () => {
     try {
       const response = await api.get(`/service/all-service`, {
@@ -118,11 +114,9 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
     fetchServices();
   }, []);
 
-  // Handle add service
   const handleAdd = () => {
-    setIsEditMode(false); // Chế độ thêm mới
+    setIsEditMode(false);
     form.reset({
-      // Reset form về giá trị mặc định
       serviceName: "",
       description: "",
       price: 0,
@@ -131,15 +125,13 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
     setIsDialogOpen(true);
   };
 
-  // Handle edit service
   const handleEdit = (service: services) => {
     setCurrentService(service);
     form.reset(service);
-    setIsEditMode(true); // Chế độ chỉnh sửa
+    setIsEditMode(true);
     setIsDialogOpen(true);
   };
 
-  // Handle update/add service based on mode
   const handleSubmit = async (data: ServiceFormData) => {
     setLoading(true);
     try {
@@ -170,13 +162,11 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
     }
   };
 
-  // Handle delete confirmation
   const confirmDelete = (serviceID: number) => {
     setDeleteServiceID(serviceID);
     setIsDeleteDialogOpen(true);
   };
 
-  // Handle delete service
   const handleDelete = async () => {
     if (deleteServiceID === null) return;
     setLoading(true);
@@ -196,14 +186,14 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
   };
 
   return (
-    <motion.div className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700 mb-8">
+    <motion.div className="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl p-6 border border-blue-200 mb-8">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-100">Service List</h2>
+        <h2 className="text-xl font-semibold text-blue-800">Service List</h2>
         <div className="relative">
           <input
             type="text"
             placeholder="Search service..."
-            className="bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-white text-gray-800 placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-300"
             onChange={handleSearch}
             value={searchTerm}
           />
@@ -218,37 +208,37 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-700">
-          <thead>
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Price
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Description
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Estimate Duration
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-700">
+          <tbody className="bg-white divide-y divide-gray-200">
             {filteredServices.length > 0 ? (
               filteredServices.map((service) => (
                 <motion.tr
-                  key={service.serviceID} // Ensure serviceID is used here
+                  key={service.serviceID}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100 flex gap-2 items-center">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex gap-2 items-center">
                     <img
                       src="https://kehlanpools.com/wp-content/uploads/2022/03/blg1.jpg"
                       alt="Service img"
@@ -256,25 +246,24 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                     />
                     {service.serviceName}
                   </td>
-
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     ${service.price.toFixed(2)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {service.description}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {service.estimatedDuration}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <button
-                      className="text-indigo-400 hover:text-indigo-300 mr-2"
+                      className="text-blue-600 hover:text-blue-800 mr-2"
                       onClick={() => handleEdit(service)}
                     >
                       <Edit size={18} />
                     </button>
                     <button
-                      className="text-red-400 hover:text-red-300"
+                      className="text-red-600 hover:text-red-800"
                       onClick={() => confirmDelete(service.serviceID)}
                     >
                       <Trash2 size={18} />
@@ -299,19 +288,18 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
         </table>
       </div>
 
-      {/* Unified Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
+        <DialogContent className="sm:max-w-[550px] bg-white">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold flex items-center">
+            <DialogTitle className="text-2xl font-bold flex items-center text-blue-800">
               {isEditMode ? (
                 <>
-                  <Edit className="mr-2 h-6 w-6 text-primary" />
+                  <Edit className="mr-2 h-6 w-6 text-blue-600" />
                   Edit Service
                 </>
               ) : (
                 <>
-                  <Briefcase className="mr-2 h-6 w-6 text-primary" />
+                  <Briefcase className="mr-2 h-6 w-6 text-blue-600" />
                   Add New Service
                 </>
               )}
@@ -334,7 +322,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                         <Input
                           placeholder="Enter service name"
                           {...field}
-                          className="pl-10"
+                          className="pl-10 border-gray-300"
                         />
                       </div>
                     </FormControl>
@@ -354,7 +342,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                         <Textarea
                           placeholder="Enter service description"
                           {...field}
-                          className="pl-10 min-h-[100px]"
+                          className="pl-10 min-h-[100px] border-gray-300"
                         />
                       </div>
                     </FormControl>
@@ -379,7 +367,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                             onChange={(e) =>
                               field.onChange(parseFloat(e.target.value))
                             }
-                            className="pl-10"
+                            className="pl-10 border-gray-300"
                           />
                         </div>
                       </FormControl>
@@ -403,7 +391,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                             onChange={(e) =>
                               field.onChange(parseFloat(e.target.value))
                             }
-                            className="pl-10"
+                            className="pl-10 border-gray-300"
                             step="0.1"
                           />
                         </div>
@@ -418,13 +406,14 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                   type="button"
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-100"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="bg-primary hover:bg-primary/90"
+                  className="bg-blue-600 text-white hover:bg-blue-700"
                 >
                   {loading ? (
                     <>
@@ -444,17 +433,21 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[400px] bg-white">
           <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogTitle className="text-blue-800">
+              Confirm Deletion
+            </DialogTitle>
           </DialogHeader>
-          <p>Are you sure you want to delete this service?</p>
+          <p className="text-gray-600">
+            Are you sure you want to delete this service?
+          </p>
           <div className="flex justify-end space-x-4 pt-4">
             <Button
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
+              className="border-gray-300 text-gray-700 hover:bg-gray-100"
             >
               Cancel
             </Button>
@@ -462,6 +455,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
               variant="destructive"
               onClick={handleDelete}
               disabled={loading}
+              className="bg-red-600 text-white hover:bg-red-700"
             >
               {loading ? "Deleting..." : "Delete"}
             </Button>

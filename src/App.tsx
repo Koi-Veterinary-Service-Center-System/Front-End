@@ -5,8 +5,7 @@ import Register from "./pages/Sercurity/register";
 import Login from "./pages/Sercurity/login";
 import UpdateProfile from "./pages/updateProfile/updateProfile";
 import AdminDashbroad from "./pages/adminDashbroad/adminDashbroad";
-import OverviewPage from "./pages/OverviewPage/overView";
-import Service from "./pages/ServicePage/service";
+import Service from "./pages/AllService/service";
 import UsersPage from "./pages/UsersManagePage/Users";
 import SchedulesMPage from "./pages/SchedulesMPage/SchedulesMPage";
 import AllService from "./pages/AllService/allService";
@@ -32,6 +31,7 @@ import BookingRecord from "./pages/Booking/bookingRecord";
 import BookingPage from "./pages/Booking/Booking";
 import DetailBooking from "./pages/Booking/DetailBooking";
 import ChangePassword from "./pages/Sercurity/ChangePassword";
+import DetailService from "./pages/AllService/DetailService";
 
 // Add your license key here
 registerLicense("Your_License_Key_Here");
@@ -56,6 +56,7 @@ function App() {
         <Route path="/service" element={<Service />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/detail-service/:serviceId" element={<DetailService />} />
         {/* Private Routes */}
         <Route
           path="/profile"
@@ -142,14 +143,6 @@ function App() {
           element={
             <PrivateRoute requiredRoles={["Manager", "Staff"]}>
               <AdminDashbroad />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/overview"
-          element={
-            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
-              <OverviewPage />
             </PrivateRoute>
           }
         />

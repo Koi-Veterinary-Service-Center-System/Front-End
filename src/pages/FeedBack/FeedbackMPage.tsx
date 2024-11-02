@@ -2,16 +2,15 @@ import HeaderAd from "@/components/Header/headerAd";
 import OverviewCards from "@/components/analyics/OverviewCards";
 import RevenueChart from "@/components/analyics/RevenueChart";
 import ChannelPerformance from "@/components/analyics/ChannelPerformance";
-import ProductPerformance from "@/components/analyics/ProductPerformance";
 import UserRetention from "@/components/analyics/UserRetension";
 import Sidebar from "@/components/Sidebar/sidebar";
 import FeedbackTable from "@/components/FeebBackManage/feedbackTable";
 
 const AnalyticsPage = () => {
   return (
-    <div className="flex h-screen bg-gray-900 text-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-gradient-to-br from-blue-50 to-white text-gray-800 overflow-hidden">
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 opacity-80 " />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-white " />
         <div className="absolute inset-0 backdrop-blur-sm" />
       </div>
       <Sidebar />

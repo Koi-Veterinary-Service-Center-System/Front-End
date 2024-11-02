@@ -22,31 +22,44 @@ const salesData = [
 const SalesTrendChart = () => {
   return (
     <motion.div
-      className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
+      className="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl p-6 border border-blue-200"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
     >
-      <h2 className="text-xl font-semibold text-gray-100 mb-4">Sales Trend</h2>
+      <h2 className="text-xl font-semibold text-blue-800 mb-4">Sales Trend</h2>
       <div style={{ width: "100%", height: 300 }}>
         <ResponsiveContainer>
           <LineChart data={salesData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey="month" stroke="#9CA3AF" />
-            <YAxis stroke="#9CA3AF" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E0E7FF" />
+            <XAxis
+              dataKey="month"
+              stroke="#4B5563"
+              tick={{ fill: "#4B5563" }}
+            />
+            <YAxis stroke="#4B5563" tick={{ fill: "#4B5563" }} />
             <Tooltip
               contentStyle={{
-                backgroundColor: "rgba(31, 41, 55, 0.8)",
-                borderColor: "#4B5563",
+                backgroundColor: "rgba(255, 255, 255, 0.8)",
+                borderColor: "#93C5FD",
+                color: "#1E40AF",
+                borderRadius: "8px",
+                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
               }}
-              itemStyle={{ color: "#E5E7EB" }}
+              itemStyle={{ color: "#1E40AF" }}
             />
-            <Legend />
+            <Legend
+              wrapperStyle={{
+                paddingTop: "10px",
+              }}
+            />
             <Line
               type="monotone"
               dataKey="sales"
-              stroke="#8B5CF6"
+              stroke="#3B82F6"
               strokeWidth={2}
+              dot={{ fill: "#3B82F6", strokeWidth: 2 }}
+              activeDot={{ r: 8 }}
             />
           </LineChart>
         </ResponsiveContainer>
@@ -54,4 +67,5 @@ const SalesTrendChart = () => {
     </motion.div>
   );
 };
+
 export default SalesTrendChart;

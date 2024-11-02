@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, XCircle } from "lucide-react";
 import api from "@/configs/axios";
 import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -35,6 +36,13 @@ import {
   Select,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
+import { Label } from "@/components/ui/label";
+import {
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const OrdersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,6 +68,10 @@ const OrdersTable = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [distances, setDistances] = useState<Distance[]>([]);
   const [isLoadingPayment, setLoadingPayment] = useState(false);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [refundPercent, setRefundPercent] = useState("");
+  const [cancelReason, setCancelReason] = useState("");
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
   const [form] = Form.useForm();
 
@@ -330,20 +342,59 @@ const OrdersTable = () => {
     setIsModalOpen(false);
     form.resetFields(); // Reset form sau khi đóng
   };
+
+  const handleCancelBooking = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsCancelDialogOpen(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!selectedBooking) return;
+
+    try {
+      const response = await api.post(
+        `/booking/cancel-booking/${selectedBooking.bookingID}`,
+        {
+          refundPercent: parseInt(refundPercent),
+          reason: cancelReason,
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Booking cancelled successfully");
+        // Update the booking status in the local state
+        setFilteredBookings((prevBookings) =>
+          prevBookings.map((booking) =>
+            booking.bookingID === selectedBooking.bookingID
+              ? { ...booking, bookingStatus: "Cancelled" }
+              : booking
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      toast.error("Failed to cancel booking");
+    } finally {
+      setIsCancelDialogOpen(false);
+      setRefundPercent("");
+      setCancelReason("");
+    }
+  };
+
   return (
     <motion.div
-      className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
+      className="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl p-6 border border-blue-200 mb-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4 }}
     >
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-100">Booking List</h2>
+        <h2 className="text-xl font-semibold text-blue-800">Booking List</h2>
         <div className="relative">
           <input
             type="text"
             placeholder="Search bookings..."
-            className="bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-white text-gray-800 placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
             value={searchTerm}
             onChange={handleSearch}
           />
@@ -690,8 +741,8 @@ const OrdersTable = () => {
         <div className="text-red-500">Error: {error}</div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead>
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Booking ID
@@ -714,7 +765,7 @@ const OrdersTable = () => {
               </tr>
             </thead>
 
-            <tbody className="divide divide-gray-700">
+            <tbody className="bg-white divide-y divide-gray-200">
               {filteredBookings.map((booking) => (
                 <motion.tr
                   key={booking.bookingID}
@@ -722,17 +773,17 @@ const OrdersTable = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
                     {booking.bookingID}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
                     {booking.customerName}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
                     {booking.totalAmount?.toLocaleString("vi-VN")} vnd
                   </td>
 
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         booking.bookingStatus === "Succeeded"
@@ -754,16 +805,25 @@ const OrdersTable = () => {
                     </span>
                   </td>
 
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {booking.bookingDate}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <button
                       className="text-indigo-400 hover:text-indigo-300 mr-2"
                       onClick={() => handleViewDetails(booking)} // Khi bấm vào nút Eye sẽ mở dialog
                     >
                       <Eye size={18} />
                     </button>
+                    {booking.bookingStatus !== "Cancelled" && (
+                      <button
+                        className="text-red-600 hover:text-red-800"
+                        onClick={() => handleCancelBooking(booking)}
+                        aria-label="Cancel booking"
+                      >
+                        <XCircle size={18} />
+                      </button>
+                    )}
                   </td>
                 </motion.tr>
               ))}
@@ -814,6 +874,61 @@ const OrdersTable = () => {
           </DialogContent>
         </Dialog>
       )}
+      {/* View Booking Details Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-blue-800">Booking Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-gray-700">
+            {/* ... (previous booking details content) */}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Booking Dialog */}
+      <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-blue-800">Cancel Booking</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-gray-700">
+            <div>
+              <Label htmlFor="refundPercent">Refund Percentage</Label>
+              <Select onValueChange={setRefundPercent} value={refundPercent}>
+                <SelectTrigger id="refundPercent">
+                  <SelectValue placeholder="Select refund percentage" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">0%</SelectItem>
+                  <SelectItem value="25">25%</SelectItem>
+                  <SelectItem value="50">50%</SelectItem>
+                  <SelectItem value="75">75%</SelectItem>
+                  <SelectItem value="100">100%</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="cancelReason">Reason for Cancellation</Label>
+              <Input
+                id="cancelReason"
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Enter reason for cancellation"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsCancelDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmCancel}>Confirm Cancellation</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };

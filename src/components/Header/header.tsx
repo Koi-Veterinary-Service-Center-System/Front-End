@@ -197,7 +197,7 @@ function UserActions({ profile, notifications, clearNotifications }) {
   return (
     <>
       {["Manager", "Staff"].includes(profile?.role) && (
-        <Link to="/overview">
+        <Link to="/service">
           <Button variant="ghost" size="icon">
             <Gauge className="h-5 w-5" />
           </Button>

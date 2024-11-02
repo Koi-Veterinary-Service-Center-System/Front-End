@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import api from "../../configs/axios";
 import Header from "@/components/Header/header";
+import { FaUser } from "react-icons/fa";
 
 const Login = () => {
   const [isResetPassword, setIsResetPassword] = useState(false);
@@ -238,24 +239,16 @@ const Login = () => {
                       }
                       size="large"
                       block
-                      className="border-blue-300 text-blue-600 hover:border-blue-500 hover:text-blue-700"
+                      className="border-blue-300 text-blue-600 hover:border-blue-500 hover:text-blue-700 mb-2"
                     >
                       Sign in with Google
                     </Button>
-                    <Button
-                      icon={
-                        <img
-                          src="src\assets\images\facebook.png"
-                          alt="Facebook"
-                          className="mr-2 h-6 w-6"
-                        />
-                      }
-                      size="large"
-                      block
-                      className="bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                      Sign in with Facebook
-                    </Button>
+                    <Link to="/">
+                      <Button className="w-full bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors duration-200">
+                        <FaUser className="mr-2 h-5 w-5" />
+                        Continue with Guest account
+                      </Button>
+                    </Link>
                   </div>
                   <div className="mt-6 text-center text-blue-800">
                     Don't have an account?{" "}
