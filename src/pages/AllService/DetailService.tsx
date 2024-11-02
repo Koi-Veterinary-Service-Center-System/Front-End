@@ -1,5 +1,7 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   FaChevronDown,
@@ -10,6 +12,8 @@ import {
   FaQuoteRight,
   FaShoppingCart,
   FaStar,
+  FaArrowLeft,
+  FaMoneyBillWave,
 } from "react-icons/fa";
 import {
   Card,
@@ -71,6 +75,7 @@ function FeedbackSkeleton() {
 
 export default function DetailService() {
   const { serviceId } = useParams<{ serviceId: string }>();
+  const navigate = useNavigate();
   const [service, setService] = useState<Services | null>(null);
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -117,17 +122,27 @@ export default function DetailService() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <div className="container mx-auto px-4 py-8">
+        <Button
+          onClick={() => navigate(-1)}
+          className="mb-4 flex items-center"
+          variant="outline"
+        >
+          <FaArrowLeft className="mr-2" /> Back
+        </Button>
         <motion.div
           initial="hidden"
           animate="visible"
           variants={fadeInUp}
           className="bg-white rounded-lg shadow-lg overflow-hidden"
         >
-          <img
-            src={service.imageURL}
-            alt={service.serviceName}
-            className="w-full h-96 object-cover"
-          />
+          <div className="relative w-full h-64 md:h-96 overflow-hidden">
+            <img
+              src={service.imageURL}
+              alt={service.serviceName}
+              className="w-full h-full object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          </div>
           <div className="p-6">
             <h1 className="text-3xl font-bold text-blue-800 mb-4">
               {service.serviceName}
@@ -136,11 +151,13 @@ export default function DetailService() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <Card>
                 <CardHeader className="flex flex-row items-center space-x-2">
-                  <FaDollarSign className="text-blue-500" />
+                  <FaMoneyBillWave className="text-blue-500" />
                   <CardTitle>Price</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-2xl font-bold">${service.price}</p>
+                  <p className="text-2xl font-bold">
+                    {service.price.toLocaleString("vi-VN")} vnd
+                  </p>
                 </CardContent>
               </Card>
               <Card>
@@ -149,7 +166,9 @@ export default function DetailService() {
                   <CardTitle>Quantity Price</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-2xl font-bold">${service.quantityPrice}</p>
+                  <p className="text-2xl font-bold">
+                    {service.quantityPrice.toLocaleString("vi-VN")} vnd
+                  </p>
                 </CardContent>
               </Card>
               <Card>
@@ -176,7 +195,10 @@ export default function DetailService() {
           <h2 className="text-2xl font-bold mb-4 text-blue-800">Feedback</h2>
           {feedback.length > 0 ? (
             feedback.map((item) => (
-              <Card className="mb-6 overflow-hidden transition-shadow duration-300 hover:shadow-lg">
+              <Card
+                key={item.feedbackID}
+                className="mb-6 overflow-hidden transition-shadow duration-300 hover:shadow-lg"
+              >
                 <CardHeader className="bg-gradient-to-r from-blue-50 to-white">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -257,7 +279,7 @@ export default function DetailService() {
               <img
                 src="https://firebasestorage.googleapis.com/v0/b/swp391veterinary.appspot.com/o/The%20Sad%20Snowman%20-%20Bird%20Watching.png?alt=media&token=86e7f422-d825-498d-b0c8-bc1b28646e9b"
                 alt="No feedback available"
-                style={{ width: "200px", height: "150px" }} // Adjust width and height as needed
+                className="w-48 h-36 object-contain mb-4"
               />
               No feedback available for this service yet.
             </p>

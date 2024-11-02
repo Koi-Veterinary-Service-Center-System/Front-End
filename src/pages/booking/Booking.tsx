@@ -373,7 +373,8 @@ function BookingPage() {
                   >
                     {services.map((service) => (
                       <Option key={service.serviceID} value={service.serviceID}>
-                        {service.serviceName} - ${service.price} (Duration:{" "}
+                        {service.serviceName} -{" "}
+                        {service.price.toLocaleString("vi-VN")}vnd (Duration:{" "}
                         {service.estimatedDuration} hours)
                       </Option>
                     ))}
@@ -495,8 +496,8 @@ function BookingPage() {
                         key={distance.distanceID}
                         value={distance.distanceID}
                       >
-                        {distance.district} - {distance.area} ($
-                        {distance.price.toLocaleString("vi-VN")})
+                        {distance.district} - {distance.area} (
+                        {distance.price.toLocaleString("vi-VN")}vnd)
                       </Option>
                     ))}
                   </Select>

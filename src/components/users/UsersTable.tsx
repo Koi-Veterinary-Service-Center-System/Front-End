@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AlertCircle, Search, UserPlus2 } from "lucide-react";
+import { AlertCircle, Ban, Edit, Search, Trash, UserPlus2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -55,6 +55,11 @@ const UsersTable = () => {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Additional state for managing the ban dialog
+  const [isBanModalOpen, setIsBanModalOpen] = useState(false);
+  const [userToBan, setUserToBan] = useState<User | null>(null);
+  const [banReason, setBanReason] = useState("");
 
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
@@ -191,6 +196,39 @@ const UsersTable = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Updated ban function to include a reason
+  const handleBanUser = async () => {
+    if (!userToBan || !banReason.trim()) return;
+    setLoading(true);
+    try {
+      await api.patch(
+        `/User/ban-user/${userToBan.userID}`,
+        { reason: banReason },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      toast.success("User banned successfully");
+      fetchUser(); // Refresh user list after banning
+      setIsBanModalOpen(false);
+      setBanReason("");
+    } catch (error: any) {
+      console.error(
+        "Failed to ban user:",
+        error.response?.data || error.message
+      );
+      toast.error("Failed to ban user. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to open the ban dialog and set the user to ban
+  const openBanDialog = (user: User) => {
+    setUserToBan(user);
+    setIsBanModalOpen(true);
   };
 
   return (
@@ -461,7 +499,6 @@ const UsersTable = () => {
                         </div>
                       </div>
                     </td>
-
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">{user.email}</div>
                     </td>
@@ -474,30 +511,78 @@ const UsersTable = () => {
                         {user.role}
                       </span>
                     </td>
-
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                         Active
                       </span>
                     </td>
-
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <button
                         className="text-blue-600 hover:text-blue-900 mr-2"
                         onClick={() => handleEdit(user)}
+                        title="Edit User"
                       >
-                        Edit
+                        <Edit size={18} />
                       </button>
                       <button
-                        className="text-red-600 hover:text-red-900"
+                        className="text-red-600 hover:text-red-900 mr-2"
                         onClick={() => {
                           setUserToDelete(user);
                           setIsDeleteModalOpen(true);
                         }}
+                        title="Delete User"
                       >
-                        Delete
+                        <Trash size={18} />
+                      </button>
+                      <button
+                        className="text-yellow-600 hover:text-yellow-800"
+                        onClick={() => openBanDialog(user)}
+                        title="Ban User"
+                      >
+                        <Ban size={18} />
                       </button>
                     </td>
+                    <Dialog
+                      open={isBanModalOpen}
+                      onOpenChange={setIsBanModalOpen}
+                    >
+                      <DialogContent className="sm:max-w-[400px] bg-white">
+                        <DialogHeader>
+                          <DialogTitle className="text-2xl font-bold text-yellow-800">
+                            Ban User
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <p className="text-sm text-gray-500">
+                            Please provide a reason for banning this user. This
+                            action is permanent.
+                          </p>
+                          <Input
+                            placeholder="Ban reason"
+                            value={banReason}
+                            onChange={(e) => setBanReason(e.target.value)}
+                          />
+                          <div className="flex justify-end space-x-4">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setIsBanModalOpen(false)}
+                              className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={handleBanUser}
+                              className="bg-yellow-600 text-white hover:bg-yellow-700"
+                              disabled={loading || !banReason.trim()}
+                            >
+                              {loading ? "Banning..." : "Ban User"}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </motion.tr>
                 ))
               ) : (

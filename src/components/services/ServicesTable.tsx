@@ -1,6 +1,6 @@
 import api from "@/configs/axios";
 import { Profile, services } from "@/types/info";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Edit,
   Search,
@@ -29,6 +29,17 @@ import {
 import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
 import ShimmerButton from "../ui/shimmer-button";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { storage } from "@/configs/firebase";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
+import { PiMoneyWavy } from "react-icons/pi";
 
 interface ServicesTableProps {
   onDeleteSuccess: () => void;
@@ -61,6 +72,8 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteServiceID, setDeleteServiceID] = useState<number | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageURL, setImageURL] = useState<string>("");
 
   const form = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
@@ -122,6 +135,8 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
       price: 0,
       estimatedDuration: 1,
     });
+    setImageFile(null);
+    setImageURL("");
     setIsDialogOpen(true);
   };
 
@@ -129,16 +144,52 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
     setCurrentService(service);
     form.reset(service);
     setIsEditMode(true);
+    setImageFile(null); // Reset the selected image file for edit
     setIsDialogOpen(true);
   };
 
+  // Handle file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
+
+  // Upload file to Firebase and get URL
+  // Upload file to Firebase and get URL
+  const uploadFileToFirebase = async (file: File): Promise<string> => {
+    const storageRef = ref(storage, `service_images/${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    return new Promise((resolve, reject) => {
+      uploadTask.on("state_changed", null, reject, async () => {
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        resolve(downloadURL);
+      });
+    });
+  };
   const handleSubmit = async (data: ServiceFormData) => {
     setLoading(true);
     try {
+      let uploadedImageUrl = imageURL;
+
+      // If there's an image file, upload it to Firebase
+      if (imageFile) {
+        uploadedImageUrl = await uploadFileToFirebase(imageFile);
+        setImageURL(uploadedImageUrl);
+      }
+
+      // Include the imageURL in the payload
+      const payload = {
+        ...data,
+        imageURL: uploadedImageUrl,
+      };
+
+      // Call API to add or edit the service
       if (isEditMode) {
         await api.put(
           `/service/update-service/${currentService?.serviceID}`,
-          data,
+          payload,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -147,14 +198,17 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
         );
         toast.success("Service updated successfully!");
       } else {
-        await api.post(`/service/add-service`, data, {
+        await api.post(`/service/add-service`, payload, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         toast.success("Service added successfully!");
       }
-      fetchServices();
+
       setIsDialogOpen(false);
       form.reset();
+      setImageFile(null);
+      setImageURL("");
+      fetchServices(); // Refresh the list of services after adding/updating
     } catch (error: any) {
       console.error("Operation failed:", error.response?.data || error.message);
     } finally {
@@ -208,28 +262,18 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Price
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Description
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Estimate Duration
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-
-          <tbody className="bg-white divide-y divide-gray-200">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Image</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Price</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Estimated Duration</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {filteredServices.length > 0 ? (
               filteredServices.map((service) => (
                 <motion.tr
@@ -238,200 +282,251 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex gap-2 items-center">
+                  <TableCell>
                     <img
-                      src="https://kehlanpools.com/wp-content/uploads/2022/03/blg1.jpg"
-                      alt="Service img"
-                      className="size-10 rounded-full"
+                      src={
+                        service.imageURL ||
+                        "https://kehlanpools.com/wp-content/uploads/2022/03/blg1.jpg"
+                      }
+                      alt={`${service.serviceName} image`}
+                      className="w-16 h-16 rounded-md object-cover"
                     />
+                  </TableCell>
+                  <TableCell className="font-medium">
                     {service.serviceName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${service.price.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  </TableCell>
+                  <TableCell>
+                    {service.price.toLocaleString("vi-VN")} vnd
+                  </TableCell>
+                  <TableCell className="max-w-xs truncate">
                     {service.description}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {service.estimatedDuration}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  </TableCell>
+                  <TableCell>{service.estimatedDuration} hours</TableCell>
+                  <TableCell className="text-right">
+                    {/* Edit Button */}
                     <button
-                      className="text-blue-600 hover:text-blue-800 mr-2"
+                      className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-blue-500 text-white hover:bg-blue-600 h-10 w-10 mr-2"
                       onClick={() => handleEdit(service)}
                     >
-                      <Edit size={18} />
+                      <Edit className="h-4 w-4" />
                     </button>
+
+                    {/* Delete Button */}
                     <button
-                      className="text-red-600 hover:text-red-800"
+                      className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-red-500 text-white hover:bg-red-600 h-10 w-10"
                       onClick={() => confirmDelete(service.serviceID)}
                     >
-                      <Trash2 size={18} />
+                      <Trash2 className="h-4 w-4" />
                     </button>
-                  </td>
+                  </TableCell>
                 </motion.tr>
               ))
             ) : (
-              <tr>
-                <td colSpan={6} className="px-6 py-4 text-center">
-                  <div className="flex justify-center items-center">
+              <TableRow>
+                <TableCell colSpan={6} className="h-24 text-center">
+                  <div className="flex flex-col items-center justify-center">
                     <img
-                      src="src/assets/images/No-Messages-1--Streamline-Bruxelles.png"
-                      alt="No Messages"
-                      className="object-contain w-1/2 h-1/2 max-w-xs max-h-64"
+                      src="/src/assets/images/No-Messages-1--Streamline-Bruxelles.png"
+                      alt="No Services"
+                      className="w-32 h-32 object-contain mb-4"
                     />
+                    <p className="text-muted-foreground">No services found</p>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[550px] bg-white">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold flex items-center text-blue-800">
-              {isEditMode ? (
-                <>
-                  <Edit className="mr-2 h-6 w-6 text-blue-600" />
-                  Edit Service
-                </>
-              ) : (
-                <>
-                  <Briefcase className="mr-2 h-6 w-6 text-blue-600" />
-                  Add New Service
-                </>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-6"
-            >
-              <FormField
-                control={form.control}
-                name="serviceName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Service Name</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                        <Input
-                          placeholder="Enter service name"
-                          {...field}
-                          className="pl-10 border-gray-300"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <FileText className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
-                        <Textarea
-                          placeholder="Enter service description"
-                          {...field}
-                          className="pl-10 min-h-[100px] border-gray-300"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Price</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                          <Input
-                            type="number"
-                            placeholder="Enter price"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value))
-                            }
-                            className="pl-10 border-gray-300"
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="estimatedDuration"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estimated Duration (hours)</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                          <Input
-                            type="number"
-                            placeholder="Enter duration"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value))
-                            }
-                            className="pl-10 border-gray-300"
-                            step="0.1"
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="flex justify-end space-x-4 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                  className="border-gray-300 text-gray-700 hover:bg-gray-100"
+      <AnimatePresence>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[600px] bg-gradient-to-br from-blue-50 to-blue-50 border-2 border-blue-200 rounded-xl shadow-xl">
+            <DialogHeader>
+              <DialogTitle className="text-3xl font-bold flex items-center text-blue-800">
+                <motion.div
+                  initial={{ rotate: -10, scale: 0.9 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                >
-                  {loading ? (
+                  {isEditMode ? (
                     <>
-                      <PlusCircle className="mr-2 h-4 w-4 animate-spin" />
-                      {isEditMode ? "Saving..." : "Adding..."}
+                      <Edit className="mr-2 h-6 w-6 text-blue-600" />
+                      Edit Service
                     </>
                   ) : (
                     <>
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      {isEditMode ? "Save" : "Add"}
+                      <Briefcase className="mr-2 h-6 w-6 text-blue-600" />
+                      Add New Service
                     </>
                   )}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+                </motion.div>
+              </DialogTitle>
+            </DialogHeader>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(handleSubmit)}
+                className="space-y-6"
+              >
+                {/* Image Upload Field */}
+                <FormField
+                  control={form.control}
+                  name="imageURl"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel className="text-blue-700">
+                        Upload Image
+                      </FormLabel>
+                      <FormControl>
+                        <div className="flex items-center space-x-4">
+                          <Input
+                            type="file"
+                            onChange={handleFileChange}
+                            className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                          />
+                          {imageURL && (
+                            <motion.img
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              src={imageURL}
+                              alt="Service Preview"
+                              className="h-24 w-24 rounded-lg object-cover border-2 border-blue-200"
+                            />
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="serviceName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-blue-700">
+                        Service Name
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Briefcase className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-500" />
+                          <Input
+                            placeholder="Enter service name"
+                            {...field}
+                            className="pl-10 border-blue-200 focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-blue-700">
+                        Description
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <FileText className="absolute left-3 top-3 h-5 w-5 text-blue-500" />
+                          <Textarea
+                            placeholder="Enter service description"
+                            {...field}
+                            className="pl-10 min-h-[120px] border-blue-200 focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-blue-700">Price</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <PiMoneyWavy className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-500" />
+                            <Input
+                              type="number"
+                              placeholder="Enter price"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(parseFloat(e.target.value))
+                              }
+                              className="pl-10 border-blue-200 focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="estimatedDuration"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-blue-700">
+                          Estimated Duration (hours)
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Clock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-500" />
+                            <Input
+                              type="number"
+                              placeholder="Enter duration"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(parseFloat(e.target.value))
+                              }
+                              className="pl-10 border-blue-200 focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                              step="0.1"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex justify-end space-x-4 pt-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                    className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    {loading ? (
+                      <>
+                        <PlusCircle className="mr-2 h-4 w-4 animate-spin" />
+                        {isEditMode ? "Saving..." : "Adding..."}
+                      </>
+                    ) : (
+                      <>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        {isEditMode ? "Save" : "Add"}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </AnimatePresence>
 
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="sm:max-w-[400px] bg-white">

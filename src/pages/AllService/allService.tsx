@@ -6,7 +6,7 @@ import Header from "@/components/Header/header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/configs/axios";
-import { FaClock, FaDollarSign, FaShoppingCart } from "react-icons/fa";
+import { FaClock, FaMoneyBillWave, FaShoppingCart } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const fadeInUp = {
@@ -66,7 +66,7 @@ function AnimatedServiceCard({
         <img
           src={service.imageURL}
           alt={service.serviceName}
-          className="w-full h-64 object-cover"
+          className="w-full h-80 object-cover"
         />
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <Link
@@ -85,12 +85,15 @@ function AnimatedServiceCard({
         <p className="mb-6 text-gray-600">{service.description}</p>
         <div className="space-y-4">
           <div className="flex items-center text-gray-600">
-            <FaDollarSign className="mr-2 text-blue-500" />
-            <p>Price: ${service.price}</p>
+            <FaMoneyBillWave className="mr-2 text-blue-500" />
+            <p>Price: {service.price.toLocaleString("vi-VN")} vnd</p>
           </div>
           <div className="flex items-center text-gray-600">
             <FaShoppingCart className="mr-2 text-blue-500" />
-            <p>Quantity Price: ${service.quantityPrice}</p>
+            <p>
+              Quantity Price: {service.quantityPrice.toLocaleString("vi-VN")}{" "}
+              vnd
+            </p>
           </div>
           <div className="flex items-center text-gray-600">
             <FaClock className="mr-2 text-blue-500" />
@@ -98,9 +101,11 @@ function AnimatedServiceCard({
           </div>
         </div>
         <div className="mt-6">
-          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-            <Link to="/booking">Request Appointment</Link>
-          </Button>
+          <Link to="/booking">
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+              Request Appointment
+            </Button>
+          </Link>
         </div>
       </div>
     </motion.div>
@@ -191,7 +196,7 @@ export default function Component() {
           transition={{ delay: 0.5 }}
         >
           <img
-            src="/placeholder.svg?height=536&width=1024"
+            src="https://cafishvet.com/wp-content/uploads/2020/10/USDA-Accredited-Veterinarian.png"
             alt="USDA Service Center"
             className="mx-auto mb-4 rounded-lg shadow-lg"
           />
