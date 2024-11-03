@@ -39,6 +39,8 @@ export type Services = {
   estimatedDuration: number;
   imageURL: string;
   quantityPrice: number;
+  isAtHome: boolean;
+  isDeleted: boolean;
 };
 
 export type Distance = {
