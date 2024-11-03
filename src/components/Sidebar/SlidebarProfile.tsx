@@ -21,8 +21,7 @@ export default function SlidebarProfile() {
     >
       <div className="p-4">
         <Link to="/" className="flex items-center space-x-2 text-primary">
-          <User className="h-6 w-6" />
-          <span className="text-xl font-bold">Profile</span>
+          <img src="src\assets\images\logo.png" alt="" />
         </Link>
       </div>
       <nav className="mt-8">

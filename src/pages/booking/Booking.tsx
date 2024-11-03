@@ -53,6 +53,7 @@ function BookingPage() {
   const [isLoadingPayment, setLoadingPayment] = useState(false);
   const [allSlots, setAllSlots] = useState<Slot[]>([]);
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+  const [isAtHomeService, setIsAtHomeService] = useState(true);
 
   // Ant Design form hook
   const [form] = Form.useForm();
@@ -278,7 +279,18 @@ function BookingPage() {
     }
   };
 
-  const calculateTota = () => {
+  const handleServiceChange = (serviceID) => {
+    const selectedService = services.find(
+      (service) => service.serviceID === serviceID
+    );
+
+    // Update isAtHomeService based on the selected service's isAtHome property
+    setIsAtHomeService(selectedService ? selectedService.isAtHome : true);
+
+    calculateTotal(); // Optionally recalculate the total if necessary
+  };
+
+  const calculateTotal = () => {
     const selectedService = services.find(
       (service) => service.serviceID === form.getFieldValue("serviceName")
     );
@@ -287,7 +299,7 @@ function BookingPage() {
     );
 
     if (selectedService && selectedDistance) {
-      const initAmount = selectedService.price + selectedDistance.price; // Tính tổng giá trị
+      const initAmount = selectedService.price + selectedDistance.price;
       setTotal(initAmount);
     } else if (selectedService) {
       setTotal(selectedService.price);
@@ -296,7 +308,7 @@ function BookingPage() {
     }
   };
 
-  const handleCheckboxChange = (e) => {
+  const handleCheckboxChange = (e: any) => {
     setIsTermsAccepted(e.target.checked);
   };
 
@@ -370,8 +382,7 @@ function BookingPage() {
                 <Form.Item
                   label={
                     <span className="flex items-center gap-2">
-                      <MdOutlineMedicalServices />
-                      Type of Services
+                      <MdOutlineMedicalServices /> Type of Services
                     </span>
                   }
                   name="serviceName"
@@ -380,15 +391,15 @@ function BookingPage() {
                   ]}
                 >
                   <Select
-                    className="w-full p-0"
+                    className="w-full"
                     style={{ height: "40px" }}
                     loading={isLoadingServices}
-                    onChange={() => calculateTota()}
+                    onChange={(value) => handleServiceChange(value)}
                   >
                     {services.map((service) => (
                       <Option key={service.serviceID} value={service.serviceID}>
                         {service.serviceName} -{" "}
-                        {service.price.toLocaleString("vi-VN")}vnd (Duration:{" "}
+                        {service.price.toLocaleString("vi-VN")} VND (Duration:{" "}
                         {service.estimatedDuration} hours)
                       </Option>
                     ))}
@@ -463,7 +474,6 @@ function BookingPage() {
                 label="Location"
                 name="location"
                 rules={[
-                  { required: true, message: "Please enter your location" },
                   {
                     pattern: /^[^\s].+$/,
                     message:
@@ -475,6 +485,7 @@ function BookingPage() {
                   className="w-full p-0"
                   style={{ height: "50px" }}
                   placeholder="Enter your location"
+                  disabled={!isAtHomeService} // Disable Input if isAtHomeService is false
                 />
               </Form.Item>
             </motion.div>
@@ -492,18 +503,19 @@ function BookingPage() {
                 <Form.Item
                   label={
                     <span className="flex items-center gap-2">
-                      <FaLocationArrow />
-                      Select a district
+                      <FaLocationArrow /> Select a district
                     </span>
                   }
                   name="district"
+                  rules={[]} // Only required if isAtHomeService is true
                 >
                   <Select
                     className="w-full p-0"
                     style={{ height: "50px" }}
                     loading={isLoadingDistance}
                     placeholder="Select a district"
-                    onChange={() => calculateTota()}
+                    disabled={!isAtHomeService} // Disable Select if isAtHomeService is false
+                    onChange={() => calculateTotal()}
                   >
                     {distances.map((distance) => (
                       <Option
@@ -511,7 +523,7 @@ function BookingPage() {
                         value={distance.distanceID}
                       >
                         {distance.district} - {distance.area} (
-                        {distance.price.toLocaleString("vi-VN")}vnd)
+                        {distance.price.toLocaleString("vi-VN")} VND)
                       </Option>
                     ))}
                   </Select>
