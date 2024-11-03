@@ -120,7 +120,7 @@ export default function BookingRecord({
               className="flex items-center space-x-2 text-lg mb-2 text-blue-700"
             >
               <FaMoneyBillWave className="text-green-500" />
-              <span>Service Fee</span>
+              <span>Arised Quantity</span>
             </Label>
             <Input
               id="arisedQuantity"

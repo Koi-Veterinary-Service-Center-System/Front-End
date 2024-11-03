@@ -55,6 +55,8 @@ import { RiServiceLine } from "react-icons/ri";
 import { GiCirclingFish } from "react-icons/gi";
 import { HiOutlineStatusOnline } from "react-icons/hi";
 import BookingRecord from "../Booking/bookingRecord";
+import BookingRecordModal from "../Booking/BookingRecordModal";
+import ConfirmStatusChangeModal from "../Booking/ConfirmStatusChangeModal";
 
 const prescriptionSchema = z.object({
   diseaseName: z.string().min(1, "Disease name is required"),
@@ -78,6 +80,12 @@ export default function Component() {
     null
   ); // Lưu presRecID để update đơn thuốc
   const [loading, setLoading] = useState(true);
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [newStatus, setNewStatus] = useState<string | null>(null);
+  const [statusChangeBookingID, setStatusChangeBookingID] = useState<
+    string | null
+  >(null);
 
   const form = useForm<PrescriptionForm>({
     resolver: zodResolver(prescriptionSchema),
@@ -151,31 +159,38 @@ export default function Component() {
 
   const statusOrder = ["On Going", "Completed", "Received_Money"]; // Thứ tự các trạng thái
 
-  const handleStatusChange = async (
+  const handleStatusChangeRequest = (
     bookingID: string,
-    newStatus: string,
+    selectedStatus: string,
     currentStatus: string
   ) => {
     const currentStatusIndex = statusOrder.indexOf(currentStatus);
-    const newStatusIndex = statusOrder.indexOf(newStatus);
+    const newStatusIndex = statusOrder.indexOf(selectedStatus);
 
-    // Kiểm tra nếu trạng thái mới nằm trước trạng thái hiện tại (không cho phép)
     if (newStatusIndex <= currentStatusIndex) {
       toast.error("You cannot move to a previous status.");
       return;
     }
 
-    let endpoint = "";
+    // Open the confirmation dialog
+    setStatusChangeBookingID(bookingID);
+    setNewStatus(selectedStatus);
+    setIsConfirmModalOpen(true);
+  };
 
+  const handleStatusChange = async () => {
+    if (!statusChangeBookingID || !newStatus) return;
+
+    let endpoint = "";
     if (newStatus === "On Going") {
-      endpoint = `/booking/ongoing/${bookingID}`;
+      endpoint = `/booking/ongoing/${statusChangeBookingID}`;
     } else if (newStatus === "Completed") {
-      setSelectedBookingID(bookingID);
-      setOpenBookingDialog(true); // Mở modal khi chọn On Going
+      setSelectedBookingID(statusChangeBookingID);
+      setOpenBookingDialog(true);
+      return;
     } else if (newStatus === "Received_Money") {
-      endpoint = `/booking/receive-money/${bookingID}`;
+      endpoint = `/booking/receive-money/${statusChangeBookingID}`;
     } else {
-      console.error("Invalid status:", newStatus);
       toast.error("Invalid status update.");
       return;
     }
@@ -191,6 +206,9 @@ export default function Component() {
     } catch (error: any) {
       console.error("Failed to update status:", error);
       toast.error(error.response.data);
+    } finally {
+      setStatusChangeBookingID(null);
+      setNewStatus(null);
     }
   };
 
@@ -227,6 +245,16 @@ export default function Component() {
   const handleCloseModal = () => {
     setOpenBookingDialog(false);
     fetchAppointments();
+  };
+
+  const openBookingRecordModal = (bookingID: number) => {
+    setSelectedBookingID(bookingID);
+    setIsRecordModalOpen(true);
+  };
+
+  const closeBookingRecordModal = () => {
+    setIsRecordModalOpen(false);
+    setSelectedBookingID(null);
   };
 
   return (
@@ -496,6 +524,23 @@ export default function Component() {
                           }
                         }}
                       >
+                        <Button
+                          variant="default"
+                          className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300"
+                          onClick={() =>
+                            openBookingRecordModal(appointment.bookingID)
+                          }
+                        >
+                          View Booking Record
+                        </Button>
+
+                        {selectedBookingID && (
+                          <BookingRecordModal
+                            bookingID={selectedBookingID}
+                            isOpen={isRecordModalOpen}
+                            onClose={closeBookingRecordModal}
+                          />
+                        )}
                         <DialogTrigger asChild>
                           <Button
                             variant="default"
@@ -641,14 +686,14 @@ export default function Component() {
                         </DialogContent>
                       </Dialog>
                       <Select
+                        value={appointment.bookingStatus}
                         onValueChange={(value) =>
-                          handleStatusChange(
+                          handleStatusChangeRequest(
                             appointment.bookingID,
                             value,
                             appointment.bookingStatus
                           )
                         }
-                        defaultValue={appointment.bookingStatus}
                       >
                         <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Update Status" />
@@ -661,6 +706,13 @@ export default function Component() {
                           </SelectItem>
                         </SelectContent>
                       </Select>
+
+                      <ConfirmStatusChangeModal
+                        isOpen={isConfirmModalOpen}
+                        onClose={() => setIsConfirmModalOpen(false)}
+                        onConfirm={handleStatusChange}
+                        newStatus={newStatus || ""}
+                      />
                     </div>
                   </CardContent>
                 </Card>

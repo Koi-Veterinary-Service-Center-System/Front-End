@@ -8,6 +8,9 @@ import { toast } from "sonner";
 const FeedbackTable = () => {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showFullCommentId, setShowFullCommentId] = useState<number | null>(
+    null
+  ); // New state for comment visibility
 
   const fetchFeedbackData = async () => {
     setLoading(true);
@@ -117,7 +120,27 @@ const FeedbackTable = () => {
                     {feedback.rate}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {feedback.comments}
+                    {showFullCommentId === feedback.feedbackID
+                      ? feedback.comments
+                      : feedback.comments.length > 50
+                      ? `${feedback.comments.substring(0, 50)}...`
+                      : feedback.comments}
+                    {feedback.comments.length > 50 && (
+                      <button
+                        onClick={() =>
+                          setShowFullCommentId((prev) =>
+                            prev === feedback.feedbackID
+                              ? null
+                              : feedback.feedbackID
+                          )
+                        }
+                        className="text-blue-600 ml-2"
+                      >
+                        {showFullCommentId === feedback.feedbackID
+                          ? "View Less"
+                          : "View More"}
+                      </button>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span
