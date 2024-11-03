@@ -8,7 +8,6 @@ import {
   PlusCircle,
   Briefcase,
   FileText,
-  DollarSign,
   Clock,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -40,6 +39,7 @@ import {
   TableRow,
 } from "../ui/table";
 import { PiMoneyWavy } from "react-icons/pi";
+import { Switch } from "../ui/switch";
 
 interface ServicesTableProps {
   onDeleteSuccess: () => void;
@@ -57,6 +57,8 @@ const serviceSchema = z.object({
     (val) => (typeof val === "string" ? parseFloat(val) : val),
     z.number().min(1, "Please input a valid estimated duration!")
   ),
+  isAtHome: z.boolean().default(false), // Boolean field with default false
+  isOnline: z.boolean().default(false), // Boolean field with default false
 });
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
@@ -82,6 +84,8 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
       description: "",
       price: 0,
       estimatedDuration: 1,
+      isAtHome: false,
+      isOnline: false,
     },
   });
 
@@ -116,8 +120,14 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
       const response = await api.get(`/service/all-service`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      setServices(response.data);
-      setFilteredServices(response.data);
+
+      // Sort services by `id` in descending order to show latest first
+      const sortedServices = response.data.sort(
+        (a: string, b: string) => b.serviceID - a.serviceID
+      );
+
+      setServices(sortedServices);
+      setFilteredServices(sortedServices);
     } catch (error: any) {
       console.error("Failed to fetch service data");
     }
@@ -134,6 +144,8 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
       description: "",
       price: 0,
       estimatedDuration: 1,
+      isAtHome: false,
+      isOnline: false,
     });
     setImageFile(null);
     setImageURL("");
@@ -174,19 +186,12 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
     setLoading(true);
     try {
       let uploadedImageUrl = imageURL;
-
-      // Upload only if there's a new image file
       if (imageFile) {
         uploadedImageUrl = await uploadFileToFirebase(imageFile);
       }
 
-      // Include the imageURL in the payload, whether new or existing
-      const payload = {
-        ...data,
-        imageURL: uploadedImageUrl,
-      };
+      const payload = { ...data, imageURL: uploadedImageUrl };
 
-      // Call API to add or edit the service
       if (isEditMode) {
         await api.put(
           `/service/update-service/${currentService?.serviceID}`,
@@ -208,8 +213,8 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
       setIsDialogOpen(false);
       form.reset();
       setImageFile(null);
-      setImageURL(""); // Reset image URL after submit
-      fetchServices(); // Refresh the list of services after adding/updating
+      setImageURL("");
+      fetchServices();
     } catch (error: any) {
       console.error("Operation failed:", error.response?.data || error.message);
     } finally {
@@ -371,7 +376,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                 {/* Image Upload Field */}
                 <FormField
                   control={form.control}
-                  name="imageURl"
+                  name="imageURL"
                   render={() => (
                     <FormItem>
                       <FormLabel className="text-blue-700">
@@ -495,6 +500,43 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                       </FormItem>
                     )}
                   />
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="isAtHome"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-blue-700">
+                            At Home Service
+                          </FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange} // Use `onCheckedChange` instead of `onChange`
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="isOnline"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-blue-700">
+                            Online Service
+                          </FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange} // Use `onCheckedChange` instead of `onChange`
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
                 <div className="flex justify-end space-x-4 pt-6">
                   <Button

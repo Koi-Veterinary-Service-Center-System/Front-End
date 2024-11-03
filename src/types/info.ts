@@ -32,7 +32,7 @@ export type koiOrPool = {
 };
 
 export type Services = {
-  serviceID: number;
+  serviceID: string;
   serviceName: string;
   description: string;
   price: number;
@@ -41,6 +41,7 @@ export type Services = {
   quantityPrice: number;
   isAtHome: boolean;
   isDeleted: boolean;
+  isOnline: boolean;
 };
 
 export type Distance = {
