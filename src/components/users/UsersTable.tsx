@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AlertCircle, Search, UserPlus2 } from "lucide-react";
+import { AlertCircle, Ban, Edit, Search, Trash, UserPlus2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -31,6 +31,14 @@ import {
 } from "@/components/ui/select";
 import { User } from "@/types/info";
 import ShimmerButton from "../ui/shimmer-button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 
 const userSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -44,6 +52,15 @@ const userSchema = z.object({
 
 type UserFormData = z.infer<typeof userSchema>;
 
+// Define Zod schema for ban reason
+const banReasonSchema = z.object({
+  reason: z
+    .string()
+    .min(5, "Please provide a reason with at least 5 characters."),
+});
+
+type BanReasonFormData = z.infer<typeof banReasonSchema>;
+
 const UsersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState<User[]>([]);
@@ -55,6 +72,15 @@ const UsersTable = () => {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Additional state for managing the ban dialog
+  const [isBanModalOpen, setIsBanModalOpen] = useState(false);
+  const [userToBan, setUserToBan] = useState<User | null>(null);
+  const [banReason, setBanReason] = useState("");
+  const formBan = useForm<BanReasonFormData>({
+    resolver: zodResolver(banReasonSchema),
+    defaultValues: { reason: "" },
+  });
 
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
@@ -191,6 +217,37 @@ const UsersTable = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Updated ban function to include a reason
+  const handleBanSubmit = async (data: BanReasonFormData) => {
+    try {
+      await api.patch(
+        `/User/ban-user/${userToBan?.userID}`,
+        { reason: data.reason },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      toast.success("User banned successfully");
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.userID === userToBan?.userID
+            ? { ...user, isActive: false }
+            : user
+        )
+      );
+      setIsBanModalOpen(false);
+    } catch (error: any) {
+      toast.error("Failed to ban user. Please try again.");
+    }
+  };
+
+  // Function to open the ban dialog and set the user to ban
+  const openBanDialog = (user: User) => {
+    setUserToBan(user);
+    setIsBanModalOpen(true);
+    form.reset(); // Clear the reason field each time dialog opens
   };
 
   return (
@@ -417,28 +474,27 @@ const UsersTable = () => {
         <div className="text-red-600 text-sm mb-4">{error}</div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <Table>
+            <TableHeader className="bg-gradient-to-r from-blue-100 via-blue-50 to-white">
+              <TableRow>
+                <TableHead className="font-semibold text-blue-800">
                   Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                </TableHead>
+                <TableHead className="font-semibold text-blue-800">
                   Email
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                </TableHead>
+                <TableHead className="font-semibold text-blue-800">
                   Role
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                </TableHead>
+                <TableHead className="font-semibold text-blue-800">
                   Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                </TableHead>
+                <TableHead className="font-semibold text-blue-800">
                   Actions
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="bg-white divide-y divide-gray-200">
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
                   <motion.tr
@@ -446,9 +502,10 @@ const UsersTable = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3 }}
+                    className="bg-white hover:bg-blue-50 transition-colors"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex  items-center">
+                    <TableCell className="font-medium">
+                      <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold">
                             {user.firstName.charAt(0)}
@@ -460,58 +517,122 @@ const UsersTable = () => {
                           </div>
                         </div>
                       </div>
-                    </td>
-
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{user.email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
                       <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleBadgeClass(
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleBadgeClass(
                           user.role
                         )}`}
                       >
                         {user.role}
                       </span>
-                    </td>
-
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        Active
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          user.isActive
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {user.isActive ? "Active" : "Inactive"}
                       </span>
-                    </td>
-
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button
-                        className="text-blue-600 hover:text-blue-900 mr-2"
-                        onClick={() => handleEdit(user)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="text-red-600 hover:text-red-900"
-                        onClick={() => {
-                          setUserToDelete(user);
-                          setIsDeleteModalOpen(true);
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </td>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(user)}
+                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setUserToDelete(user);
+                            setIsDeleteModalOpen(true);
+                          }}
+                          className="text-red-600 hover:text-red-800 hover:bg-red-100"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openBanDialog(user)}
+                          className="text-yellow-600 hover:text-yellow-800 hover:bg-yellow-100"
+                        >
+                          <Ban className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </motion.tr>
                 ))
               ) : (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-6 py-4 text-center text-sm text-gray-500"
-                  >
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center">
                     No users found.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
+          <Dialog open={isBanModalOpen} onOpenChange={setIsBanModalOpen}>
+            <DialogContent className="sm:max-w-[400px] bg-white">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold text-yellow-800">
+                  Ban User
+                </DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-gray-500">
+                Please provide a reason for banning this user. This action is
+                permanent.
+              </p>
+              <Form {...formBan}>
+                <form
+                  onSubmit={formBan.handleSubmit(handleBanSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={formBan.control}
+                    name="reason"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ban Reason</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter reason for banning"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end space-x-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsBanModalOpen(false)}
+                      className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="bg-yellow-600 text-white hover:bg-yellow-700"
+                    >
+                      Ban User
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
       )}
 

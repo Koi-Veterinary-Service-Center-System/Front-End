@@ -55,7 +55,7 @@ const VetServiceChannelPerformance = () => {
 
       setFeedbackData(transformedData);
     } catch (error: any) {
-      setError("Error fetching data");
+      setError(error.response.data);
       console.error("Error fetching feedback data:", error);
     } finally {
       setLoading(false);
@@ -68,7 +68,7 @@ const VetServiceChannelPerformance = () => {
 
   return (
     <motion.div
-      className="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl p-6 border border-blue-700"
+      className="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl p-6 border border-blue-200 mb-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
@@ -78,7 +78,7 @@ const VetServiceChannelPerformance = () => {
       </h2>
 
       {loading ? (
-        <p className="text-gray-400">Loading...</p>
+        <p className="text-blue-400">Loading...</p>
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : (

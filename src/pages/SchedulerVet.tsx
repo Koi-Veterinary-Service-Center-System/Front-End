@@ -23,7 +23,7 @@ const timeSlots = [
 ];
 
 export default function VetCalendar() {
-  const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 10));
+  const [currentDate, setCurrentDate] = useState(new Date()); // Dynamically sets to today's date
   const [events, setEvents] = useState<VetSlots[]>([]);
 
   useEffect(() => {

@@ -1,7 +1,15 @@
 import "./booking.scss";
 import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
-import { Input, Form, Button, Select, DatePicker, InputNumber } from "antd";
+import {
+  Input,
+  Form,
+  Button,
+  Select,
+  DatePicker,
+  InputNumber,
+  Checkbox,
+} from "antd";
 import { useEffect, useRef, useState } from "react";
 import api from "../../configs/axios";
 import {
@@ -22,6 +30,7 @@ import { RiSortNumberDesc } from "react-icons/ri";
 import { motion } from "framer-motion";
 import TextArea from "antd/es/input/TextArea";
 import moment from "moment";
+import TermsModal from "@/components/TermsModal/TermsModal";
 
 const { Option } = Select;
 
@@ -43,6 +52,7 @@ function BookingPage() {
   const [distances, setDistances] = useState<Distance[]>([]);
   const [isLoadingPayment, setLoadingPayment] = useState(false);
   const [allSlots, setAllSlots] = useState<Slot[]>([]);
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
 
   // Ant Design form hook
   const [form] = Form.useForm();
@@ -286,6 +296,10 @@ function BookingPage() {
     }
   };
 
+  const handleCheckboxChange = (e) => {
+    setIsTermsAccepted(e.target.checked);
+  };
+
   return (
     <div className="mt-5">
       <Header />
@@ -373,7 +387,8 @@ function BookingPage() {
                   >
                     {services.map((service) => (
                       <Option key={service.serviceID} value={service.serviceID}>
-                        {service.serviceName} - ${service.price} (Duration:{" "}
+                        {service.serviceName} -{" "}
+                        {service.price.toLocaleString("vi-VN")}vnd (Duration:{" "}
                         {service.estimatedDuration} hours)
                       </Option>
                     ))}
@@ -495,8 +510,8 @@ function BookingPage() {
                         key={distance.distanceID}
                         value={distance.distanceID}
                       >
-                        {distance.district} - {distance.area} ($
-                        {distance.price.toLocaleString("vi-VN")})
+                        {distance.district} - {distance.area} (
+                        {distance.price.toLocaleString("vi-VN")}vnd)
                       </Option>
                     ))}
                   </Select>
@@ -599,15 +614,31 @@ function BookingPage() {
               {/* Định dạng số với dấu chấm phân tách hàng nghìn */}
             </motion.div>
 
+            {/* Terms and Conditions Section */}
+            <motion.div
+              className="mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Checkbox onChange={handleCheckboxChange}>I accept the</Checkbox>
+              <TermsModal />
+            </motion.div>
+
             <motion.div
               className="text-center"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: isTermsAccepted ? 1.1 : 1 }}
+              whileTap={{ scale: isTermsAccepted ? 0.9 : 1 }}
             >
               <Button
                 type="primary"
                 htmlType="submit"
-                className="bg-blue-600 text-white py-2 px-6 rounded-lg shadow-md hover:bg-blue-500"
+                className={`bg-blue-600 text-white py-2 px-6 rounded-lg shadow-md ${
+                  isTermsAccepted
+                    ? "hover:bg-blue-500"
+                    : "opacity-50 cursor-not-allowed"
+                }`}
+                disabled={!isTermsAccepted} // Button only enabled if terms accepted
               >
                 Book Now
               </Button>

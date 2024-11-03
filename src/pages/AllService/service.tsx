@@ -47,7 +47,7 @@ const Service = () => {
         );
       } catch (error) {
         console.error("Error fetching data:", error);
-        toast.error("Failed to load data.");
+        toast.info(error.response.data);
       } finally {
         setLoadingServices(false);
       }
@@ -98,20 +98,14 @@ const Service = () => {
             />
           </motion.div>
 
-          <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
-            <ServicesTable
-              onDeleteSuccess={handleDeleteSuccess}
-              onAddSuccess={handleAddSuccess}
-            />
-          </div>
+          <ServicesTable
+            onDeleteSuccess={handleDeleteSuccess}
+            onAddSuccess={handleAddSuccess}
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-white shadow-lg rounded-lg p-6">
-              <SalesTrendChart />
-            </div>
-            <div className="bg-white shadow-lg rounded-lg p-6">
-              <CategoryDistributionChart />
-            </div>
+            <SalesTrendChart />
+            <CategoryDistributionChart />
           </div>
         </main>
       </div>
