@@ -40,7 +40,7 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(response.data));
       navigate("/", { state: { loginSuccess: true } });
     } catch (error) {
-      toast.error("Invalid username or password. Please try again.");
+      toast.error(error.response.data);
     }
   };
 

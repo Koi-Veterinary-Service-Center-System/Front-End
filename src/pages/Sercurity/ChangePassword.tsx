@@ -1,20 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FiMail, FiLock } from "react-icons/fi";
+import { FiLock } from "react-icons/fi";
 import { Form, Input, Button, Card } from "antd";
 import { toast } from "sonner";
 import api from "@/configs/axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate(); // Khởi tạo router
+  const [searchParams] = useSearchParams(); // Get search params from the URL
+  const [email, setEmail] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const emailFromUrl = searchParams.get("email");
+    if (emailFromUrl) {
+      setEmail(emailFromUrl);
+    } else {
+      toast.error("Email parameter is missing from the URL.");
+    }
+  }, [searchParams]);
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
-  const onFinish = async (values: string) => {
-    const { email, newPassword, confirmPassword } = values;
+  const onFinish = async (values) => {
+    const { newPassword, confirmPassword } = values;
 
     if (newPassword !== confirmPassword) {
       toast.error("Passwords don't match");
@@ -52,26 +63,9 @@ export default function ResetPassword() {
         <Card className="w-[350px] bg-white shadow-lg border-blue-200">
           <div className="bg-blue-600 text-white p-4 rounded-t-lg">
             <h2 className="text-2xl font-semibold">Change Password</h2>
-            <p className="text-blue-100">
-              Enter your email and new password below.
-            </p>
+            <p className="text-blue-100">Enter your new password below.</p>
           </div>
           <Form layout="vertical" onFinish={onFinish} className="p-6 space-y-4">
-            <Form.Item
-              label="Email"
-              name="email"
-              rules={[
-                { required: true, message: "Please enter your email" },
-                { type: "email", message: "Please enter a valid email" },
-              ]}
-            >
-              <Input
-                prefix={<FiMail className="text-blue-400" />}
-                placeholder="Enter your email"
-                className="pl-2"
-              />
-            </Form.Item>
-
             <Form.Item
               label="New Password"
               name="newPassword"
