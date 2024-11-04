@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import api from "../../configs/axios";
-import { Booking, Profile } from "../../types/info";
+import { Booking, Prescription, Profile } from "../../types/info";
 import {
   Moon,
   Sun,
@@ -18,6 +18,9 @@ import {
   FileText,
   DollarSign,
   Video,
+  Pill,
+  Clipboard,
+  Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -30,6 +33,14 @@ import { BsCashCoin, BsCreditCard2Back } from "react-icons/bs";
 import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
 import { TbMoneybag } from "react-icons/tb";
 import { SiGooglemeet } from "react-icons/si";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 const statusSteps = [
   {
     label: "Pending",
@@ -114,6 +125,8 @@ const DetailBooking = () => {
   const [error, setError] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [selectedPrescription, setSelectedPrescription] =
+    useState<Prescription | null>(null);
   const backgroundStyle = {
     backgroundImage: "url('src/assets/images/subtle-prism.png')", // Add the path to your image here
     backgroundSize: "cover", // Makes the background cover the entire area
@@ -204,6 +217,14 @@ const DetailBooking = () => {
       console.log("Error message:", errorMessage); // Log specific error message
       setError(errorMessage);
       toast.error(errorMessage);
+    }
+  };
+  const fetchPrescriptionRecord = async (bookingId: Booking) => {
+    try {
+      const response = await api.get(`/pres-rec/${bookingId}`);
+      setSelectedPrescription(response.data);
+    } catch (error) {
+      console.error("Error fetching prescription record:", error);
     }
   };
 
@@ -465,15 +486,118 @@ const DetailBooking = () => {
                             animate="visible"
                             transition={{ delay: 0.7 }}
                           >
-                            <FileText className="h-5 w-5 mr-3 text-blue-500" />
-                            <span className="text-gray-700">
-                              Prescription:{" "}
-                              {booking.hasPres ? (
-                                <CheckCircle className="inline h-5 w-5 text-green-500 ml-2" />
-                              ) : (
-                                <XCircle className="inline h-5 w-5 text-red-500 ml-2" />
-                              )}
-                            </span>
+                            <div className="flex-shrink-0">
+                              <FileText className="h-8 w-8 text-blue-500" />
+                            </div>
+                            <div className="flex-grow">
+                              <h3 className="text-lg font-semibold text-gray-800">
+                                Prescription
+                              </h3>
+                              <div className="mt-2">
+                                {booking.hasPres ? (
+                                  <Badge variant="success" className="text-sm">
+                                    <CheckCircle className="inline-block h-4 w-4 mr-1" />
+                                    Available
+                                  </Badge>
+                                ) : (
+                                  <Badge
+                                    variant="destructive"
+                                    className="text-sm"
+                                  >
+                                    <XCircle className="inline-block h-4 w-4 mr-1" />
+                                    Not Available
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            {booking.hasPres && (
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="ml-auto"
+                                    onClick={() =>
+                                      fetchPrescriptionRecord(booking.bookingID)
+                                    }
+                                  >
+                                    View Details
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[425px]">
+                                  <DialogHeader>
+                                    <DialogTitle className="text-2xl font-bold text-blue-600">
+                                      Prescription Details
+                                    </DialogTitle>
+                                  </DialogHeader>
+                                  {selectedPrescription ? (
+                                    <div className="mt-4 space-y-4">
+                                      <div className="flex items-center space-x-3">
+                                        <Pill className="h-5 w-5 text-blue-500" />
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-500">
+                                            Disease
+                                          </p>
+                                          <p className="text-lg font-semibold text-gray-800">
+                                            {selectedPrescription.diseaseName}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center space-x-3">
+                                        <Clipboard className="h-5 w-5 text-blue-500" />
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-500">
+                                            Symptoms
+                                          </p>
+                                          <p className="text-lg font-semibold text-gray-800">
+                                            {selectedPrescription.symptoms}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center space-x-3">
+                                        <FileText className="h-5 w-5 text-blue-500" />
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-500">
+                                            Note
+                                          </p>
+                                          <p className="text-lg font-semibold text-gray-800">
+                                            {selectedPrescription.note}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center space-x-3">
+                                        <Calendar className="h-5 w-5 text-blue-500" />
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-500">
+                                            Frequency
+                                          </p>
+                                          <p className="text-lg font-semibold text-gray-800">
+                                            {selectedPrescription.frequency}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center space-x-3">
+                                        <Calendar className="h-5 w-5 text-blue-500" />
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-500">
+                                            Created At
+                                          </p>
+                                          <p className="text-lg font-semibold text-gray-800">
+                                            {new Date(
+                                              selectedPrescription.createAt
+                                            ).toLocaleString()}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <p className="text-center text-gray-500 mt-4">
+                                      No Prescription Found
+                                    </p>
+                                  )}
+                                </DialogContent>
+                              </Dialog>
+                            )}
                           </motion.div>
 
                           <motion.div
