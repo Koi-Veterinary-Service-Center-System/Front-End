@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
-import { AlertCircle, Ban, Edit, Search, Trash, UserPlus2 } from "lucide-react";
+import {
+  AlertCircle,
+  Ban,
+  Edit,
+  Search,
+  Trash,
+  Unlock,
+  UserPlus2,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -238,8 +246,40 @@ const UsersTable = () => {
         )
       );
       setIsBanModalOpen(false);
+      formBan.reset();
+      fetchUser();
     } catch (error: any) {
       toast.error("Failed to ban user. Please try again.");
+    }
+  };
+
+  // Handle Unban User
+  const handleUnbanUser = async (userID) => {
+    setLoading(true);
+    try {
+      await api.patch(
+        `/User/unban-user/${userID}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      toast.success("User unbanned successfully");
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.userID === userID ? { ...user, isActive: true } : user
+        )
+      );
+      setFilteredUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.userID === userID ? { ...user, isActive: true } : user
+        )
+      );
+    } catch (error) {
+      console.error("Failed to unban user:", error.message);
+      toast.error("Failed to unban user. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -489,7 +529,7 @@ const UsersTable = () => {
                 <TableHead className="font-semibold text-blue-800">
                   Status
                 </TableHead>
-                <TableHead className="font-semibold text-blue-800">
+                <TableHead className="font-semibold text-blue-800 ">
                   Actions
                 </TableHead>
               </TableRow>
@@ -533,7 +573,7 @@ const UsersTable = () => {
                         className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           user.isActive
                             ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-800"
+                            : "bg-red-100 text-red-800"
                         }`}
                       >
                         {user.isActive ? "Active" : "Inactive"}
@@ -560,14 +600,26 @@ const UsersTable = () => {
                         >
                           <Trash className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openBanDialog(user)}
-                          className="text-yellow-600 hover:text-yellow-800 hover:bg-yellow-100"
-                        >
-                          <Ban className="h-4 w-4" />
-                        </Button>
+                        {user.isActive ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openBanDialog(user)}
+                            className="text-yellow-600 hover:text-yellow-800 hover:bg-yellow-100"
+                          >
+                            <Ban className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleUnbanUser(user.userID)}
+                            className="text-green-600 hover:text-green-800 hover:bg-green-100"
+                            disabled={loading}
+                          >
+                            <Unlock className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </motion.tr>

@@ -206,7 +206,7 @@ const OrdersTable = () => {
 
   const fetchUser = async () => {
     try {
-      const response = await api.get("User/all-user", {
+      const response = await api.get("User/get-all-Customer", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setUsers(response.data);
@@ -232,7 +232,7 @@ const OrdersTable = () => {
       setFilteredBookings(response.data); // Gán luôn danh sách booking ban đầu
     } catch (error: any) {
       console.error(error.message);
-      toast.error("Failed to fetch bookings.");
+      toast.info(error.response.data);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -257,9 +257,24 @@ const OrdersTable = () => {
   };
 
   // Hàm mở dialog với chi tiết của booking đã chọn
-  const handleViewDetails = (booking: Booking) => {
-    setSelectedBooking(booking); // Lưu thông tin booking đã chọn
-    setIsDialogOpen(true); // Mở dialog
+  const handleViewDetails = async (booking: Booking) => {
+    try {
+      // Fetch the booking record including the `note` field from the API
+      const response = await api.get(`/bookingRecord/${booking.bookingID}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+
+      // Update the selected booking with the new details, including `note`
+      setSelectedBooking({
+        ...booking,
+        note: response.data.note, // Add the note from the response
+      });
+
+      setIsDialogOpen(true); // Open the dialog
+    } catch (error) {
+      console.error("Error fetching booking record details:", error);
+      toast.error("Failed to load booking details.");
+    }
   };
 
   // Hàm đóng dialog
@@ -697,13 +712,11 @@ const OrdersTable = () => {
                   loading={isLoadingPayment}
                   placeholder="Select payment method"
                 >
-                  {payments.map((item) => (
-                    <Select.Option key={item.paymentID} value={item.paymentID}>
-                      <div className="flex items-center gap-2">
-                        <span>{item.type}</span>
-                      </div>
-                    </Select.Option>
-                  ))}
+                  <Select.Option key="1" value="1">
+                    <div className="flex items-center gap-2">
+                      <span>In Cash</span>
+                    </div>
+                  </Select.Option>
                 </Select>
               </Form.Item>
             </motion.div>
@@ -869,6 +882,10 @@ const OrdersTable = () => {
                 <strong>Slot:</strong> {selectedBooking.slotStartTimeAtBooking}{" "}
                 - {selectedBooking.slotEndTimeAtBooking} (
                 {selectedBooking.slotWeekDateAtBooking})
+              </p>
+              <p>
+                <strong>Note:</strong>{" "}
+                {selectedBooking?.note || "No additional notes"}
               </p>
             </div>
           </DialogContent>

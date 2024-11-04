@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -7,7 +5,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -78,9 +75,6 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
                 <DialogTitle className="text-2xl font-bold text-blue-800">
                   Booking Record Details
                 </DialogTitle>
-                <DialogDescription className="text-blue-600">
-                  Detailed information for booking ID: {bookingID}
-                </DialogDescription>
               </DialogHeader>
               {loading ? (
                 <div className="flex justify-center items-center h-32">

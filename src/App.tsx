@@ -197,7 +197,7 @@ function App() {
         <Route
           path="/users"
           element={
-            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
+            <PrivateRoute requiredRoles={["Manager"]}>
               <UsersPage />
             </PrivateRoute>
           }

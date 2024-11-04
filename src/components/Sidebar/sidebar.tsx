@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
-  BarChart2,
   Calendar,
   House,
   Menu,
@@ -56,6 +55,12 @@ export default function Sidebar() {
     fetchProfile();
   }, []);
 
+  // Filter out "Users" if the role is "staff"
+  const filteredItems =
+    profile?.role === "Staff"
+      ? SIDEBAR_ITEMS.filter((item) => item.name !== "Users")
+      : SIDEBAR_ITEMS;
+
   return (
     <motion.div
       className={`relative z-10 transition-all duration-300 ease-in-out flex-shrink-0 bg-gradient-to-b from-blue-50 to-white ${
@@ -84,14 +89,14 @@ export default function Sidebar() {
           className="align-middle justify-center flex"
         >
           <img
-            src="src\assets\images\logo.png"
+            src="src/assets/images/logo.png"
             alt="Logo"
             className="w-36 h-36"
           />
         </motion.div>
 
         <nav className="mt-8 flex flex-col items-center flex-grow">
-          {SIDEBAR_ITEMS.map((item, index) => (
+          {filteredItems.map((item, index) => (
             <Link key={index} to={item.path}>
               <motion.div className="flex items-center p-4 text-sm font-medium rounded-lg hover:bg-blue-100 transition-colors mb-2">
                 <item.icon
