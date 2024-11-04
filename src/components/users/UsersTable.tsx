@@ -626,8 +626,15 @@ const UsersTable = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
-                    No users found.
+                  <TableCell colSpan={6} className="h-24 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <img
+                        src="/src/assets/images/No-Messages-1--Streamline-Bruxelles.png"
+                        alt="No Services"
+                        className="w-32 h-32 object-contain mb-4"
+                      />
+                      <p className="text-muted-foreground">No users found</p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}

@@ -10,12 +10,6 @@ const ConnectedAccounts = () => {
       connected: true,
       icon: "src/assets/images/google.png",
     },
-    {
-      id: 2,
-      name: "Facebook",
-      connected: false,
-      icon: "src/assets/images/facebook.png",
-    },
   ]);
   return (
     <SettingSection icon={HelpCircle} title={"Connected Accounts"}>
@@ -56,7 +50,7 @@ const ConnectedAccounts = () => {
           </button>
         </div>
       ))}
-      <button className="mt-4 flex items-center text-indigo-400 hover:text-indigo-300 transition duration-200">
+      <button className="mt-4 flex items-center text-blue-400 hover:text-blue-300 transition duration-200">
         <Plus size={18} className="mr-2" /> Add Account
       </button>
     </SettingSection>

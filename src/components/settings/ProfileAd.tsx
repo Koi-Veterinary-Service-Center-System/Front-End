@@ -34,10 +34,10 @@ const ProfileAd = () => {
         />
 
         <div>
-          <h3 className="text-lg font-semibold text-gray-400">
+          <h3 className="text-lg font-semibold text-black">
             {profile?.firstName} {profile?.lastName}
           </h3>
-          <p className="text-gray-400">{profile?.email}</p>
+          <p className="text-black">{profile?.email}</p>
         </div>
       </div>
 

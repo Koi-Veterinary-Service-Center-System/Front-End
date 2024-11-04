@@ -1,4 +1,7 @@
+"use client";
+
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AlertTriangle, DollarSign, XCircle, CheckCircle } from "lucide-react";
 
 interface CancelBookingDialogProps {
   open: boolean;
@@ -23,11 +27,11 @@ interface CancelBookingDialogProps {
   onConfirm: (refundPercent: string, cancelReason: string) => void;
 }
 
-const CancelBookingDialog: React.FC<CancelBookingDialogProps> = ({
+export default function Component({
   open,
   onClose,
   onConfirm,
-}) => {
+}: CancelBookingDialogProps) {
   const [refundPercent, setRefundPercent] = useState("");
   const [cancelReason, setCancelReason] = useState("");
 
@@ -38,46 +42,92 @@ const CancelBookingDialog: React.FC<CancelBookingDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Cancel Booking</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="refundPercent">Refund Percentage</Label>
-            <Select onValueChange={setRefundPercent} value={refundPercent}>
-              <SelectTrigger id="refundPercent">
-                <SelectValue placeholder="Select refund percentage" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0">0%</SelectItem>
-                <SelectItem value="25">25%</SelectItem>
-                <SelectItem value="50">50%</SelectItem>
-                <SelectItem value="75">75%</SelectItem>
-                <SelectItem value="100">100%</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="cancelReason">Reason for Cancellation</Label>
-            <Input
-              id="cancelReason"
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              placeholder="Enter reason for cancellation"
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm}>Confirm Cancellation</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <AnimatePresence>
+      {open && (
+        <Dialog open={open} onOpenChange={onClose}>
+          <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-red-50 to-orange-50">
+            <DialogHeader>
+              <motion.div
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <DialogTitle className="text-2xl font-bold text-red-600 flex items-center">
+                  <AlertTriangle className="w-8 h-8 mr-2 text-red-500" />
+                  Cancel Booking
+                </DialogTitle>
+              </motion.div>
+            </DialogHeader>
+            <motion.div
+              className="space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+            >
+              <div className="space-y-2">
+                <Label
+                  htmlFor="refundPercent"
+                  className="text-lg font-semibold text-gray-700"
+                >
+                  Refund Percentage
+                </Label>
+                <Select onValueChange={setRefundPercent} value={refundPercent}>
+                  <SelectTrigger id="refundPercent" className="w-full">
+                    <SelectValue placeholder="Select refund percentage" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[0, 25, 50, 75, 100].map((percent) => (
+                      <SelectItem key={percent} value={percent.toString()}>
+                        <div className="flex items-center">
+                          <DollarSign className="w-4 h-4 mr-2 text-green-500" />
+                          {percent}%
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="cancelReason"
+                  className="text-lg font-semibold text-gray-700"
+                >
+                  Reason for Cancellation
+                </Label>
+                <Input
+                  id="cancelReason"
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="Enter reason for cancellation"
+                  className="w-full"
+                />
+              </div>
+            </motion.div>
+            <DialogFooter className="mt-6">
+              <motion.div
+                className="flex justify-end space-x-4 w-full"
+                whileHover={{ scale: 1.05 }}
+              >
+                <Button
+                  variant="outline"
+                  onClick={onClose}
+                  className="flex items-center"
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirm}
+                  className="bg-red-500 hover:bg-red-600 text-white flex items-center"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Confirm Cancellation
+                </Button>
+              </motion.div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+    </AnimatePresence>
   );
-};
-
-export default CancelBookingDialog;
+}
