@@ -23,7 +23,8 @@ interface KoiVetBookingProps {
 const bookingSchema = z.object({
   arisedQuantity: z
     .number({ required_error: "Arised quantity is required" })
-    .min(1, "Arised quantity must be at least 1"),
+    .min(0, "Arised quantity must be at least 0")
+    .max(15, "Arised quantity must be smaller than 15"),
   note: z.string().optional(),
 });
 

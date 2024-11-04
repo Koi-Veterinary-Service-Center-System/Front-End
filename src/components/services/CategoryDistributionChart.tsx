@@ -17,7 +17,6 @@ const CategoryDistributionChart = () => {
     { name: string; value: number }[]
   >([]);
 
-  // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -26,11 +25,9 @@ const CategoryDistributionChart = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-
-        // Format data for the chart
         const formattedData = response.data.map((service: any) => ({
           name: service.serviceName,
-          value: service.price, // Adjust this based on the data you want to display
+          value: service.price,
         }));
 
         setCategoryData(formattedData);
@@ -59,12 +56,13 @@ const CategoryDistributionChart = () => {
               data={categoryData}
               cx={"50%"}
               cy={"50%"}
-              labelLine={false}
+              innerRadius={40} // Adjusted for donut chart
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
+              labelLine={true} // Display label lines
               label={({ name, percent }) =>
-                `${name} ${(percent * 100).toFixed(0)}%`
+                `${name}: ${(percent * 100).toFixed(0)}%`
               }
             >
               {categoryData.map((entry, index) => (
@@ -81,7 +79,7 @@ const CategoryDistributionChart = () => {
               }}
               itemStyle={{ color: "#E5E7EB" }}
             />
-            <Legend />
+            <Legend wrapperStyle={{ maxHeight: "100px", overflowY: "auto" }} />
           </PieChart>
         </ResponsiveContainer>
       </div>

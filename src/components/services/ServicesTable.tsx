@@ -1,5 +1,5 @@
 import api from "@/configs/axios";
-import { Profile, services } from "@/types/info";
+import { Profile, Services } from "@/types/info";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Edit,
@@ -40,6 +40,8 @@ import {
 } from "../ui/table";
 import { PiMoneyWavy } from "react-icons/pi";
 import { Switch } from "../ui/switch";
+import { Tooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
 
 interface ServicesTableProps {
   onDeleteSuccess: () => void;
@@ -65,9 +67,9 @@ type ServiceFormData = z.infer<typeof serviceSchema>;
 
 const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [services, setServices] = useState<services[]>([]);
-  const [filteredServices, setFilteredServices] = useState<services[]>([]);
-  const [currentService, setCurrentService] = useState<services | null>(null);
+  const [services, setServices] = useState<Services[]>([]);
+  const [filteredServices, setFilteredServices] = useState<Services[]>([]);
+  const [currentService, setCurrentService] = useState<Services | null>(null);
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -152,7 +154,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
     setIsDialogOpen(true);
   };
 
-  const handleEdit = (service: services) => {
+  const handleEdit = (service: Services) => {
     setCurrentService(service);
     form.reset(service);
     setIsEditMode(true);
@@ -276,7 +278,9 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
               <TableHead>Price</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Estimated Duration</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              {profile?.role === "Staff" && (
+                <TableHead className="text-right">Actions</TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -305,26 +309,37 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                     {service.price.toLocaleString("vi-VN")} vnd
                   </TableCell>
                   <TableCell className="max-w-xs truncate">
-                    {service.description}
+                    {service.description.length > 50 ? (
+                      <>
+                        <span
+                          data-tooltip-id="description-tooltip"
+                          data-tooltip-content={service.description}
+                          className="text-black cursor-pointer"
+                        >
+                          {service.description.slice(0, 50)}...
+                        </span>
+                      </>
+                    ) : (
+                      service.description
+                    )}
                   </TableCell>
                   <TableCell>{service.estimatedDuration} hours</TableCell>
-                  <TableCell className="text-right">
-                    {/* Edit Button */}
-                    <button
-                      className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-blue-500 text-white hover:bg-blue-600 h-10 w-10 mr-2"
-                      onClick={() => handleEdit(service)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-
-                    {/* Delete Button */}
-                    <button
-                      className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-red-500 text-white hover:bg-red-600 h-10 w-10"
-                      onClick={() => confirmDelete(service.serviceID)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </TableCell>
+                  {profile?.role !== "Manager" && (
+                    <TableCell className="text-right">
+                      <button
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-blue-500 text-white hover:bg-blue-600 h-10 w-10 mr-2"
+                        onClick={() => handleEdit(service)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-red-500 text-white hover:bg-red-600 h-10 w-10"
+                        onClick={() => confirmDelete(service.serviceID)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </TableCell>
+                  )}
                 </motion.tr>
               ))
             ) : (
@@ -600,6 +615,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
           </div>
         </DialogContent>
       </Dialog>
+      <Tooltip id="description-tooltip" />
     </motion.div>
   );
 };

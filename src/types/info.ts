@@ -118,6 +118,7 @@ export type User = {
   gender: boolean; // true cho nam, false cho nữ
   userName: string;
   email: string;
+  isActive: boolean;
 };
 
 export type Vet = {
