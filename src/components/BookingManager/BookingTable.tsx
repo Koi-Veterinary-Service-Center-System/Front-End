@@ -43,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import CancelBookingDialog from "./CancelBookingDialog";
 
 const OrdersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -363,7 +364,10 @@ const OrdersTable = () => {
     setIsCancelDialogOpen(true);
   };
 
-  const handleConfirmCancel = async () => {
+  const handleConfirmCancel = async (
+    refundPercent: string,
+    cancelReason: string
+  ) => {
     if (!selectedBooking) return;
 
     try {
@@ -374,6 +378,7 @@ const OrdersTable = () => {
           reason: cancelReason,
         }
       );
+      console.log(response.data);
 
       if (response.status === 200) {
         toast.success("Booking cancelled successfully");
@@ -391,8 +396,6 @@ const OrdersTable = () => {
       toast.error("Failed to cancel booking");
     } finally {
       setIsCancelDialogOpen(false);
-      setRefundPercent("");
-      setCancelReason("");
     }
   };
 
@@ -904,48 +907,13 @@ const OrdersTable = () => {
       </Dialog>
 
       {/* Cancel Booking Dialog */}
-      <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-        <DialogContent className="bg-white">
-          <DialogHeader>
-            <DialogTitle className="text-blue-800">Cancel Booking</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 text-gray-700">
-            <div>
-              <Label htmlFor="refundPercent">Refund Percentage</Label>
-              <Select onValueChange={setRefundPercent} value={refundPercent}>
-                <SelectTrigger id="refundPercent">
-                  <SelectValue placeholder="Select refund percentage" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">0%</SelectItem>
-                  <SelectItem value="25">25%</SelectItem>
-                  <SelectItem value="50">50%</SelectItem>
-                  <SelectItem value="75">75%</SelectItem>
-                  <SelectItem value="100">100%</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="cancelReason">Reason for Cancellation</Label>
-              <Input
-                id="cancelReason"
-                value={cancelReason}
-                onChange={(e) => setCancelReason(e.target.value)}
-                placeholder="Enter reason for cancellation"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsCancelDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmCancel}>Confirm Cancellation</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+      {/* Các phần khác của OrdersTable */}
+      <CancelBookingDialog
+        open={isCancelDialogOpen}
+        onClose={() => setIsCancelDialogOpen(false)}
+        onConfirm={handleConfirmCancel}
+      />
     </motion.div>
   );
 };
