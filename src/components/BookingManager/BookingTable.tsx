@@ -10,9 +10,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MdAddBusiness } from "react-icons/md";
+import { MdAddBusiness, MdAssignment } from "react-icons/md";
 import { MdOutlineMedicalServices } from "react-icons/md";
-import { FaLocationArrow } from "react-icons/fa";
+import {
+  FaCalendarAlt,
+  FaLocationArrow,
+  FaMapMarkerAlt,
+  FaMoneyBillWave,
+  FaPhoneAlt,
+  FaUserAlt,
+} from "react-icons/fa";
 import { FaUserDoctor } from "react-icons/fa6";
 import { MdNoteAlt } from "react-icons/md";
 import { RiSecurePaymentFill, RiSortNumberDesc } from "react-icons/ri";
@@ -44,6 +51,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import CancelBookingDialog from "./CancelBookingDialog";
+import { BsFillBookmarkCheckFill } from "react-icons/bs";
+import { TableCell, TableRow } from "../ui/table";
 
 const OrdersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -782,67 +791,80 @@ const OrdersTable = () => {
             </thead>
 
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredBookings.map((booking) => (
-                <motion.tr
-                  key={booking.bookingID}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
-                    {booking.bookingID}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
-                    {booking.customerName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
-                    {booking.totalAmount?.toLocaleString("vi-VN")} vnd
-                  </td>
-
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        booking.bookingStatus === "Succeeded"
-                          ? "bg-green-100 text-green-800"
-                          : booking.bookingStatus === "Pending"
-                          ? "bg-yellow-100 text-yellow-400"
-                          : booking.bookingStatus === "Scheduled"
-                          ? "bg-blue-100 text-blue-800"
-                          : booking.bookingStatus === "Ongoing"
-                          ? "bg-orange-100 text-orange-800"
-                          : booking.bookingStatus === "Completed"
-                          ? "bg-teal-100 text-teal-800"
-                          : booking.bookingStatus === "Received_Money"
-                          ? "bg-purple-100 text-purple-800"
-                          : "bg-red-100 text-red-800" // Default màu đỏ cho các trạng thái khác
-                      }`}
-                    >
-                      {booking.bookingStatus}
-                    </span>
-                  </td>
-
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {booking.bookingDate}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <button
-                      className="text-indigo-400 hover:text-indigo-300 mr-2"
-                      onClick={() => handleViewDetails(booking)} // Khi bấm vào nút Eye sẽ mở dialog
-                    >
-                      <Eye size={18} />
-                    </button>
-                    {booking.bookingStatus !== "Cancelled" && (
-                      <button
-                        className="text-red-600 hover:text-red-800"
-                        onClick={() => handleCancelBooking(booking)}
-                        aria-label="Cancel booking"
+              {filteredBookings.length > 0 ? (
+                filteredBookings.map((booking) => (
+                  <motion.tr
+                    key={booking.bookingID}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
+                      {booking.bookingID}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
+                      {booking.customerName}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
+                      {booking.totalAmount?.toLocaleString("vi-VN")} vnd
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          booking.bookingStatus === "Succeeded"
+                            ? "bg-green-100 text-green-800"
+                            : booking.bookingStatus === "Pending"
+                            ? "bg-yellow-100 text-yellow-400"
+                            : booking.bookingStatus === "Scheduled"
+                            ? "bg-blue-100 text-blue-800"
+                            : booking.bookingStatus === "Ongoing"
+                            ? "bg-orange-100 text-orange-800"
+                            : booking.bookingStatus === "Completed"
+                            ? "bg-teal-100 text-teal-800"
+                            : booking.bookingStatus === "Received_Money"
+                            ? "bg-purple-100 text-purple-800"
+                            : "bg-red-100 text-red-800" // Default màu đỏ cho các trạng thái khác
+                        }`}
                       >
-                        <XCircle size={18} />
+                        {booking.bookingStatus}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {booking.bookingDate}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <button
+                        className="text-indigo-400 hover:text-indigo-300 mr-2"
+                        onClick={() => handleViewDetails(booking)} // Khi bấm vào nút Eye sẽ mở dialog
+                      >
+                        <Eye size={18} />
                       </button>
-                    )}
-                  </td>
-                </motion.tr>
-              ))}
+                      {booking.bookingStatus === "Cancelled" && (
+                        <button
+                          className="text-red-600 hover:text-red-800"
+                          onClick={() => handleCancelBooking(booking)}
+                          aria-label="Cancel booking"
+                        >
+                          <XCircle size={18} />
+                        </button>
+                      )}
+                    </td>
+                  </motion.tr>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <img
+                        src="/src/assets/images/No-Messages-1--Streamline-Bruxelles.png"
+                        alt="No Services"
+                        className="w-32 h-32 object-contain mb-4"
+                      />
+                      <p className="text-muted-foreground">No bookings found</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
             </tbody>
           </table>
         </div>
@@ -851,45 +873,138 @@ const OrdersTable = () => {
       {/* Dialog hiển thị chi tiết booking */}
       {selectedBooking && (
         <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Booking Details</DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-blue-800">
+                Booking Details
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <p>
-                <strong>Booking ID:</strong> {selectedBooking.bookingID}
-              </p>
-              <p>
-                <strong>Customer Name:</strong> {selectedBooking.customerName}
-              </p>
-              <p>
-                <strong>Service:</strong> {selectedBooking.serviceNameAtBooking}
-              </p>
-              <p>
-                <strong>Location:</strong> {selectedBooking.location}
-              </p>
-              <p>
-                <strong>Phone Number:</strong> {selectedBooking.phoneNumber}
-              </p>
-              <p>
-                <strong>Status:</strong> {selectedBooking.bookingStatus}
-              </p>
-              <p>
-                <strong>Booking Date:</strong> {selectedBooking.bookingDate}
-              </p>
-              <p>
-                <strong>Payment Type:</strong>{" "}
-                {selectedBooking.paymentTypeAtBooking}
-              </p>
-              <p>
-                <strong>Slot:</strong> {selectedBooking.slotStartTimeAtBooking}{" "}
-                - {selectedBooking.slotEndTimeAtBooking} (
-                {selectedBooking.slotWeekDateAtBooking})
-              </p>
-              <p>
-                <strong>Note:</strong>{" "}
-                {selectedBooking?.note || "No additional notes"}
-              </p>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center space-x-2"
+              >
+                <MdAssignment className="text-blue-500" />
+                <p>
+                  <strong>Booking ID:</strong> {selectedBooking.bookingID}
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4 }}
+                className="flex items-center space-x-2"
+              >
+                <FaUserAlt className="text-green-500" />
+                <p>
+                  <strong>Customer Name:</strong> {selectedBooking.customerName}
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                className="flex items-center space-x-2"
+              >
+                <MdOutlineMedicalServices className="text-purple-500" />
+                <p>
+                  <strong>Service:</strong>{" "}
+                  {selectedBooking.serviceNameAtBooking}
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+                className="flex items-center space-x-2"
+              >
+                <FaMapMarkerAlt className="text-red-500" />
+                <p>
+                  <strong>Location:</strong> {selectedBooking.location}
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7 }}
+                className="flex items-center space-x-2"
+              >
+                <FaPhoneAlt className="text-yellow-500" />
+                <p>
+                  <strong>Phone Number:</strong> {selectedBooking.phoneNumber}
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+                className="flex items-center space-x-2"
+              >
+                <BsFillBookmarkCheckFill className="text-indigo-500" />
+                <p>
+                  <strong>Status:</strong> {selectedBooking.bookingStatus}
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.9 }}
+                className="flex items-center space-x-2"
+              >
+                <FaCalendarAlt className="text-teal-500" />
+                <p>
+                  <strong>Booking Date:</strong> {selectedBooking.bookingDate}
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1.0 }}
+                className="flex items-center space-x-2"
+              >
+                <FaMoneyBillWave className="text-orange-500" />
+                <p>
+                  <strong>Payment Type:</strong>{" "}
+                  {selectedBooking.paymentTypeAtBooking}
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1.1 }}
+                className="flex items-center space-x-2"
+              >
+                <MdAssignment className="text-pink-500" />
+                <p>
+                  <strong>Slot:</strong>{" "}
+                  {selectedBooking.slotStartTimeAtBooking} -{" "}
+                  {selectedBooking.slotEndTimeAtBooking} (
+                  {selectedBooking.slotWeekDateAtBooking})
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1.2 }}
+                className="flex items-center space-x-2"
+              >
+                <MdAssignment className="text-gray-500" />
+                <p>
+                  <strong>Note:</strong>{" "}
+                  {selectedBooking.note || "No additional notes"}
+                </p>
+              </motion.div>
             </div>
           </DialogContent>
         </Dialog>
