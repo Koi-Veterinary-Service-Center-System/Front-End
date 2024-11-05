@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Edit, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
@@ -10,23 +8,14 @@ import { toast } from "sonner";
 import api from "@/configs/axios";
 import Sidebar from "@/components/Sidebar/sidebar";
 import HeaderAd from "@/components/Header/headerAd";
-import { Vet } from "@/types/info";
-
-interface Slot {
-  id: string;
-  day: string;
-  task: string;
-  vetId: string;
-  startTime: Date;
-  endTime: Date;
-  weekDate: string;
-}
+import { Slot, Vet } from "@/types/info";
 
 export default function SchedulePage() {
   const [slots, setSlots] = useState<Slot[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [vets, setVets] = useState<Vet[]>([]);
   const [currentSlot, setCurrentSlot] = useState<Slot | null>(null);
+  const [availableSlots, setAvailableSlots] = useState<Slot[]>([]);
   const [currentWeekStart, setCurrentWeekStart] = useState(
     startOfWeek(new Date())
   );
@@ -58,13 +47,14 @@ export default function SchedulePage() {
         },
       });
 
-      const formattedSlots = response.data.map((slot: any) => ({
+      const formattedSlots = response.data.map((slot: Slot) => ({
         id: slot.slotID.toString(),
         day: slot.weekDate,
         task: `${slot.vetFirstName} ${slot.vetLastName}`,
         vetId: slot.vetId,
         startTime: new Date(`1970-01-01T${slot.slotStartTime}`),
         endTime: new Date(`1970-01-01T${slot.slotEndTime}`),
+        weekDate: slot.weekDate,
       }));
 
       setSlots(formattedSlots);
@@ -74,12 +64,35 @@ export default function SchedulePage() {
     }
   };
 
+  const fetchAvailableSlots = async () => {
+    try {
+      const response = await api.get(`/slot/all-slot`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const availableSlots = response.data.map((slot: any) => ({
+        id: slot.slotID.toString(),
+        weekDate: slot.weekDate,
+        startTime: new Date(`1970-01-01T${slot.startTime}`),
+        endTime: new Date(`1970-01-01T${slot.endTime}`),
+      }));
+
+      setAvailableSlots(availableSlots);
+    } catch (error) {
+      console.error("Error fetching available slots:", error);
+      toast.error("Failed to fetch available slots. Please try again.");
+    }
+  };
+
   useEffect(() => {
     fetchVet();
     fetchSlots();
+    fetchAvailableSlots();
   }, []);
 
-  const handleAddSlot = async (values: any) => {
+  const handleAddSlot = async (values: Slot) => {
     const newSlotData = {
       vetID: values.vetId,
       slotID: parseInt(values.slotId),
@@ -228,9 +241,9 @@ export default function SchedulePage() {
                 <div className="p-4">
                   {slots
                     .filter((slot) => slot.day === format(day, "EEEE"))
-                    .map((slot) => (
+                    .map((slot, index) => (
                       <div
-                        key={`${slot.id}-${format(day, "yyyy-MM-dd")}`}
+                        key={`${slot.id}-${format(day, "yyyy-MM-dd")}-${index}`}
                         className="mb-3 p-3 bg-blue-50 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
                       >
                         <div className="flex justify-between items-center">
@@ -309,7 +322,7 @@ export default function SchedulePage() {
               rules={[{ required: true, message: "Please select a slot" }]}
             >
               <Select placeholder="Select Slot">
-                {slots.map((slot) => (
+                {availableSlots.map((slot) => (
                   <Select.Option key={slot.id} value={slot.id}>
                     {slot.weekDate} - {format(slot.startTime, "HH:mm")} to{" "}
                     {format(slot.endTime, "HH:mm")}
@@ -317,6 +330,7 @@ export default function SchedulePage() {
                 ))}
               </Select>
             </Form.Item>
+
             <Form.Item
               label="Start Time"
               name="startTime"

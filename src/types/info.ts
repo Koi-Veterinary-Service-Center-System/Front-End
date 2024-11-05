@@ -7,6 +7,11 @@ export type Slot = {
   startTime: string;
   endTime: string;
   weekDate: string;
+  vetFirstName: string;
+  vetLastName: string;
+  vetId: string;
+  slotStartTime: string;
+  slotEndTime: string;
 };
 
 export type Profile = {
