@@ -664,7 +664,7 @@ function BookingPage() {
               <Button
                 type="primary"
                 htmlType="submit"
-                className={`bg-blue-600 text-white py-2 px-6 rounded-lg shadow-md ${
+                className={`bg-blue-500 shadow-lg shadow-blue-500/50 text-white py-2 px-6 rounded-lg  ${
                   isTermsAccepted
                     ? "hover:bg-blue-500"
                     : "opacity-50 cursor-not-allowed"

@@ -485,7 +485,7 @@ const DetailBooking = () => {
                                     View Details
                                   </Button>
                                 </DialogTrigger>
-                                <DialogContent className="sm:max-w-[425px]">
+                                <DialogContent className="sm:max-w-[300px]">
                                   <DialogHeader>
                                     <DialogTitle className="text-2xl font-bold text-blue-600">
                                       Prescription Details
