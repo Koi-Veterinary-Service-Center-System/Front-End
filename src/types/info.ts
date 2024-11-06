@@ -3,6 +3,7 @@ export type Object = {
 };
 
 export type Slot = {
+  id: string;
   slotID: number;
   startTime: string;
   endTime: string;
@@ -12,6 +13,8 @@ export type Slot = {
   vetId: string;
   slotStartTime: string;
   slotEndTime: string;
+  task: string;
+  day: string;
 };
 
 export type Profile = {
@@ -45,8 +48,8 @@ export type Services = {
   imageURL: string;
   quantityPrice: number;
   isAtHome: boolean;
-  isDeleted: boolean;
   isOnline: boolean;
+  isDeleted: boolean;
 };
 
 export type Distance = {

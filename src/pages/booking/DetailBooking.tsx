@@ -17,7 +17,6 @@ import {
   XCircle,
   FileText,
   DollarSign,
-  Video,
   Pill,
   Clipboard,
   Calendar,
@@ -30,7 +29,6 @@ import { Badge } from "@/components/ui/badge";
 import { VscNotebook } from "react-icons/vsc";
 import { HiOutlineMail } from "react-icons/hi";
 import { BsCashCoin, BsCreditCard2Back } from "react-icons/bs";
-import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
 import { TbMoneybag } from "react-icons/tb";
 import { SiGooglemeet } from "react-icons/si";
 import {
@@ -41,6 +39,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useParams } from "react-router-dom";
+import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
 const statusSteps = [
   {
     label: "Pending",
@@ -121,6 +121,7 @@ const StatusComponent = ({ currentStatus }: { currentStatus?: string }) => {
 };
 
 const DetailBooking = () => {
+  const { bookingID } = useParams();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -128,7 +129,7 @@ const DetailBooking = () => {
   const [selectedPrescription, setSelectedPrescription] =
     useState<Prescription | null>(null);
   const backgroundStyle = {
-    backgroundImage: "url('src/assets/images/subtle-prism.png')", // Add the path to your image here
+    backgroundImage: "url('/assets/images/subtle-prism.png')", // Add the path to your image here
     backgroundSize: "cover", // Makes the background cover the entire area
     backgroundPosition: "center", // Centers the background
     backgroundRepeat: "no-repeat", // Ensures the image doesn't repeat
@@ -138,62 +139,22 @@ const DetailBooking = () => {
   // Fetch all booking and calculate totals based on the user's role
   const fetchBooking = async () => {
     try {
-      // Gọi API với endpoint /booking/view-booking-process
-      let response = await api.get(`/booking/view-booking-process`, {
+      // Gọi API mới với bookingID từ useParams
+      const response = await api.get(`/booking/view-booking/${bookingID}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-      let fetchedBookings = response.data;
-      console.log("Fetched Bookings (Process):", fetchedBookings);
-
-      // Nếu có booking nào có status là "Succeeded" hoặc "Cancelled"
-      const hasHistoryStatus = fetchedBookings.some((booking: Booking) =>
-        ["Succeeded", "Cancelled"].includes(booking.bookingStatus)
-      );
-
-      // Nếu có, chuyển sang endpoint "/booking/view-booking-history"
-      if (hasHistoryStatus) {
-        response = await api.get(`/booking/view-booking-history`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-
-        fetchedBookings = response.data;
-        console.log("Fetched Bookings (History):", fetchedBookings);
-      }
-
-      setBookings(fetchedBookings); // Cập nhật bookings
+      const fetchedBookings = response.data;
+      console.log("Fetched Bookings:", fetchedBookings);
+      setBookings([fetchedBookings]); // Cập nhật bookings
     } catch (error: any) {
       console.error("Fetch error:", error);
-
-      // Nếu gặp lỗi 404 từ endpoint đầu tiên, thử gọi endpoint thứ hai
-      if (error.response && error.response.status === 404) {
-        try {
-          const response = await api.get(`/booking/view-booking-history`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          });
-
-          const fetchedBookings = response.data;
-          console.log("Fallback to History Bookings:", fetchedBookings);
-          setBookings(fetchedBookings); // Cập nhật bookings với dữ liệu lịch sử
-        } catch (historyError: any) {
-          console.error("History Fetch Error:", historyError);
-          const errorMessage =
-            historyError.response?.data?.message || "Failed to fetch bookings.";
-          setError(errorMessage);
-          toast.error(errorMessage);
-        }
-      } else {
-        const errorMessage =
-          error.response?.data?.message || "Failed to fetch bookings.";
-        setError(errorMessage);
-        toast.error(errorMessage);
-      }
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch bookings.";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -236,7 +197,7 @@ const DetailBooking = () => {
 
   useEffect(() => {
     fetchBooking();
-  }, []);
+  }, [bookingID]); // Gọi lại fetchBooking khi id thay đổi
 
   const handleDarkModeSwitch = () => {
     setIsDarkMode(!isDarkMode);

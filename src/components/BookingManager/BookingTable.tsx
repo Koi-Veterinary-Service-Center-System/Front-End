@@ -43,13 +43,6 @@ import {
   Select,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { Label } from "@/components/ui/label";
-import {
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import CancelBookingDialog from "./CancelBookingDialog";
 import { BsFillBookmarkCheckFill } from "react-icons/bs";
 import { TableCell, TableRow } from "../ui/table";
@@ -79,10 +72,8 @@ const OrdersTable = () => {
   const [distances, setDistances] = useState<Distance[]>([]);
   const [isLoadingPayment, setLoadingPayment] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
-  const [refundPercent, setRefundPercent] = useState("");
-  const [cancelReason, setCancelReason] = useState("");
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-
+  const [isLoadingCancel, setIsLoadingCancel] = useState(false);
   const [form] = Form.useForm();
 
   // Fetch Slots
@@ -238,8 +229,12 @@ const OrdersTable = () => {
       const response = await api.get(`/booking/all-booking`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      setBookings(response.data);
-      setFilteredBookings(response.data); // Gán luôn danh sách booking ban đầu
+      const sortedBookings = response.data.sort(
+        (a: any, b: any) => b.bookingID - a.bookingID
+      );
+
+      setBookings(sortedBookings);
+      setFilteredBookings(sortedBookings); // Gán luôn danh sách booking ban đầu
     } catch (error: any) {
       console.error(error.message);
       toast.info(error.response.data);
@@ -283,7 +278,7 @@ const OrdersTable = () => {
       setIsDialogOpen(true); // Open the dialog
     } catch (error) {
       console.error("Error fetching booking record details:", error);
-      toast.error("Failed to load booking details.");
+      toast.error(error.response.data);
     }
   };
 
@@ -379,8 +374,10 @@ const OrdersTable = () => {
   ) => {
     if (!selectedBooking) return;
 
+    setIsLoadingCancel(true); // Bật trạng thái loading
+
     try {
-      const response = await api.post(
+      const response = await api.patch(
         `/booking/cancel-booking/${selectedBooking.bookingID}`,
         {
           refundPercent: parseInt(refundPercent),
@@ -402,8 +399,9 @@ const OrdersTable = () => {
       }
     } catch (error) {
       console.error("Error cancelling booking:", error);
-      toast.error("Failed to cancel booking");
+      toast.error(error.response.data);
     } finally {
+      setIsLoadingCancel(false); // Tắt trạng thái loading sau khi hoàn thành
       setIsCancelDialogOpen(false);
     }
   };
@@ -839,7 +837,7 @@ const OrdersTable = () => {
                       >
                         <Eye size={18} />
                       </button>
-                      {booking.bookingStatus === "Cancelled" && (
+                      {booking.bookingStatus !== "Cancelled" && (
                         <button
                           className="text-red-600 hover:text-red-800"
                           onClick={() => handleCancelBooking(booking)}
@@ -1028,6 +1026,7 @@ const OrdersTable = () => {
         open={isCancelDialogOpen}
         onClose={() => setIsCancelDialogOpen(false)}
         onConfirm={handleConfirmCancel}
+        isLoading={isLoadingCancel} // Truyền trạng thái loading
       />
     </motion.div>
   );

@@ -136,10 +136,16 @@ export default function Component() {
   const [isLoading, setLoading] = useState(true);
 
   const fetchServices = async () => {
+    setLoading(true);
     try {
       const response = await api.get(`/service/all-service`);
+
       if (Array.isArray(response.data)) {
-        setServices(response.data);
+        // Sort services by serviceID in descending order (newest first)
+        const sortedServices = response.data.sort(
+          (a: any, b: any) => b.serviceID - a.serviceID
+        );
+        setServices(sortedServices);
       } else {
         console.error("API response is not an array");
         setServices([]);

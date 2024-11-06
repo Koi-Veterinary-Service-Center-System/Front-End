@@ -100,8 +100,11 @@ const History = () => {
         params: { status }, // Filter bookings by status
       });
 
-      const fetchedBookings = response.data;
-      setBookings(fetchedBookings); // Update the bookings state
+      // Lấy dữ liệu và sắp xếp theo bookingID (mới nhất lên đầu)
+      const fetchedBookings = response.data.sort(
+        (a: Booking, b: Booking) => b.bookingID - a.bookingID
+      );
+      setBookings(fetchedBookings); // Cập nhật state bookings
     } catch (error: any) {
       setBookings([]); // Reset bookings on error
       toast.info(error.response?.data || "Failed to fetch bookings.");
@@ -351,7 +354,10 @@ const History = () => {
                                 </div>
                               </CardHeader>
                               <CardContent>
-                                <Link to="/detailB" className="block mb-4">
+                                <Link
+                                  to={`/detailB/${booking.bookingID}`}
+                                  className="block mb-4"
+                                >
                                   <div className="flex items-center">
                                     <Avatar className="h-10 w-10 mr-3">
                                       <AvatarImage

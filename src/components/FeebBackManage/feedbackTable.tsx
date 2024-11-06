@@ -16,7 +16,11 @@ const FeedbackTable = () => {
     setLoading(true);
     try {
       const response = await api.get("/Feedback/all-feedback");
-      setFeedbacks(response.data);
+      const sortedFeedbacks = response.data.sort(
+        (a: any, b: any) => b.feedbackID - a.feedbackID
+      );
+
+      setFeedbacks(sortedFeedbacks);
     } catch (error) {
       console.error("Failed to fetch feedback data:", error);
     } finally {
@@ -30,10 +34,7 @@ const FeedbackTable = () => {
   ) => {
     try {
       const response = await api.put(
-        `/Feedback/show-hide-feedback/${feedbackID}`,
-        {
-          isVisible: !currentStatus,
-        }
+        `/Feedback/show-hide-feedback/${feedbackID}?isVisible=${!currentStatus}`
       );
 
       if (response.status === 200) {
@@ -46,7 +47,7 @@ const FeedbackTable = () => {
         );
         toast.success("Feedback visibility updated successfully!");
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.response?.data || "Failed to update visibility");
     }
   };

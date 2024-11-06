@@ -61,7 +61,9 @@ const TermsModal = () => {
       icon: <FaExclamationTriangle className="text-yellow-500" />,
       content: `3.1 Cancellations by the Customer
   • Customers may cancel their appointment before it transitions to the "In Progress" status.
-  o For cash payment: no refund will be provided.
+  o For cash payment: 
+    Cancellation is only allowed within 12 hours after booking.
+    No refund will be provided.
   o For VNPay payment:
     Canceled 7 days prior: 100% refund.
     Canceled 3 days prior: 50% refund.

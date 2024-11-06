@@ -107,7 +107,7 @@ function App() {
           }
         />
         <Route
-          path="/detailB"
+          path="/detailB/:bookingID"
           element={
             <PrivateRoute>
               <DetailBooking />
