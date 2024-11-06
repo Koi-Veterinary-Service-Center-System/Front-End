@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -7,7 +5,6 @@ import {
   FaChevronDown,
   FaChevronUp,
   FaClock,
-  FaDollarSign,
   FaQuoteLeft,
   FaQuoteRight,
   FaShoppingCart,
@@ -25,16 +22,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/configs/axios";
 import { Services } from "@/types/info";
+import { Feedback } from "@/types/feedback"; // Import the Feedback type here
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-interface Feedback {
-  feedbackID: string;
-  customerName: string;
-  rate: number;
-  comments: string;
-  serviceName: string;
-}
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -193,87 +183,88 @@ export default function DetailService() {
           className="mt-12"
         >
           <h2 className="text-2xl font-bold mb-4 text-blue-800">Feedback</h2>
-          {feedback.length > 0 ? (
-            feedback.map((item) => (
-              <Card
-                key={item.feedbackID}
-                className="mb-6 overflow-hidden transition-shadow duration-300 hover:shadow-lg"
-              >
-                <CardHeader className="bg-gradient-to-r from-blue-50 to-white">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src="" alt={item.customerName} />
-                        <AvatarFallback className="bg-blue-400">
-                          {item.customerName.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <CardTitle className="text-lg font-semibold text-blue-800">
-                          {item.customerName}
-                        </CardTitle>
-                        <CardDescription className="text-sm text-gray-600"></CardDescription>
+          {feedback.filter((item) => item.isVisible).length > 0 ? ( // Filter chỉ hiển thị feedback có isVisible là true
+            feedback
+              .filter((item) => item.isVisible) // Lọc feedback có isVisible = true
+              .map((item) => (
+                <Card
+                  key={item.feedbackID}
+                  className="mb-6 overflow-hidden transition-shadow duration-300 hover:shadow-lg"
+                >
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-white">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src="" alt={item.customerName} />
+                          <AvatarFallback className="bg-blue-400">
+                            {item.customerName.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-lg font-semibold text-blue-800">
+                            {item.customerName}
+                          </CardTitle>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <FaStar
+                              key={i}
+                              className={
+                                i < item.rate
+                                  ? "text-yellow-400"
+                                  : "text-gray-300"
+                              }
+                              size={20}
+                            />
+                          ))}
+                        </div>
+                        <CardDescription className="text-sm font-medium text-blue-600 mt-1">
+                          {item.serviceName}
+                        </CardDescription>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <FaStar
-                            key={i}
-                            className={
-                              i < item.rate
-                                ? "text-yellow-400"
-                                : "text-gray-300"
-                            }
-                            size={20}
-                          />
-                        ))}
-                      </div>
-                      <CardDescription className="text-sm font-medium text-blue-600 mt-1">
-                        {item.serviceName}
-                      </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-4 pb-2">
+                    <div className="relative">
+                      <FaQuoteLeft
+                        className="absolute top-0 left-0 text-blue-200 opacity-50"
+                        size={20}
+                      />
+                      <p className="text-gray-700 pl-6 pr-6 pt-2 pb-2">
+                        {isExpanded
+                          ? item.comments
+                          : `${item.comments.slice(0, 150)}${
+                              item.comments.length > 150 ? "..." : ""
+                            }`}
+                      </p>
+                      <FaQuoteRight
+                        className="absolute bottom-0 right-0 text-blue-200 opacity-50"
+                        size={20}
+                      />
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-4 pb-2">
-                  <div className="relative">
-                    <FaQuoteLeft
-                      className="absolute top-0 left-0 text-blue-200 opacity-50"
-                      size={20}
-                    />
-                    <p className="text-gray-700 pl-6 pr-6 pt-2 pb-2">
-                      {isExpanded
-                        ? item.comments
-                        : `${item.comments.slice(0, 150)}${
-                            item.comments.length > 150 ? "..." : ""
-                          }`}
-                    </p>
-                    <FaQuoteRight
-                      className="absolute bottom-0 right-0 text-blue-200 opacity-50"
-                      size={20}
-                    />
-                  </div>
-                  {item.comments.length > 150 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsExpanded(!isExpanded)}
-                      className="mt-2 text-blue-600 hover:text-blue-800 transition-colors duration-200"
-                    >
-                      {isExpanded ? (
-                        <>
-                          Show Less <FaChevronUp className="ml-2" />
-                        </>
-                      ) : (
-                        <>
-                          Read More <FaChevronDown className="ml-2" />
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            ))
+                    {item.comments.length > 150 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="mt-2 text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                      >
+                        {isExpanded ? (
+                          <>
+                            Show Less <FaChevronUp className="ml-2" />
+                          </>
+                        ) : (
+                          <>
+                            Read More <FaChevronDown className="ml-2" />
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))
           ) : (
             <p className="text-gray-600">
               <img

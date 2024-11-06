@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import "./booking.scss";
 import Header from "../../components/Header/header";
 import Footer from "../../components/Footer/footer";
@@ -58,7 +59,7 @@ function BookingPage() {
   // Ant Design form hook
   const [form] = Form.useForm();
 
-  const handleDateChange = (date) => {
+  const handleDateChange = (date: unknown) => {
     if (!date) {
       setSlots(allSlots); // Khôi phục tất cả slots nếu không có ngày được chọn
       return;
@@ -255,7 +256,7 @@ function BookingPage() {
         console.log("Server Error:", error.response.data);
         toast.info(JSON.stringify(error.response.data)); // Hiển thị lỗi chi tiết
       } else {
-        toast.error("Failed to book the service.");
+        toast.error(error.response.data);
       }
     }
   };
@@ -279,15 +280,33 @@ function BookingPage() {
     }
   };
 
-  const handleServiceChange = (serviceID) => {
+  const handleServiceChange = async (serviceID: number) => {
     const selectedService = services.find(
       (service) => service.serviceID === serviceID
     );
 
-    // Update isAtHomeService based on the selected service's isAtHome property
     setIsAtHomeService(selectedService ? selectedService.isAtHome : true);
 
-    calculateTotal(); // Optionally recalculate the total if necessary
+    if (selectedService?.isOnline) {
+      // Nếu dịch vụ online, chỉ hiển thị VNPay
+      setPayments([{ paymentID: 2, type: "VNPay", isDeleted: false }]);
+      form.setFieldsValue({ paymentType: 2 }); // Đặt mặc định phương thức thanh toán là VNPay
+    } else {
+      // Nếu dịch vụ không phải online, hiển thị lại tất cả các phương thức thanh toán
+      try {
+        setLoadingPayment(true);
+        const response = await api.get("/payment/all-payment");
+        setPayments(response.data);
+        form.resetFields(["paymentType"]); // Reset giá trị paymentType khi chuyển về dịch vụ không online
+      } catch (error) {
+        console.error("Error fetching payments:", error);
+        toast.error("Failed to load payments.");
+      } finally {
+        setLoadingPayment(false);
+      }
+    }
+
+    calculateTotal();
   };
 
   const calculateTotal = () => {
@@ -330,7 +349,7 @@ function BookingPage() {
         </motion.div>
 
         <motion.div
-          className="max-w-4xl mx-auto bg-gray-50 shadow-lg rounded-lg p-8"
+          className="max-w-6xl mx-auto bg-gray-50 shadow-lg rounded-lg p-8"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}

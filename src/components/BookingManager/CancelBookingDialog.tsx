@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
@@ -19,18 +17,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertTriangle, DollarSign, XCircle, CheckCircle } from "lucide-react";
+import {
+  AlertTriangle,
+  DollarSign,
+  XCircle,
+  CheckCircle,
+  Loader2,
+} from "lucide-react"; // Import Loader2 cho trạng thái loading
 
 interface CancelBookingDialogProps {
   open: boolean;
   onClose: () => void;
   onConfirm: (refundPercent: string, cancelReason: string) => void;
+  isLoading: boolean; // Thêm prop isLoading
 }
 
-export default function Component({
+export default function CancelBookingDialog({
   open,
   onClose,
   onConfirm,
+  isLoading, // Nhận prop isLoading
 }: CancelBookingDialogProps) {
   const [refundPercent, setRefundPercent] = useState("");
   const [cancelReason, setCancelReason] = useState("");
@@ -112,6 +118,7 @@ export default function Component({
                   variant="outline"
                   onClick={onClose}
                   className="flex items-center"
+                  disabled={isLoading} // Vô hiệu hóa khi đang loading
                 >
                   <XCircle className="w-4 h-4 mr-2" />
                   Cancel
@@ -119,9 +126,14 @@ export default function Component({
                 <Button
                   onClick={handleConfirm}
                   className="bg-red-500 hover:bg-red-600 text-white flex items-center"
+                  disabled={isLoading} // Vô hiệu hóa khi đang loading
                 >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Confirm Cancellation
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> // Hiển thị spinner khi loading
+                  ) : (
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                  )}
+                  {isLoading ? "Cancelling..." : "Confirm Cancellation"}
                 </Button>
               </motion.div>
             </DialogFooter>

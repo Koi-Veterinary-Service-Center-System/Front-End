@@ -58,7 +58,7 @@ export default function BookingRecord({
 
     try {
       const response = await api.post(
-        "/bookingRecord/create-bookingRecord/auto-completed-booking",
+        "/bookingRecord/create-bookingRecord/auto-completed-or-received-money-booking",
         {
           bookingID: currentBookingID,
           arisedQuantity: data.arisedQuantity,
