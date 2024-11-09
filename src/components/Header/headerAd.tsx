@@ -53,14 +53,6 @@ export default function HeaderAd({ title }: { title: string }) {
             <h1 className="text-2xl font-semibold text-blue-800">{title}</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-500" />
-              <Input
-                type="search"
-                placeholder="Search..."
-                className="pl-8 w-[200px] md:w-[300px] bg-white border border-blue-300 text-blue-900 focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
             <Button
               variant="ghost"
               size="icon"

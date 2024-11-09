@@ -116,6 +116,7 @@ export type Booking = {
   quantity: number;
   district: string;
   bookingRecordNote: string;
+  hasFeedback: boolean;
 };
 
 export type User = {
@@ -127,6 +128,7 @@ export type User = {
   userName: string;
   email: string;
   isActive: boolean;
+  isDeleted: boolean;
 };
 
 export type Vet = {

@@ -85,6 +85,8 @@ const History = () => {
     customerBankNumber: "",
     customerBankAccountName: "",
   });
+  const [isHovered, setIsHovered] = useState(false);
+  const [isWaving, setIsWaving] = useState(false);
 
   // Fetch all booking and calculate totals
   // Fetch bookings based on active status
@@ -258,6 +260,15 @@ const History = () => {
     setSelectedBookingId(bookingId);
     setIsConfirmModalOpen(true);
   };
+
+  useEffect(() => {
+    const waveInterval = setInterval(() => {
+      setIsWaving(true);
+      setTimeout(() => setIsWaving(false), 1000);
+    }, 5000);
+
+    return () => clearInterval(waveInterval);
+  }, []);
   return (
     <div className={`min-h-screen bg-gray-100 ${isDarkMode ? "dark" : ""}`}>
       <div className="flex">
@@ -436,15 +447,53 @@ const History = () => {
                                 {/* Check if booking status is Succeeded or Cancelled */}
                                 {["Succeeded", "Cancelled"].includes(
                                   booking.bookingStatus
-                                ) ? (
+                                ) && booking.hasFeedback ? (
                                   <Link to={`/feedback/${booking.bookingID}`}>
-                                    <Button
-                                      variant="outline"
-                                      className="text-blue-500 hover:bg-blue-100"
+                                    <motion.div
+                                      className="relative"
+                                      onHoverStart={() => setIsHovered(true)}
+                                      onHoverEnd={() => setIsHovered(false)}
                                     >
-                                      <VscFeedback className="mr-2" />
-                                      Feedback
-                                    </Button>
+                                      <Button
+                                        variant="outline"
+                                        className="relative overflow-hidden bg-white text-blue-600 border-blue-400 hover:bg-blue-50 hover:border-blue-500 transition-all duration-300 ease-in-out"
+                                      >
+                                        <VscFeedback className="mr-2" />
+                                        Feedback
+                                        <motion.div
+                                          className="absolute inset-0 bg-blue-100 z-0"
+                                          initial={{ scale: 0, opacity: 0 }}
+                                          animate={{
+                                            scale: isHovered ? 1 : 0,
+                                            opacity: isHovered ? 0.5 : 0,
+                                          }}
+                                          transition={{ duration: 0.3 }}
+                                        />
+                                      </Button>
+                                      <motion.div
+                                        className="absolute -top-4 -right-4 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center"
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{
+                                          delay: 0.5,
+                                          type: "spring",
+                                          stiffness: 500,
+                                          damping: 30,
+                                        }}
+                                      >
+                                        <motion.div
+                                          className="w-4 h-4 bg-white rounded-full"
+                                          animate={{
+                                            y: isWaving ? [-2, 2, -2] : 0,
+                                          }}
+                                          transition={{
+                                            duration: 0.3,
+                                            repeat: isWaving ? 3 : 0,
+                                            repeatType: "reverse",
+                                          }}
+                                        />
+                                      </motion.div>
+                                    </motion.div>
                                   </Link>
                                 ) : (
                                   <>
@@ -487,6 +536,7 @@ const History = () => {
                                             "Ongoing",
                                             "Completed",
                                             "Received_Money",
+                                            "Cancelled",
                                           ].includes(booking.bookingStatus)}
                                         >
                                           Cancel Booking

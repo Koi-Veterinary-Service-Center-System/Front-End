@@ -123,8 +123,12 @@ const UsersTable = () => {
       const response = await api.get("User/all-user", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      setUsers(response.data);
-      setFilteredUsers(response.data);
+
+      // Filter out users where isDeleted is true
+      const activeUsers = response.data.filter((user: User) => !user.isDeleted);
+
+      setUsers(activeUsers);
+      setFilteredUsers(activeUsers);
       setError(null);
     } catch (error: any) {
       console.error("Failed to fetch user data:", error.message);
@@ -210,7 +214,7 @@ const UsersTable = () => {
     setLoading(true);
     setError(null);
     try {
-      await api.delete(`/User/delete-user/${userToDelete.userID}`, {
+      await api.patch(`/User/soft-delete/${userToDelete.userID}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       toast.success("Deleted user successfully");
