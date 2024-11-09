@@ -294,6 +294,7 @@ function UpdateProfile() {
                             placeholder={profile?.email || "Enter email"}
                             prefix={<MailOutlined className="text-gray-400" />}
                             className="rounded-md"
+                            disabled
                           />
                         </Form.Item>
                       </motion.div>

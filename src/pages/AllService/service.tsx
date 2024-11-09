@@ -10,12 +10,26 @@ import { useEffect, useState } from "react";
 import api from "@/configs/axios";
 import CategoryDistributionChart from "@/components/services/CategoryDistributionChart";
 
+interface ServiceData {
+  id: number;
+  name: string;
+  price: number;
+  sales: number;
+  // Bạn có thể thêm các thuộc tính khác của dịch vụ nếu cần
+}
+
+interface BookingData {
+  id: number;
+  totalAmount: number;
+  // Thêm các thuộc tính khác của booking nếu cần
+}
+
 const Service = () => {
-  const [isLoadingServices, setLoadingServices] = useState(false);
-  const [services, setServices] = useState<any[]>([]);
-  const [totalRevenue, setTotalRevenue] = useState(0);
-  const [topSelling, setTopSelling] = useState(0);
-  const [lowService, setLowService] = useState(0);
+  const [isLoadingServices, setLoadingServices] = useState<boolean>(false);
+  const [services, setServices] = useState<ServiceData[]>([]);
+  const [totalRevenue, setTotalRevenue] = useState<number>(0);
+  const [topSelling, setTopSelling] = useState<number>(0);
+  const [lowService, setLowService] = useState<number>(0);
 
   const handleDeleteSuccess = () => {
     toast.success("Service deleted successfully");
@@ -29,21 +43,35 @@ const Service = () => {
     const fetchServicesAndRevenue = async () => {
       try {
         setLoadingServices(true);
-        const servicesResponse = await api.get("/service/all-service");
+
+        // Fetch services data
+        const servicesResponse = await api.get<ServiceData[]>(
+          "/service/all-service"
+        );
         const servicesData = servicesResponse.data;
         setServices(servicesData);
 
-        const bookingsResponse = await api.get("/booking/all-booking");
+        // Calculate topSelling based on the highest sales value in servicesData
+        const maxPriceService = servicesData.reduce((max, service) => {
+          return service.price > max ? service.price : max;
+        }, 0);
+        setTopSelling(maxPriceService);
+
+        // Fetch bookings data
+        const bookingsResponse = await api.get<BookingData[]>(
+          "/booking/all-booking"
+        );
         const bookingsData = bookingsResponse.data;
 
+        // Calculate total revenue from bookings
         const totalRev = bookingsData.reduce((total, booking) => {
           return total + booking.totalAmount;
         }, 0);
         setTotalRevenue(totalRev);
 
-        setTopSelling(servicesData.length > 0 ? 89 : 0);
+        // Calculate lowService as the count of services with price < 100000
         setLowService(
-          servicesData.filter((service) => service.price < 100).length
+          servicesData.filter((service) => service.price < 100000).length
         );
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -75,9 +103,9 @@ const Service = () => {
               color="#3B82F6"
             />
             <StatCard
-              name="Top Selling"
+              name="High Price Services"
               icon={TrendingUp}
-              value={topSelling}
+              value={topSelling.toLocaleString("vi-VN")}
               color="#10B981"
             />
             <StatCard

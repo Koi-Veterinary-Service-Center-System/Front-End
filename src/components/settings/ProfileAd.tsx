@@ -3,6 +3,7 @@ import SettingSection from "./SettingSection";
 import { useEffect, useState } from "react";
 import api from "@/configs/axios";
 import { Profile } from "@/types/info";
+import { Link } from "react-router-dom";
 
 const ProfileAd = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -40,10 +41,11 @@ const ProfileAd = () => {
           <p className="text-black">{profile?.email}</p>
         </div>
       </div>
-
-      <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200 w-full sm:w-auto">
-        Edit Profile
-      </button>
+      <Link to="/updateProfile">
+        <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200 w-full sm:w-auto">
+          Edit Profile
+        </button>
+      </Link>
     </SettingSection>
   );
 };

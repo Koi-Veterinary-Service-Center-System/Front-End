@@ -73,7 +73,14 @@ const FeedbackChart = () => {
       {loading ? (
         <p className="text-blue-600">Loading...</p>
       ) : error ? (
-        <p className="text-red-500">{error}</p>
+        <div className="flex flex-col items-center justify-center">
+          <img
+            src="/src/assets/images/No-Messages-1--Streamline-Bruxelles.png"
+            alt="No Services"
+            className="w-32 h-32 object-contain mb-4"
+          />
+          <p className="text-muted-foreground">No data found</p>
+        </div>
       ) : (
         <div style={{ width: "100%", height: 400 }}>
           <ResponsiveContainer>

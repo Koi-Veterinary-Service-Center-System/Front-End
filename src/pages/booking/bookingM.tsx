@@ -1,13 +1,13 @@
-import { CheckCircle, Clock, ShoppingBag } from "lucide-react";
+import { CheckCircle, ShoppingBag, X } from "lucide-react";
 import { motion } from "framer-motion";
 import HeaderAd from "@/components/Header/headerAd";
 import StatCard from "@/components/common/StatCard";
-import OrdersTable from "@/components/BookingManager/BookingTable";
 import Sidebar from "@/components/Sidebar/sidebar";
 import { useEffect, useState } from "react";
 import { PiHandCoins } from "react-icons/pi";
 import api from "../../configs/axios";
 import { Booking } from "@/types/info";
+import BookingTable from "@/components/BookingManager/BookingTable";
 
 const BookMPage = () => {
   const [orderStats, setOrderStats] = useState({
@@ -88,9 +88,9 @@ const BookMPage = () => {
               color="#6366F1"
             />
             <StatCard
-              name="Pending Bookings"
-              icon={Clock}
-              value={orderStats.pendingOrders}
+              name="Cancelled Bookings"
+              icon={X}
+              value={orderStats.cancelledOrders}
               color="#F59E0B"
             />
             <StatCard
@@ -107,12 +107,7 @@ const BookMPage = () => {
             />
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            {/* <DailyOrders />
-            <OrderDistribution /> */}
-          </div>
-
-          <OrdersTable />
+          <BookingTable />
         </main>
       </div>
     </div>

@@ -471,7 +471,6 @@ const UsersTable = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Customer">Customer</SelectItem>
                           <SelectItem value="Vet">Vet</SelectItem>
                           <SelectItem value="Staff">Staff</SelectItem>
                           <SelectItem value="Manager">Manager</SelectItem>

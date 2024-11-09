@@ -31,7 +31,6 @@ const SIDEBAR_ITEMS = [
     path: "/feedbackmanager",
   },
   { name: "HomePage", icon: House, color: "#93C5FD", path: "/" },
-  { name: "Settings", icon: Settings, color: "#BFDBFE", path: "/settings" },
 ];
 
 export default function Sidebar() {
@@ -56,9 +55,12 @@ export default function Sidebar() {
   }, []);
 
   // Filter out "Users" if the role is "staff"
+  // Filter out "Users" and "Schedules" if the role is "Staff"
   const filteredItems =
     profile?.role === "Staff"
-      ? SIDEBAR_ITEMS.filter((item) => item.name !== "Users")
+      ? SIDEBAR_ITEMS.filter(
+          (item) => item.name !== "Users" && item.name !== "Schedules"
+        )
       : SIDEBAR_ITEMS;
 
   return (

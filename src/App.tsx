@@ -32,6 +32,7 @@ import BookingPage from "./pages/Booking/Booking";
 import DetailBooking from "./pages/Booking/DetailBooking";
 import ChangePassword from "./pages/Sercurity/ChangePassword";
 import DetailService from "./pages/AllService/DetailService";
+import FeedbackManagement from "./pages/FeedBack/FeedbackMPage";
 
 // Add your license key here
 registerLicense("Your_License_Key_Here");
@@ -150,7 +151,7 @@ function App() {
           path="/feedbackmanager"
           element={
             <PrivateRoute requiredRoles={["Manager", "Staff"]}>
-              <AnalyticsPage />
+              <FeedbackManagement />
             </PrivateRoute>
           }
         />
@@ -165,7 +166,7 @@ function App() {
         <Route
           path="/schedules"
           element={
-            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
+            <PrivateRoute requiredRoles={["Manager"]}>
               <SchedulesMPage />
             </PrivateRoute>
           }

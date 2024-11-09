@@ -25,27 +25,13 @@ const UsersPage = () => {
       });
 
       const allUsers = response.data;
-      const today = dayjs().format("YYYY-MM-DD");
       const oneMonthAgo = dayjs().subtract(30, "day").format("YYYY-MM-DD");
-
+      const activeUsersCount = allUsers.filter(
+        (user: User) => user.isActive
+      ).length;
       // Tổng số người dùng
       setTotalUsers(allUsers.length);
 
-      // Người dùng mới hôm nay
-      const newUsers = allUsers.filter(
-        (user) => dayjs(user.created_at).format("YYYY-MM-DD") === today
-      );
-      setNewUsersToday(newUsers.length);
-
-      // Người dùng không hoạt động trong 30 ngày => Tính churn rate
-      const inactiveUsers = allUsers.filter((user) =>
-        dayjs(user.last_login).isBefore(oneMonthAgo)
-      );
-      const churnRateCalculated = (inactiveUsers.length / totalUsers) * 100;
-      setChurnRate(churnRateCalculated.toFixed(2)); // Churn rate dạng phần trăm
-
-      // Người dùng đang hoạt động (đăng nhập trong 30 ngày qua)
-      const activeUsersCount = allUsers.length - inactiveUsers.length;
       setActiveUsers(activeUsersCount);
     } catch (error: any) {
       console.error("Failed to fetch user data:", error.message);
@@ -70,35 +56,27 @@ const UsersPage = () => {
         <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8">
           {/* STATS */}
           <motion.div
-            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8"
+            className="flex flex-wrap justify-center gap-6 mb-8 max-w-full"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
           >
-            <StatCard
-              name="Total Users"
-              icon={UsersIcon}
-              value={totalUsers.toLocaleString()}
-              color="#6366F1"
-            />
-            <StatCard
-              name="New Users Today"
-              icon={UserPlus}
-              value={newUsersToday}
-              color="#10B981"
-            />
-            <StatCard
-              name="Active Users"
-              icon={UserCheck}
-              value={activeUsers.toLocaleString()}
-              color="#F59E0B"
-            />
-            <StatCard
-              name="Churn Rate"
-              icon={UserX}
-              value={`${churnRate}%`}
-              color="#EF4444"
-            />
+            <div className="w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 px-2">
+              <StatCard
+                name="Total Users"
+                icon={UsersIcon}
+                value={totalUsers.toLocaleString()}
+                color="#6366F1"
+              />
+            </div>
+            <div className="w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 px-2">
+              <StatCard
+                name="Active Users"
+                icon={UserCheck}
+                value={activeUsers.toLocaleString()}
+                color="#F59E0B"
+              />
+            </div>
           </motion.div>
 
           <UsersTable />

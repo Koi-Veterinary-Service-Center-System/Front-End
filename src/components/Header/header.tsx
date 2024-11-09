@@ -210,11 +210,7 @@ function UserActions({ profile, notifications, clearNotifications }) {
           </Button>
         </Link>
       )}
-      <Link to="/favorites">
-        <Button variant="ghost" size="icon">
-          <Heart className="h-5 w-5" />
-        </Button>
-      </Link>
+
       <NotificationsPopover
         notifications={notifications}
         clearNotifications={clearNotifications}

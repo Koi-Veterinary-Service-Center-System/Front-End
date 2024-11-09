@@ -615,7 +615,13 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
           </div>
         </DialogContent>
       </Dialog>
-      <Tooltip id="description-tooltip" />
+      <Tooltip
+        id="description-tooltip"
+        style={{
+          maxWidth: "200px", // Đặt chiều rộng tối đa cho Tooltip
+          whiteSpace: "normal", // Đảm bảo xuống hàng khi vượt quá chiều rộng
+        }}
+      />
     </motion.div>
   );
 };
