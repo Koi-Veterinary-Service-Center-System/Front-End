@@ -307,18 +307,13 @@ const UsersTable = () => {
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value.toLowerCase());
-              const filtered = users.filter(
-                (user) =>
-                  user.firstName
-                    .toLowerCase()
-                    .includes(e.target.value.toLowerCase()) ||
-                  user.lastName
-                    .toLowerCase()
-                    .includes(e.target.value.toLowerCase()) ||
-                  user.email
-                    .toLowerCase()
-                    .includes(e.target.value.toLowerCase())
+
+              const filtered = users.filter((user) =>
+                `${user.firstName} ${user.lastName} ${user.email}`
+                  .toLowerCase()
+                  .includes(e.target.value.toLowerCase())
               );
+
               setFilteredUsers(filtered);
             }}
           />

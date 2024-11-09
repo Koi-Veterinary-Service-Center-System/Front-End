@@ -456,7 +456,7 @@ const DetailBooking = () => {
                               </h3>
                               <div className="mt-2">
                                 {booking.hasPres ? (
-                                  <Badge variant="success" className="text-sm">
+                                  <Badge className="text-sm">
                                     <CheckCircle className="inline-block h-4 w-4 mr-1" />
                                     Available
                                   </Badge>

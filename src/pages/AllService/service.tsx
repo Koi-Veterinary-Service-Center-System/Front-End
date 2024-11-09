@@ -9,14 +9,7 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import api from "@/configs/axios";
 import CategoryDistributionChart from "@/components/services/CategoryDistributionChart";
-
-interface ServiceData {
-  id: number;
-  name: string;
-  price: number;
-  sales: number;
-  // Bạn có thể thêm các thuộc tính khác của dịch vụ nếu cần
-}
+import { Services } from "@/types/info";
 
 interface BookingData {
   id: number;
@@ -26,7 +19,7 @@ interface BookingData {
 
 const Service = () => {
   const [isLoadingServices, setLoadingServices] = useState<boolean>(false);
-  const [services, setServices] = useState<ServiceData[]>([]);
+  const [services, setServices] = useState<Services[]>([]);
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
   const [topSelling, setTopSelling] = useState<number>(0);
   const [lowService, setLowService] = useState<number>(0);
@@ -45,17 +38,25 @@ const Service = () => {
         setLoadingServices(true);
 
         // Fetch services data
-        const servicesResponse = await api.get<ServiceData[]>(
+        const servicesResponse = await api.get<Services[]>(
           "/service/all-service"
         );
         const servicesData = servicesResponse.data;
         setServices(servicesData);
+
+        console.log("Services Data:", servicesData); // Log toàn bộ dữ liệu dịch vụ để kiểm tra
 
         // Calculate topSelling based on the highest sales value in servicesData
         const maxPriceService = servicesData.reduce((max, service) => {
           return service.price > max ? service.price : max;
         }, 0);
         setTopSelling(maxPriceService);
+
+        // Calculate lowService as the count of services with price < 100000
+        const lowPriceServices = servicesData.filter(
+          (service) => service.price < 100000
+        );
+        setLowService(lowPriceServices.length);
 
         // Fetch bookings data
         const bookingsResponse = await api.get<BookingData[]>(
@@ -68,11 +69,6 @@ const Service = () => {
           return total + booking.totalAmount;
         }, 0);
         setTotalRevenue(totalRev);
-
-        // Calculate lowService as the count of services with price < 100000
-        setLowService(
-          servicesData.filter((service) => service.price < 100000).length
-        );
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
