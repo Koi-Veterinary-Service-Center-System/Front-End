@@ -245,33 +245,40 @@ export default function FishPrescriptionSystem() {
                               ID: {prescription.prescriptionRecordID}
                             </Badge>
                             <div className="flex space-x-2">
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => handleEdit(prescription)}
-                                className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 transition-colors duration-300"
-                              >
-                                <Edit className="h-4 w-4" />
-                                <span className="sr-only">
-                                  Edit prescription
-                                </span>
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => {
-                                  setPrescriptionToDelete(
-                                    prescription.prescriptionRecordID
-                                  );
-                                  setIsDeleteDialogOpen(true);
-                                }}
-                                className="text-red-600 hover:text-red-800 hover:bg-red-100 transition-colors duration-300"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                <span className="sr-only">
-                                  Delete prescription
-                                </span>
-                              </Button>
+                              {/* Chỉ hiển thị nút Edit và Delete khi bookingStatus không phải là "Succeed" hoặc "Cancelled" */}
+                              {booking &&
+                                booking.bookingStatus !== "Succeeded" &&
+                                booking.bookingStatus !== "Cancelled" && (
+                                  <>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => handleEdit(prescription)}
+                                      className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 transition-colors duration-300"
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                      <span className="sr-only">
+                                        Edit prescription
+                                      </span>
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => {
+                                        setPrescriptionToDelete(
+                                          prescription.prescriptionRecordID
+                                        );
+                                        setIsDeleteDialogOpen(true);
+                                      }}
+                                      className="text-red-600 hover:text-red-800 hover:bg-red-100 transition-colors duration-300"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                      <span className="sr-only">
+                                        Delete prescription
+                                      </span>
+                                    </Button>
+                                  </>
+                                )}
                             </div>
                           </div>
                         </CardHeader>

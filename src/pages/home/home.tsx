@@ -153,12 +153,6 @@ function Home() {
                 <div className="p-4">
                   <h4 className="font-semibold text-lg">{post.title}</h4>
                   <p className="text-gray-600">{post.description}</p>
-                  <Link
-                    to={post.link}
-                    className="text-blue-500 hover:underline mt-2 inline-block"
-                  >
-                    Read More →
-                  </Link>
                 </div>
               </motion.div>
             ))}
@@ -208,13 +202,6 @@ function Home() {
                 <div className="p-4 relative">
                   <h4 className="font-semibold text-lg">{vet.name}</h4>
                   <p className="text-gray-600">{vet.experience}</p>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-4 right-4"
-                  >
-                    <Heart className="h-5 w-5" />
-                  </Button>
                 </div>
               </motion.div>
             ))}

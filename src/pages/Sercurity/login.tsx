@@ -228,21 +228,6 @@ const Login = () => {
                     OR
                   </div>
                   <div className="mt-4 space-y-3">
-                    <Button
-                      onClick={handleLoginGoogle}
-                      icon={
-                        <img
-                          src="src\assets\images\google.png"
-                          alt="Google"
-                          className="mr-2 h-6 w-6"
-                        />
-                      }
-                      size="large"
-                      block
-                      className="border-blue-300 text-blue-600 hover:border-blue-500 hover:text-blue-700 mb-2"
-                    >
-                      Sign in with Google
-                    </Button>
                     <Link to="/">
                       <Button className="w-full bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors duration-200">
                         <FaUser className="mr-2 h-5 w-5" />

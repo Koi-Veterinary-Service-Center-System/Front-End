@@ -1,12 +1,11 @@
 import HeaderAd from "@/components/Header/headerAd";
-import OverviewCards from "@/components/analyics/OverviewCards";
 import RevenueChart from "@/components/analyics/RevenueChart";
 import ChannelPerformance from "@/components/analyics/ChannelPerformance";
 import UserRetention from "@/components/analyics/UserRetension";
 import Sidebar from "@/components/Sidebar/sidebar";
 import FeedbackTable from "@/components/FeebBackManage/feedbackTable";
 
-const AnalyticsPage = () => {
+const FeedbackManagement = () => {
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 to-white text-gray-800 overflow-hidden">
       <div className="fixed inset-0 z-0">
@@ -18,7 +17,6 @@ const AnalyticsPage = () => {
         <HeaderAd title={"Analytics Dashboard"} />
 
         <main className="max-w-7xl mx-auto py-6 px-4 lg:px-8">
-          <OverviewCards />
           <FeedbackTable />
           <RevenueChart />
 
@@ -31,4 +29,4 @@ const AnalyticsPage = () => {
     </div>
   );
 };
-export default AnalyticsPage;
+export default FeedbackManagement;

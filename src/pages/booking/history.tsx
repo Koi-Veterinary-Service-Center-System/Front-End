@@ -39,6 +39,7 @@ import {
 import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
 import { FaRegMoneyBillAlt } from "react-icons/fa";
 import { differenceInDays } from "date-fns";
+import ConfirmStatusChangeModal from "./ConfirmStatusChangeModal";
 
 const statusOptions = [
   "Scheduled",
@@ -78,6 +79,7 @@ const History = () => {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
     null
   );
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [cancelBookingInfo, setCancelBookingInfo] = useState({
     bankName: "",
     customerBankNumber: "",
@@ -233,6 +235,29 @@ const History = () => {
     }
   };
 
+  // Confirm success status handler
+  const handleConfirmSuccess = async () => {
+    if (!selectedBookingId) return;
+
+    try {
+      await api.patch(`/booking/success/${selectedBookingId}`, null, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      toast.success(`Booking ${selectedBookingId} status updated to Success`);
+      setIsConfirmModalOpen(false);
+      fetchBookingsByStatus(activeStatus);
+    } catch (error: any) {
+      toast.error(error.response.data);
+    }
+  };
+
+  // Open modal to confirm success status
+  const openConfirmModal = (bookingId: string) => {
+    setSelectedBookingId(bookingId);
+    setIsConfirmModalOpen(true);
+  };
   return (
     <div className={`min-h-screen bg-gray-100 ${isDarkMode ? "dark" : ""}`}>
       <div className="flex">
@@ -434,10 +459,7 @@ const History = () => {
                                         className="bg-blue-500 text-white hover:bg-blue-600"
                                         variant="outline"
                                         onClick={() =>
-                                          handleUpdateStatus(
-                                            booking.bookingID,
-                                            "Success"
-                                          )
+                                          openConfirmModal(booking.bookingID)
                                         }
                                         disabled={[
                                           "Pending",
@@ -567,7 +589,12 @@ const History = () => {
           </div>
         </main>
       </div>
-
+      <ConfirmStatusChangeModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirmSuccess}
+        newStatus="Success"
+      />
       {error && <div className="text-red-500 mt-4">{error}</div>}
     </div>
   );

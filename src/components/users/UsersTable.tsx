@@ -307,18 +307,13 @@ const UsersTable = () => {
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value.toLowerCase());
-              const filtered = users.filter(
-                (user) =>
-                  user.firstName
-                    .toLowerCase()
-                    .includes(e.target.value.toLowerCase()) ||
-                  user.lastName
-                    .toLowerCase()
-                    .includes(e.target.value.toLowerCase()) ||
-                  user.email
-                    .toLowerCase()
-                    .includes(e.target.value.toLowerCase())
+
+              const filtered = users.filter((user) =>
+                `${user.firstName} ${user.lastName} ${user.email}`
+                  .toLowerCase()
+                  .includes(e.target.value.toLowerCase())
               );
+
               setFilteredUsers(filtered);
             }}
           />
@@ -471,7 +466,6 @@ const UsersTable = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Customer">Customer</SelectItem>
                           <SelectItem value="Vet">Vet</SelectItem>
                           <SelectItem value="Staff">Staff</SelectItem>
                           <SelectItem value="Manager">Manager</SelectItem>

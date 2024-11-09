@@ -1,16 +1,15 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import api from "../../configs/axios"; // Make sure this path is correct
 import { Eye, EyeOff } from "lucide-react";
-import { Feedback } from "@/types/info";
+import { Tooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
+import api from "../../configs/axios";
 import { toast } from "sonner";
+import { Feedback } from "@/types/info";
 
 const FeedbackTable = () => {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showFullCommentId, setShowFullCommentId] = useState<number | null>(
-    null
-  ); // New state for comment visibility
 
   const fetchFeedbackData = async () => {
     setLoading(true);
@@ -19,7 +18,6 @@ const FeedbackTable = () => {
       const sortedFeedbacks = response.data.sort(
         (a: any, b: any) => b.feedbackID - a.feedbackID
       );
-
       setFeedbacks(sortedFeedbacks);
     } catch (error) {
       console.error("Failed to fetch feedback data:", error);
@@ -36,7 +34,6 @@ const FeedbackTable = () => {
       const response = await api.put(
         `/Feedback/show-hide-feedback/${feedbackID}?isVisible=${!currentStatus}`
       );
-
       if (response.status === 200) {
         setFeedbacks((prevFeedbacks) =>
           prevFeedbacks.map((feedback) =>
@@ -121,27 +118,24 @@ const FeedbackTable = () => {
                     {feedback.rate}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    {showFullCommentId === feedback.feedbackID
-                      ? feedback.comments
-                      : feedback.comments.length > 50
-                      ? `${feedback.comments.substring(0, 50)}...`
-                      : feedback.comments}
-                    {feedback.comments.length > 50 && (
-                      <button
-                        onClick={() =>
-                          setShowFullCommentId((prev) =>
-                            prev === feedback.feedbackID
-                              ? null
-                              : feedback.feedbackID
-                          )
-                        }
-                        className="text-blue-600 ml-2"
+                    {feedback.comments.length > 50 ? (
+                      <span
+                        data-tooltip-id={`tooltip-${feedback.feedbackID}`}
+                        data-tooltip-content={feedback.comments}
+                        className="text-black cursor-pointer"
                       >
-                        {showFullCommentId === feedback.feedbackID
-                          ? "View Less"
-                          : "View More"}
-                      </button>
+                        {feedback.comments.slice(0, 50)}...
+                      </span>
+                    ) : (
+                      feedback.comments
                     )}
+                    <Tooltip
+                      id={`tooltip-${feedback.feedbackID}`}
+                      style={{
+                        maxWidth: "200px", // Đặt chiều rộng tối đa cho Tooltip
+                        whiteSpace: "normal", // Đảm bảo xuống hàng khi vượt quá chiều rộng
+                      }}
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span

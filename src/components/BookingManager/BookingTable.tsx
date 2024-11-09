@@ -47,7 +47,7 @@ import CancelBookingDialog from "./CancelBookingDialog";
 import { BsFillBookmarkCheckFill } from "react-icons/bs";
 import { TableCell, TableRow } from "../ui/table";
 
-const OrdersTable = () => {
+const BookingTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -315,6 +315,7 @@ const OrdersTable = () => {
         paymentId: values.paymentType || 0,
         bookingDate: bookingDate,
         quantity: values.quantity,
+        userID: values.customerID,
       };
 
       console.log("Booking Data:", bookingData);
@@ -459,7 +460,7 @@ const OrdersTable = () => {
               >
                 <Form.Item
                   label="Customer Name"
-                  name="customerId"
+                  name="userID"
                   rules={[
                     { required: true, message: "Please select a customer" },
                   ]}
@@ -761,7 +762,14 @@ const OrdersTable = () => {
       {loading ? (
         <div className="text-white">Loading...</div>
       ) : error ? (
-        <div className="text-red-500">Error: {error}</div>
+        <div className="flex flex-col items-center justify-center">
+          <img
+            src="/src/assets/images/No-Messages-1--Streamline-Bruxelles.png"
+            alt="No Services"
+            className="w-32 h-32 object-contain mb-4"
+          />
+          <p className="text-muted-foreground">No booking found</p>
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -1031,4 +1039,4 @@ const OrdersTable = () => {
     </motion.div>
   );
 };
-export default OrdersTable;
+export default BookingTable;
