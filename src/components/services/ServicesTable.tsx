@@ -123,9 +123,14 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
+      // Filter out services where isDeleted is true
+      const filteredResponse = response.data.filter(
+        (service: Services) => !service.isDeleted
+      );
+
       // Sort services by `id` in descending order to show latest first
-      const sortedServices = response.data.sort(
-        (a: string, b: string) => b.serviceID - a.serviceID
+      const sortedServices = filteredResponse.sort(
+        (a: Services, b: Services) => b.serviceID - a.serviceID
       );
 
       setServices(sortedServices);
@@ -233,7 +238,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
     if (deleteServiceID === null) return;
     setLoading(true);
     try {
-      await api.delete(`/service/delete-service/${deleteServiceID}`, {
+      await api.patch(`/service/soft-delete/${deleteServiceID}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       fetchServices();

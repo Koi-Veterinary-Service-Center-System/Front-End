@@ -330,21 +330,6 @@ export default function SchedulePage() {
                 ))}
               </Select>
             </Form.Item>
-
-            <Form.Item
-              label="Start Time"
-              name="startTime"
-              rules={[{ required: true, message: "Please select start time" }]}
-            >
-              <TimePicker use12Hours format="h:mm a" />
-            </Form.Item>
-            <Form.Item
-              label="End Time"
-              name="endTime"
-              rules={[{ required: true, message: "Please select end time" }]}
-            >
-              <TimePicker use12Hours format="h:mm a" />
-            </Form.Item>
           </Form>
         </Modal>
       </div>
