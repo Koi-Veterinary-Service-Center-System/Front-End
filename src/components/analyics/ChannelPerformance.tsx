@@ -38,14 +38,13 @@ const VetServiceChannelPerformance = () => {
       // Chuyển đổi dữ liệu thành định dạng mà biểu đồ có thể sử dụng
       const transformedData = response.data.reduce(
         (acc: { name: string; value: number }[], item: any) => {
-          const existingService = acc.find(
-            (service) => service.name === item.serviceName
-          );
+          const label = `${item.serviceName} (Rate ${item.rate})`;
+          const existingEntry = acc.find((entry) => entry.name === label);
 
-          if (existingService) {
-            existingService.value += 1; // Tăng số lượng feedback cho dịch vụ này
+          if (existingEntry) {
+            existingEntry.value += 1; // Tăng số lượng feedback cho dịch vụ này và rate này
           } else {
-            acc.push({ name: item.serviceName, value: 1 });
+            acc.push({ name: label, value: 1 });
           }
 
           return acc;
@@ -74,7 +73,7 @@ const VetServiceChannelPerformance = () => {
       transition={{ delay: 0.3 }}
     >
       <h2 className="text-xl font-semibold text-blue-800 mb-4">
-        Veterinary Service Channel Performance
+        Veterinary Service Performance by Rate
       </h2>
 
       {loading ? (

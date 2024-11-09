@@ -500,56 +500,71 @@ const History = () => {
                                         </DialogHeader>
                                         <p>
                                           Are you sure you want to cancel this
-                                          booking? Please provide your bank
-                                          information for any refunds.
+                                          booking?
                                         </p>
 
-                                        {/* Form điền thông tin */}
-                                        <form>
-                                          <div className="mb-4">
-                                            <label className="block text-gray-700">
-                                              Bank Name:
-                                            </label>
-                                            <input
-                                              type="text"
-                                              name="bankName"
-                                              value={cancelBookingInfo.bankName}
-                                              onChange={handleInputChange}
-                                              className="w-full p-2 border border-gray-300 rounded mt-2"
-                                              required
-                                            />
-                                          </div>
-                                          <div className="mb-4">
-                                            <label className="block text-gray-700">
-                                              Bank Account Number:
-                                            </label>
-                                            <input
-                                              type="text"
-                                              name="customerBankNumber"
-                                              value={
-                                                cancelBookingInfo.customerBankNumber
-                                              }
-                                              onChange={handleInputChange}
-                                              className="w-full p-2 border border-gray-300 rounded mt-2"
-                                              required
-                                            />
-                                          </div>
-                                          <div className="mb-4">
-                                            <label className="block text-gray-700">
-                                              Bank Account Holder's Name:
-                                            </label>
-                                            <input
-                                              type="text"
-                                              name="customerBankAccountName"
-                                              value={
-                                                cancelBookingInfo.customerBankAccountName
-                                              }
-                                              onChange={handleInputChange}
-                                              className="w-full p-2 border border-gray-300 rounded mt-2"
-                                              required
-                                            />
-                                          </div>
-                                        </form>
+                                        {/* Show bank information form only if payment type is not "In Cash" */}
+                                        {booking.paymentTypeAtBooking !==
+                                        "In Cash" ? (
+                                          <>
+                                            <p>
+                                              Please provide your bank
+                                              information for any refunds.
+                                            </p>
+                                            <form>
+                                              <div className="mb-4">
+                                                <label className="block text-gray-700">
+                                                  Bank Name:
+                                                </label>
+                                                <input
+                                                  type="text"
+                                                  name="bankName"
+                                                  value={
+                                                    cancelBookingInfo.bankName
+                                                  }
+                                                  onChange={handleInputChange}
+                                                  className="w-full p-2 border border-gray-300 rounded mt-2"
+                                                  required
+                                                />
+                                              </div>
+                                              <div className="mb-4">
+                                                <label className="block text-gray-700">
+                                                  Bank Account Number:
+                                                </label>
+                                                <input
+                                                  type="text"
+                                                  name="customerBankNumber"
+                                                  value={
+                                                    cancelBookingInfo.customerBankNumber
+                                                  }
+                                                  onChange={handleInputChange}
+                                                  className="w-full p-2 border border-gray-300 rounded mt-2"
+                                                  required
+                                                />
+                                              </div>
+                                              <div className="mb-4">
+                                                <label className="block text-gray-700">
+                                                  Account Holder's Name:
+                                                </label>
+                                                <input
+                                                  type="text"
+                                                  name="customerBankAccountName"
+                                                  value={
+                                                    cancelBookingInfo.customerBankAccountName
+                                                  }
+                                                  onChange={handleInputChange}
+                                                  className="w-full p-2 border border-gray-300 rounded mt-2"
+                                                  required
+                                                />
+                                              </div>
+                                            </form>
+                                          </>
+                                        ) : (
+                                          <p>
+                                            No bank information needed for "In
+                                            Cash" payment type.
+                                          </p>
+                                        )}
 
                                         <Button
                                           className="mt-4 w-full bg-red-600"

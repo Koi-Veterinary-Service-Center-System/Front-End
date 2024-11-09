@@ -83,12 +83,7 @@ const Footer = () => {
           {/* Company Links */}
           <FooterSection
             title="Company"
-            links={[
-              { text: "About Us", url: "/about" },
-              { text: "Blog", url: "/blog" },
-              { text: "Gift Cards", url: "/gift-cards" },
-              { text: "Careers", url: "/careers" },
-            ]}
+            links={[{ text: "About Us", url: "/about-us" }]}
           />
 
           {/* Useful Links */}
@@ -96,9 +91,7 @@ const Footer = () => {
             title="Useful Links"
             links={[
               { text: "New Products", url: "/new-products" },
-              { text: "Best Sellers", url: "/best-sellers" },
-              { text: "Discount", url: "/discounts" },
-              { text: "F.A.Q", url: "/faq" },
+              { text: "Fish Service", url: "/services" },
             ]}
           />
 
@@ -106,16 +99,14 @@ const Footer = () => {
           <FooterSection
             title="Customer Service"
             links={[
-              { text: "Contact Us", url: "/contact" },
-              { text: "Fish Service", url: "/fish-service" },
-              { text: "Returns", url: "/returns" },
-              { text: "Order Tracking", url: "/order-tracking" },
+              { text: "Contact Us", url: "/contact-us" },
+              { text: "Returns", url: "/" },
             ]}
           />
 
           {/* Store Info */}
           <div className="space-y-4">
-            <h5 className="text-lg font-semibold">Store</h5>
+            <h5 className="text-lg font-semibold">Service Center</h5>
             <div className="space-y-2 text-sm text-gray-600">
               <p className="flex items-start">
                 <FaMapMarkerAlt className="mr-2 mt-1 flex-shrink-0 text-blue-500" />

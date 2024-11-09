@@ -80,7 +80,7 @@ const UsersTable = () => {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+  const [banLoading, setBanLoading] = useState(false);
   // Additional state for managing the ban dialog
   const [isBanModalOpen, setIsBanModalOpen] = useState(false);
   const [userToBan, setUserToBan] = useState<User | null>(null);
@@ -229,6 +229,7 @@ const UsersTable = () => {
 
   // Updated ban function to include a reason
   const handleBanSubmit = async (data: BanReasonFormData) => {
+    setBanLoading(true);
     try {
       await api.patch(
         `/User/ban-user/${userToBan?.userID}`,
@@ -250,6 +251,8 @@ const UsersTable = () => {
       fetchUser();
     } catch (error: any) {
       toast.error("Failed to ban user. Please try again.");
+    } finally {
+      setBanLoading(false); // Stop loading after completion
     }
   };
 
@@ -678,8 +681,9 @@ const UsersTable = () => {
                     <Button
                       type="submit"
                       className="bg-yellow-600 text-white hover:bg-yellow-700"
+                      disabled={banLoading}
                     >
-                      Ban User
+                      {banLoading ? "Banning..." : "Ban User"}
                     </Button>
                   </div>
                 </form>
