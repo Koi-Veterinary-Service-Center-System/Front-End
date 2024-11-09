@@ -1,15 +1,30 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Trash, AlertTriangle } from "lucide-react";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import api from "../../configs/axios";
 import { toast } from "sonner";
 import { Feedback } from "@/types/info";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
+// Mock userRole for demonstration, replace with actual role from context or state
+const userRole = "Manager"; // Replace with the actual user role
 
 const FeedbackTable = () => {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [feedbackToDelete, setFeedbackToDelete] = useState<Feedback | null>(
+    null
+  );
 
   const fetchFeedbackData = async () => {
     setLoading(true);
@@ -46,6 +61,33 @@ const FeedbackTable = () => {
       }
     } catch (error: any) {
       toast.error(error.response?.data || "Failed to update visibility");
+    }
+  };
+
+  const openDeleteModal = (feedback: Feedback) => {
+    setFeedbackToDelete(feedback);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteFeedback = async () => {
+    if (!feedbackToDelete) return;
+    try {
+      const response = await api.delete(
+        `/Feedback/delete-feedback/${feedbackToDelete.feedbackID}`
+      );
+      if (response.status === 200) {
+        setFeedbacks((prevFeedbacks) =>
+          prevFeedbacks.filter(
+            (feedback) => feedback.feedbackID !== feedbackToDelete.feedbackID
+          )
+        );
+        toast.success("Feedback deleted successfully!");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data || "Failed to delete feedback");
+    } finally {
+      setIsDeleteModalOpen(false);
+      setFeedbackToDelete(null);
     }
   };
 
@@ -132,8 +174,8 @@ const FeedbackTable = () => {
                     <Tooltip
                       id={`tooltip-${feedback.feedbackID}`}
                       style={{
-                        maxWidth: "200px", // Đặt chiều rộng tối đa cho Tooltip
-                        whiteSpace: "normal", // Đảm bảo xuống hàng khi vượt quá chiều rộng
+                        maxWidth: "200px",
+                        whiteSpace: "normal",
                       }}
                     />
                   </td>
@@ -148,7 +190,7 @@ const FeedbackTable = () => {
                       {feedback.isVisible ? "Visible" : "Hidden"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm flex space-x-2">
                     <button
                       onClick={() =>
                         handleToggleVisibility(
@@ -164,12 +206,52 @@ const FeedbackTable = () => {
                         <EyeOff size={18} />
                       )}
                     </button>
+                    {userRole === "Manager" && (
+                      <button
+                        onClick={() => openDeleteModal(feedback)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <Trash size={18} />
+                      </button>
+                    )}
                   </td>
                 </motion.tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {feedbackToDelete && (
+        <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+          <DialogContent className="bg-white sm:max-w-[400px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center text-red-600">
+                <AlertTriangle className="w-6 h-6 mr-2" />
+                Confirm Deletion
+              </DialogTitle>
+            </DialogHeader>
+            <p className="text-gray-600">
+              Are you sure you want to delete this feedback? This action cannot
+              be undone.
+            </p>
+            <DialogFooter className="flex justify-end space-x-4 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeleteFeedback}
+                className="bg-red-600 text-white hover:bg-red-700"
+              >
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </motion.div>
   );

@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -315,7 +314,7 @@ const BookingTable = () => {
         paymentId: values.paymentType || 0,
         bookingDate: bookingDate,
         quantity: values.quantity,
-        userID: values.customerID,
+        customerId: values.customerId,
       };
 
       console.log("Booking Data:", bookingData);
@@ -325,7 +324,7 @@ const BookingTable = () => {
       if (response.status === 200 || response.status === 201) {
         toast.success("Booking successful!");
       }
-      window.location.href = "/process";
+      fetchBookings();
     } catch (error: any) {
       console.error("Booking error:", error);
       if (error.response && error.response.data) {
@@ -460,7 +459,7 @@ const BookingTable = () => {
               >
                 <Form.Item
                   label="Customer Name"
-                  name="userID"
+                  name="customerId"
                   rules={[
                     { required: true, message: "Please select a customer" },
                   ]}
@@ -845,15 +844,16 @@ const BookingTable = () => {
                       >
                         <Eye size={18} />
                       </button>
-                      {booking.bookingStatus !== "Cancelled" && (
-                        <button
-                          className="text-red-600 hover:text-red-800"
-                          onClick={() => handleCancelBooking(booking)}
-                          aria-label="Cancel booking"
-                        >
-                          <XCircle size={18} />
-                        </button>
-                      )}
+                      {booking.bookingStatus !== "Cancelled" &&
+                        booking.bookingStatus !== "Succeeded" && (
+                          <button
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => handleCancelBooking(booking)}
+                            aria-label="Cancel booking"
+                          >
+                            <XCircle size={18} />
+                          </button>
+                        )}
                     </td>
                   </motion.tr>
                 ))
@@ -1035,6 +1035,7 @@ const BookingTable = () => {
         onClose={() => setIsCancelDialogOpen(false)}
         onConfirm={handleConfirmCancel}
         isLoading={isLoadingCancel} // Truyền trạng thái loading
+        paymentType={selectedBooking?.paymentTypeAtBooking}
       />
     </motion.div>
   );

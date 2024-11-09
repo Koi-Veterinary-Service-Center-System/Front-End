@@ -37,6 +37,7 @@ export default function CancelBookingDialog({
   onClose,
   onConfirm,
   isLoading, // Nhận prop isLoading
+  paymentType,
 }: CancelBookingDialogProps) {
   const [refundPercent, setRefundPercent] = useState("");
   const [cancelReason, setCancelReason] = useState("");
@@ -70,29 +71,34 @@ export default function CancelBookingDialog({
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.3 }}
             >
-              <div className="space-y-2">
-                <Label
-                  htmlFor="refundPercent"
-                  className="text-lg font-semibold text-gray-700"
-                >
-                  Refund Percentage
-                </Label>
-                <Select onValueChange={setRefundPercent} value={refundPercent}>
-                  <SelectTrigger id="refundPercent" className="w-full">
-                    <SelectValue placeholder="Select refund percentage" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[0, 25, 50, 75, 100].map((percent) => (
-                      <SelectItem key={percent} value={percent.toString()}>
-                        <div className="flex items-center">
-                          <DollarSign className="w-4 h-4 mr-2 text-green-500" />
-                          {percent}%
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {paymentType !== "In Cash" && (
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="refundPercent"
+                    className="text-lg font-semibold text-gray-700"
+                  >
+                    Refund Percentage
+                  </Label>
+                  <Select
+                    onValueChange={setRefundPercent}
+                    value={refundPercent}
+                  >
+                    <SelectTrigger id="refundPercent" className="w-full">
+                      <SelectValue placeholder="Select refund percentage" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[0, 25, 50, 75, 100].map((percent) => (
+                        <SelectItem key={percent} value={percent.toString()}>
+                          <div className="flex items-center">
+                            <DollarSign className="w-4 h-4 mr-2 text-green-500" />
+                            {percent}%
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label
                   htmlFor="cancelReason"
