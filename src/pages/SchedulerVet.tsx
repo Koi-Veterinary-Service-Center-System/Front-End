@@ -84,6 +84,7 @@ export default function VetCalendar() {
           .filter(Boolean);
 
         setEvents(data as VetSlots[]);
+        console.log(data);
       } catch (error) {
         console.error("Error fetching schedule data:", error);
       }

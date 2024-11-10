@@ -180,15 +180,20 @@ const DetailBooking = () => {
       toast.error(errorMessage);
     }
   };
-  const fetchPrescriptionRecord = async (bookingId: Booking) => {
+  const fetchPrescriptionRecord = async (bookingID: Booking) => {
     try {
-      const response = await api.get(`/pres-rec/${bookingId}`);
-      setSelectedPrescription(response.data);
+      const response = await api.get(`/pres-rec/${bookingID}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      console.log("Prescription response:", response.data); // Debug log
+      setSelectedPrescription(response.data[0]); // Assuming the response is an array, get the first item
     } catch (error) {
       console.error("Error fetching prescription record:", error);
+      toast.error("Failed to fetch prescription record.");
     }
   };
-
   // Call fetchBooking in useEffect
   // Fetch Profile once on component mount
   useEffect(() => {
