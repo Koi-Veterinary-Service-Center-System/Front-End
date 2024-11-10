@@ -430,7 +430,12 @@ const History = () => {
                                   </div>
                                   <div className="flex items-center">
                                     <MapPinIcon className="h-4 w-4 mr-2 text-blue-500" />
-                                    <span>{booking.location}</span>
+                                    <span>
+                                      {booking.location ===
+                                      "undefined, undefined, undefined"
+                                        ? "District 1, Ho Chi Minh City"
+                                        : booking.location}
+                                    </span>
                                   </div>
                                   <div className="flex items-center">
                                     <CreditCardIcon className="h-4 w-4 mr-2 text-blue-500" />

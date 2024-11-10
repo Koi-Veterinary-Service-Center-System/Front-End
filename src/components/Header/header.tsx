@@ -215,7 +215,7 @@ function UserActions({ profile, notifications, clearNotifications }) {
         notifications={notifications}
         clearNotifications={clearNotifications}
       />
-      {["Vet", "Customer"].includes(profile?.role) && (
+      {["Vet"].includes(profile?.role) && (
         <Link to="/schedulesV">
           <Button variant="ghost" size="icon">
             <CalendarCheck2 className="h-5 w-5" />

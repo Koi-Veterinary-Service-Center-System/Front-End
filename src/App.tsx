@@ -12,7 +12,6 @@ import AllService from "./pages/AllService/allService";
 import ErrorBoundary from "./errorBoudary";
 import { registerLicense } from "@syncfusion/ej2-base";
 import "./index.css";
-import AnalyticsPage from "./pages/FeedBack/FeedbackMPage";
 import SettingsPage from "./pages/settingpage/setting";
 import FishPrescription from "./pages/prescriptions/prescription";
 import { Toaster } from "sonner";
@@ -33,6 +32,7 @@ import DetailBooking from "./pages/Booking/DetailBooking";
 import ChangePassword from "./pages/Sercurity/ChangePassword";
 import DetailService from "./pages/AllService/DetailService";
 import FeedbackManagement from "./pages/FeedBack/FeedbackMPage";
+import EmailConfirmation from "./pages/Sercurity/EmailConfirmation";
 
 // Add your license key here
 registerLicense("Your_License_Key_Here");
@@ -58,6 +58,7 @@ function App() {
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/detail-service/:serviceId" element={<DetailService />} />
+        <Route path="/emailConfirmation" element={<EmailConfirmation />} />
         {/* Private Routes */}
         <Route
           path="/profile"
@@ -182,7 +183,7 @@ function App() {
         <Route
           path="/schedulesV"
           element={
-            <PrivateRoute requiredRoles={["Vet", "Customer"]}>
+            <PrivateRoute requiredRoles={["Vet"]}>
               <VetCalendar />
             </PrivateRoute>
           }

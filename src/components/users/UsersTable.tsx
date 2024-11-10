@@ -93,7 +93,7 @@ const UsersTable = () => {
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
       case "Staff":
-        return "bg-red-100 text-red-800";
+        return "bg-pink-100 text-pink-800";
       case "Manager":
         return "bg-yellow-100 text-yellow-800";
       case "Customer":
