@@ -22,7 +22,7 @@ import {
 import { FaUserDoctor } from "react-icons/fa6";
 import { MdNoteAlt } from "react-icons/md";
 import { RiSecurePaymentFill, RiSortNumberDesc } from "react-icons/ri";
-
+import moment from "moment";
 import {
   Booking,
   Distance,
@@ -74,6 +74,7 @@ const BookingTable = () => {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isLoadingCancel, setIsLoadingCancel] = useState(false);
   const [form] = Form.useForm();
+  const [allSlots, setAllSlots] = useState<Slot[]>([]);
 
   // Fetch Slots
   useEffect(() => {
@@ -81,8 +82,8 @@ const BookingTable = () => {
       try {
         setLoadingSlots(true);
         const response = await api.get("/slot/all-slot");
-        setSlots(response.data); // Assuming response data is the array of slots
-        // setAllSlots(response.data); // Save all slots for filtering later
+        setSlots(response.data); // Hiển thị slots
+        setAllSlots(response.data); // Lưu trữ slots ban đầu
       } catch (error) {
         console.error("Error fetching slots:", error);
         toast.error("Failed to load slot data.");
@@ -100,7 +101,13 @@ const BookingTable = () => {
       try {
         setLoadingServices(true);
         const response = await api.get("/service/all-service");
-        setServices(response.data); // Assuming response data is the array of services
+
+        // Lọc các dịch vụ để chỉ hiển thị những dịch vụ không có thuộc tính isOnline
+        const filteredServices = response.data.filter(
+          (service) => !service.isOnline
+        );
+
+        setServices(filteredServices); // Cập nhật với danh sách dịch vụ đã lọc
       } catch (error) {
         console.error("Error fetching services:", error);
         toast.error("Failed to load service data.");
@@ -193,6 +200,22 @@ const BookingTable = () => {
     });
   };
 
+  const handleDateChange = (date: unknown) => {
+    if (!date) {
+      setSlots(allSlots); // Khôi phục tất cả slots nếu không có ngày được chọn
+      return;
+    }
+
+    const dayOfWeek = date.day();
+
+    const filteredSlots = allSlots.filter((slot) => {
+      const slotDay = moment(slot.weekDate, "dddd").day();
+      return slotDay === dayOfWeek;
+    });
+
+    setSlots(filteredSlots);
+  };
+
   // Handle vet change to fetch slot
   const handleVetChange = (vetId: number) => {
     // Find the selected vet's name
@@ -277,7 +300,7 @@ const BookingTable = () => {
       setIsDialogOpen(true); // Open the dialog
     } catch (error) {
       console.error("Error fetching booking record details:", error);
-      toast.error(error.response.data);
+      toast.info(error.response.data);
     }
   };
 
@@ -324,6 +347,8 @@ const BookingTable = () => {
       if (response.status === 200 || response.status === 201) {
         toast.success("Booking successful!");
       }
+      setIsModalOpen(false); // Đóng modal sau khi đặt chỗ thành công
+      form.resetFields();
       fetchBookings();
     } catch (error: any) {
       console.error("Booking error:", error);
@@ -439,6 +464,7 @@ const BookingTable = () => {
           visible={isModalOpen}
           onCancel={handleCancel}
           footer={null} // Loại bỏ các nút mặc định của Modal
+          width={800}
         >
           <Form
             form={form}
@@ -483,7 +509,17 @@ const BookingTable = () => {
                   name="bookingDate"
                   rules={[{ required: true, message: "Please select a date" }]}
                 >
-                  <DatePicker className="w-full p-2 shadow-sm" />
+                  <DatePicker
+                    className="w-full p-2 shadow-sm"
+                    disabledDate={
+                      (current) =>
+                        current &&
+                        (current < moment().endOf("day") || // Disable past dates
+                          current.day() === 0 || // Disable Sundays
+                          current.day() === 6) // Disable Saturdays
+                    }
+                    onChange={handleDateChange} // Gọi hàm handleDateChange khi chọn ngày
+                  />
                 </Form.Item>
               </motion.div>
 
@@ -555,7 +591,6 @@ const BookingTable = () => {
                     </span>
                   }
                   name="vet" // Đảm bảo 'name' đúng
-                  rules={[{ required: true, message: "Please select a vet" }]}
                 >
                   <Select
                     className="w-full p-0"
@@ -626,16 +661,27 @@ const BookingTable = () => {
                   name="district"
                 >
                   <Select
+                    showSearch
                     className="w-full p-0"
                     style={{ height: "50px" }}
                     loading={isLoadingDistance}
                     placeholder="Select a district"
                     onChange={() => calculateTota()}
+                    optionFilterProp="label" // Use label for filtering if using label
+                    filterOption={
+                      (input, option) =>
+                        String(option?.label)
+                          .toLowerCase()
+                          .includes(input.toLowerCase()) // Ensure option.label is a string
+                    }
                   >
                     {distances.map((distance) => (
                       <Select.Option
                         key={distance.distanceID}
                         value={distance.distanceID}
+                        label={`${distance.district} - ${
+                          distance.area
+                        } (${distance.price.toLocaleString("vi-VN")} VND)`}
                       >
                         {distance.district} - {distance.area} ($
                         {distance.price})

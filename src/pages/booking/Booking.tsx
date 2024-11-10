@@ -533,17 +533,28 @@ function BookingPage() {
                   rules={[]} // Only required if isAtHomeService is true
                 >
                   <Select
+                    showSearch // Enable search functionality
                     className="w-full p-0"
                     style={{ height: "50px" }}
                     loading={isLoadingDistance}
                     placeholder="Select a district"
                     disabled={!isAtHomeService} // Disable Select if isAtHomeService is false
                     onChange={() => calculateTotal()}
+                    optionFilterProp="label" // Use label for filtering if using label
+                    filterOption={
+                      (input, option) =>
+                        String(option?.label)
+                          .toLowerCase()
+                          .includes(input.toLowerCase()) // Ensure option.label is a string
+                    }
                   >
                     {distances.map((distance) => (
                       <Option
                         key={distance.distanceID}
                         value={distance.distanceID}
+                        label={`${distance.district} - ${
+                          distance.area
+                        } (${distance.price.toLocaleString("vi-VN")} VND)`}
                       >
                         {distance.district} - {distance.area} (
                         {distance.price.toLocaleString("vi-VN")} VND)
