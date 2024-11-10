@@ -449,10 +449,9 @@ const History = () => {
                                 </div>
                               </CardContent>
                               <CardFooter className="flex justify-between">
-                                {/* Check if booking status is Succeeded or Cancelled */}
-                                {["Succeeded", "Cancelled"].includes(
-                                  booking.bookingStatus
-                                ) && booking.hasFeedback ? (
+                                {/* Feedback Button: Only show when booking status is Succeeded and feedback is not yet provided */}
+                                {booking.bookingStatus === "Succeeded" &&
+                                !booking.hasFeedback ? (
                                   <Link to={`/feedback/${booking.bookingID}`}>
                                     <motion.div
                                       className="relative"
@@ -500,136 +499,119 @@ const History = () => {
                                       </motion.div>
                                     </motion.div>
                                   </Link>
-                                ) : (
-                                  <>
-                                    {/* Confirm to Success Button */}
-                                    {[
-                                      "Scheduled",
-                                      "Ongoing",
-                                      "Completed",
-                                      "Received_Money",
-                                    ].includes(booking.bookingStatus) && (
+                                ) : null}
+
+                                {/* Confirm to Success Button: Only show when booking status is Succeeded */}
+                                {booking.bookingStatus === "Received_Money" && (
+                                  <Button
+                                    className="bg-blue-500 text-white hover:bg-blue-600"
+                                    variant="outline"
+                                    onClick={() =>
+                                      openConfirmModal(booking.bookingID)
+                                    }
+                                  >
+                                    Confirm to Success
+                                  </Button>
+                                )}
+
+                                {/* Cancel Booking Button: Only show when booking status is Scheduled */}
+                                {booking.bookingStatus === "Scheduled" && (
+                                  <Dialog
+                                    open={isCancelDialogOpen}
+                                    onOpenChange={setIsCancelDialogOpen}
+                                  >
+                                    <DialogTrigger asChild>
                                       <Button
-                                        className="bg-blue-500 text-white hover:bg-blue-600"
-                                        variant="outline"
+                                        variant="destructive"
                                         onClick={() =>
-                                          openConfirmModal(booking.bookingID)
+                                          openCancelDialog(booking.bookingID)
                                         }
-                                        disabled={[
-                                          "Pending",
-                                          "Scheduled",
-                                          "Ongoing",
-                                          "Completed",
-                                        ].includes(booking.bookingStatus)}
                                       >
-                                        Confirm to Success
+                                        Cancel Booking
                                       </Button>
-                                    )}
-
-                                    {/* Cancel Booking Button */}
-                                    <Dialog
-                                      open={isCancelDialogOpen}
-                                      onOpenChange={setIsCancelDialogOpen}
-                                    >
-                                      <DialogTrigger asChild>
-                                        <Button
-                                          variant="destructive"
-                                          onClick={() =>
-                                            openCancelDialog(booking.bookingID)
-                                          }
-                                          disabled={[
-                                            "Ongoing",
-                                            "Completed",
-                                            "Received_Money",
-                                            "Cancelled",
-                                          ].includes(booking.bookingStatus)}
-                                        >
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                      <DialogHeader>
+                                        <DialogTitle>
                                           Cancel Booking
-                                        </Button>
-                                      </DialogTrigger>
-                                      <DialogContent>
-                                        <DialogHeader>
-                                          <DialogTitle>
-                                            Cancel Booking
-                                          </DialogTitle>
-                                        </DialogHeader>
-                                        <p>
-                                          Are you sure you want to cancel this
-                                          booking?
-                                        </p>
+                                        </DialogTitle>
+                                      </DialogHeader>
+                                      <p>
+                                        Are you sure you want to cancel this
+                                        booking?
+                                      </p>
 
-                                        {/* Show bank information form only if payment type is not "In Cash" */}
-                                        {booking.paymentTypeAtBooking !==
-                                        "In Cash" ? (
-                                          <>
-                                            <p>
-                                              Please provide your bank
-                                              information for any refunds.
-                                            </p>
-                                            <form>
-                                              <div className="mb-4">
-                                                <label className="block text-gray-700">
-                                                  Bank Name:
-                                                </label>
-                                                <input
-                                                  type="text"
-                                                  name="bankName"
-                                                  value={
-                                                    cancelBookingInfo.bankName
-                                                  }
-                                                  onChange={handleInputChange}
-                                                  className="w-full p-2 border border-gray-300 rounded mt-2"
-                                                  required
-                                                />
-                                              </div>
-                                              <div className="mb-4">
-                                                <label className="block text-gray-700">
-                                                  Bank Account Number:
-                                                </label>
-                                                <input
-                                                  type="text"
-                                                  name="customerBankNumber"
-                                                  value={
-                                                    cancelBookingInfo.customerBankNumber
-                                                  }
-                                                  onChange={handleInputChange}
-                                                  className="w-full p-2 border border-gray-300 rounded mt-2"
-                                                  required
-                                                />
-                                              </div>
-                                              <div className="mb-4">
-                                                <label className="block text-gray-700">
-                                                  Account Holder's Name:
-                                                </label>
-                                                <input
-                                                  type="text"
-                                                  name="customerBankAccountName"
-                                                  value={
-                                                    cancelBookingInfo.customerBankAccountName
-                                                  }
-                                                  onChange={handleInputChange}
-                                                  className="w-full p-2 border border-gray-300 rounded mt-2"
-                                                  required
-                                                />
-                                              </div>
-                                            </form>
-                                          </>
-                                        ) : (
+                                      {/* Show bank information form only if payment type is not "In Cash" */}
+                                      {booking.paymentTypeAtBooking !==
+                                      "In Cash" ? (
+                                        <>
                                           <p>
-                                            No bank information needed for "In
-                                            Cash" payment type.
+                                            Please provide your bank information
+                                            for any refunds.
                                           </p>
-                                        )}
+                                          <form>
+                                            <div className="mb-4">
+                                              <label className="block text-gray-700">
+                                                Bank Name:
+                                              </label>
+                                              <input
+                                                type="text"
+                                                name="bankName"
+                                                value={
+                                                  cancelBookingInfo.bankName
+                                                }
+                                                onChange={handleInputChange}
+                                                className="w-full p-2 border border-gray-300 rounded mt-2"
+                                                required
+                                              />
+                                            </div>
+                                            <div className="mb-4">
+                                              <label className="block text-gray-700">
+                                                Bank Account Number:
+                                              </label>
+                                              <input
+                                                type="text"
+                                                name="customerBankNumber"
+                                                value={
+                                                  cancelBookingInfo.customerBankNumber
+                                                }
+                                                onChange={handleInputChange}
+                                                className="w-full p-2 border border-gray-300 rounded mt-2"
+                                                required
+                                              />
+                                            </div>
+                                            <div className="mb-4">
+                                              <label className="block text-gray-700">
+                                                Account Holder's Name:
+                                              </label>
+                                              <input
+                                                type="text"
+                                                name="customerBankAccountName"
+                                                value={
+                                                  cancelBookingInfo.customerBankAccountName
+                                                }
+                                                onChange={handleInputChange}
+                                                className="w-full p-2 border border-gray-300 rounded mt-2"
+                                                required
+                                              />
+                                            </div>
+                                          </form>
+                                        </>
+                                      ) : (
+                                        <p>
+                                          No bank information needed for "In
+                                          Cash" payment type.
+                                        </p>
+                                      )}
 
-                                        <Button
-                                          className="mt-4 w-full bg-red-600"
-                                          onClick={handleCancelBooking}
-                                        >
-                                          Confirm Cancel
-                                        </Button>
-                                      </DialogContent>
-                                    </Dialog>
-                                  </>
+                                      <Button
+                                        className="mt-4 w-full bg-red-600"
+                                        onClick={handleCancelBooking}
+                                      >
+                                        Confirm Cancel
+                                      </Button>
+                                    </DialogContent>
+                                  </Dialog>
                                 )}
                               </CardFooter>
                             </Card>
