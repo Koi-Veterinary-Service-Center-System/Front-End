@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, Spin } from "antd";
 import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
 import { GrContactInfo } from "react-icons/gr";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,11 +7,14 @@ import { toast } from "sonner";
 import api from "../../configs/axios";
 import Header from "@/components/Header/header";
 import { FaUser } from "react-icons/fa";
+import { useState } from "react";
 
 const Register = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async (values: any) => {
+    setIsLoading(true);
     try {
       const response = await api.post("User/register", values);
       const { token } = response.data;
@@ -19,9 +22,11 @@ const Register = () => {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(response.data));
 
-      navigate("/", { state: { registerSuccess: true } });
+      navigate("/emailConfirmation", { state: { registerSuccess: true } });
     } catch (error: any) {
       toast.error(error.response.data);
+    } finally {
+      setIsLoading(false); // Dừng loading khi đăng ký xong
     }
   };
 
@@ -260,12 +265,18 @@ const Register = () => {
                       type="primary"
                       htmlType="submit"
                       className="w-full bg-blue-600 hover:bg-blue-700"
+                      disabled={isLoading}
                     >
-                      Register
+                      {isLoading ? <Spin /> : "Register"}
                     </Button>
                   </Form.Item>
                 </motion.div>
               </Form>
+              {isLoading && (
+                <div className="text-center text-blue-800 mt-4">
+                  <Spin size="large" /> <span>Page redirecting...</span>
+                </div>
+              )}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -291,20 +302,6 @@ const Register = () => {
                 transition={{ delay: 1.3 }}
                 className="mt-4 space-y-3"
               >
-                <Button
-                  icon={
-                    <img
-                      src="src\assets\images\google.png"
-                      alt="Google"
-                      className="mr-2 h-6 w-6"
-                    />
-                  }
-                  size="large"
-                  block
-                  className="border-blue-300 text-blue-600 hover:border-blue-500 hover:text-blue-700 mb-2"
-                >
-                  Sign up with Google
-                </Button>
                 <Link to="/">
                   <Button className="w-full bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors duration-200">
                     <FaUser className="mr-2 h-5 w-5" />

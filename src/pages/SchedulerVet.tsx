@@ -23,7 +23,7 @@ const timeSlots = [
 ];
 
 export default function VetCalendar() {
-  const [currentDate, setCurrentDate] = useState(new Date()); // Dynamically sets to today's date
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<VetSlots[]>([]);
 
   useEffect(() => {
@@ -78,6 +78,7 @@ export default function VetCalendar() {
               slotStartTime: startTime,
               slotEndTime: endTime,
               meetURL: item.meetURL,
+              isBook: item.isBook,
             };
           })
           .filter(Boolean);
@@ -139,8 +140,7 @@ export default function VetCalendar() {
   };
 
   const flashingVariants = {
-    visible: { opacity: 1 },
-    hidden: { opacity: 0 },
+    flash: { opacity: [1, 0.7, 1], scale: [1, 1.05, 1] },
   };
 
   return (
@@ -156,6 +156,7 @@ export default function VetCalendar() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.5 }}
       >
+        {/* Calendar Header */}
         <div className="bg-blue-600 text-white p-4">
           <h1 className="text-2xl font-bold mb-4">Calendar</h1>
           <div className="flex justify-between items-center">
@@ -181,6 +182,8 @@ export default function VetCalendar() {
             </button>
           </div>
         </div>
+
+        {/* Calendar Body */}
         <div className="overflow-x-auto">
           <div className="min-w-[800px]">
             <div className="grid grid-cols-8 bg-blue-50">
@@ -213,7 +216,24 @@ export default function VetCalendar() {
                         className="border-r border-b border-blue-100 last:border-r-0 relative p-2"
                       >
                         {event && (
-                          <div className="bg-blue-200 border border-blue-300 rounded p-1 text-xs">
+                          <motion.div
+                            className={`${
+                              event.isBook
+                                ? "bg-blue-300 border border-blue-400"
+                                : "bg-blue-200 border border-blue-300"
+                            } rounded p-1 text-xs`}
+                            variants={event.isBook ? flashingVariants : {}}
+                            animate={event.isBook ? "flash" : ""}
+                            transition={
+                              event.isBook
+                                ? {
+                                    duration: 1,
+                                    repeat: Infinity,
+                                    repeatType: "reverse",
+                                  }
+                                : {}
+                            }
+                          >
                             <Link to="/detail" className="block mb-1">
                               <div className="font-semibold text-blue-800">
                                 {event.vetName}
@@ -230,7 +250,6 @@ export default function VetCalendar() {
                                 })}
                               </div>
                             </Link>
-
                             <Link
                               to={event.meetURL}
                               target="_blank"
@@ -245,7 +264,6 @@ export default function VetCalendar() {
                               Join Meet
                               {event.meetURL && (
                                 <motion.div
-                                  variants={flashingVariants}
                                   animate={{ opacity: [1, 0, 1] }}
                                   transition={{
                                     duration: 1,
@@ -257,7 +275,7 @@ export default function VetCalendar() {
                                 </motion.div>
                               )}
                             </Link>
-                          </div>
+                          </motion.div>
                         )}
                       </div>
                     );
@@ -267,14 +285,6 @@ export default function VetCalendar() {
             </div>
           </div>
         </div>
-      </motion.div>
-      <motion.div
-        className="mt-6 text-sm text-blue-600 text-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-      >
-        Current Date: {currentDate.toLocaleDateString()}
       </motion.div>
     </motion.div>
   );

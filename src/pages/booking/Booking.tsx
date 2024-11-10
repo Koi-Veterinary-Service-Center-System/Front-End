@@ -386,8 +386,12 @@ function BookingPage() {
                 >
                   <DatePicker
                     className="w-full p-2 shadow-sm"
-                    disabledDate={(current) =>
-                      current && current < moment().endOf("day")
+                    disabledDate={
+                      (current) =>
+                        current &&
+                        (current < moment().endOf("day") || // Disable past dates
+                          current.day() === 0 || // Disable Sundays
+                          current.day() === 6) // Disable Saturdays
                     }
                     onChange={handleDateChange} // Gọi hàm handleDateChange khi chọn ngày
                   />

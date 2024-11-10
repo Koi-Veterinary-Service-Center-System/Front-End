@@ -376,7 +376,10 @@ const DetailBooking = () => {
                           >
                             <MapPinIcon className="h-5 w-5 mr-3 text-blue-500" />
                             <span className="text-gray-700">
-                              {booking.location}
+                              {booking.location ===
+                              "undefined, undefined, undefined"
+                                ? "District 1, Ho Chi Minh City"
+                                : booking.location}
                             </span>
                           </motion.div>
                           <motion.div
@@ -416,10 +419,17 @@ const DetailBooking = () => {
                           >
                             <VscNotebook className="h-5 w-5 mr-3 text-blue-500" />
                             <span className="text-gray-700">
-                              {booking.bookingStatus === "Succeed" ||
-                              booking.bookingStatus === "Cancelled"
-                                ? booking.bookingRecordNote
-                                : booking.note}
+                              {
+                                [
+                                  "Succeed",
+                                  "Cancelled",
+                                  "Completed",
+                                  "Received_Money",
+                                ].includes(booking.bookingStatus)
+                                  ? booking.bookingRecordNote ||
+                                    "No notes available" // Nếu bookingRecordNote là null hoặc rỗng
+                                  : booking.note || "No notes available" // Nếu note là null hoặc rỗng
+                              }
                             </span>
                           </motion.div>
 
