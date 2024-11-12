@@ -583,12 +583,12 @@ function BookingPage() {
                     },
                     {
                       type: "number",
-                      min: 1,
-                      message: "Quantity must be at least 1", // Bắt lỗi nếu người dùng nhập số nhỏ hơn 1
+                      min: 0,
+                      message: "Quantity must be at least 0", // Bắt lỗi nếu người dùng nhập số nhỏ hơn 1
                     },
                   ]}
                 >
-                  <InputNumber min={1} className="w-full p-2 shadow-sm" />
+                  <InputNumber min={0} className="w-full p-2 shadow-sm" />
                 </Form.Item>
               </motion.div>
             </motion.div>
