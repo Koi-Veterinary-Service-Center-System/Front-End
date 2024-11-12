@@ -1,10 +1,8 @@
-import { UserCheck, UserPlus, UsersIcon, UserX } from "lucide-react";
+import { UserCheck, UsersIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import HeaderAd from "@/components/Header/headerAd";
 import StatCard from "@/components/common/StatCard";
-import UserActivityHeatmap from "@/components/users/UserActivityHeatmap";
 import UsersTable from "@/components/users/UsersTable";
-import UserGrowthChart from "@/components/users/UserGrowthChart";
 import Sidebar from "@/components/Sidebar/sidebar";
 import { useEffect, useState } from "react";
 import { User } from "@/types/info";
@@ -78,14 +76,12 @@ const UsersPage = () => {
               />
             </div>
           </motion.div>
-
           <UsersTable />
-
-          {/* USER CHARTS */}
+          {/* USER CHARTS
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
             <UserGrowthChart />
             <UserActivityHeatmap />
-          </div>
+          </div> */}
         </main>
       </div>
     </div>

@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { AlertTriangle, DollarSign, Package, TrendingUp } from "lucide-react";
 import HeaderAd from "@/components/Header/headerAd";
 import ServicesTable from "@/components/services/ServicesTable";
-import SalesTrendChart from "@/components/services/SalesTrendChart";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import api from "@/configs/axios";
@@ -126,8 +125,7 @@ const Service = () => {
             onAddSuccess={handleAddSuccess}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <SalesTrendChart />
+          <div className="grid  gap-8">
             <CategoryDistributionChart />
           </div>
         </main>

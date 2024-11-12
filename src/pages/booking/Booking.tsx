@@ -171,7 +171,7 @@ function BookingPage() {
       setVets(response.data); // Update the vets list based on the slot
     } catch (error) {
       console.error("Error fetching available vets:", error);
-      toast.error("Failed to load vet data.");
+      toast.info(error.response.data);
     } finally {
       setLoadingVets(false);
     }

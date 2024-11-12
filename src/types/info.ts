@@ -28,7 +28,6 @@ export type Profile = {
   address?: string; // Optional
   imageURL?: string;
   phoneNumber: string;
-  // Add any other fields your profile may have
 };
 
 export type koiOrPool = {
@@ -161,4 +160,5 @@ export type Feedback = {
   rate: number; // Đánh giá (rate) dưới dạng số, ví dụ: 1 đến 5 sao
   comments: string; // Bình luận của khách hàng
   isVisible: boolean; // Trạng thái hiển thị của phản hồi
+  vetName: string;
 };
