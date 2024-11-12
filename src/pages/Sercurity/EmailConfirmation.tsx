@@ -46,7 +46,6 @@ export default function EmailConfirmation() {
     setIsLoading(true);
     try {
       const response = await api.post("/User/verify-email", {
-        email: email,
         code: code.join(""),
       });
 
@@ -105,14 +104,6 @@ export default function EmailConfirmation() {
         </p>
         {!isSubmitted ? (
           <form onSubmit={handleSubmit} className="space-y-6">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full p-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500 focus:outline-none mb-4"
-            />
             <div className="flex justify-center gap-2">
               {code.map((digit, idx) => (
                 <motion.input

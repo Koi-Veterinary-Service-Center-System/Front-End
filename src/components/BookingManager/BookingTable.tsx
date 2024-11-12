@@ -915,7 +915,8 @@ const BookingTable = () => {
                       >
                         <Eye size={18} />
                       </button>
-                      {booking.bookingStatus !== "Cancelled" &&
+                      {profile?.role === "Staff" &&
+                        booking.bookingStatus !== "Cancelled" &&
                         booking.bookingStatus !== "Succeeded" && (
                           <button
                             className="text-red-600 hover:text-red-800"

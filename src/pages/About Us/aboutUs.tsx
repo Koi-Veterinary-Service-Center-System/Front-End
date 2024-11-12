@@ -1,4 +1,3 @@
-import React from "react";
 import { motion } from "framer-motion";
 import { Fish, Droplet, Users, Phone, Award, Clock, Heart } from "lucide-react";
 import {
@@ -202,10 +201,7 @@ export default function AboutUs() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
-                  <Link to="/contact">Contact Us</Link>
-                </Button>
-                <Button className="flex-1 bg-green-500 hover:bg-green-600 text-white">
-                  <Link to="/emergency">24/7 Emergency Line</Link>
+                  <Link to="/contact-us">Contact Us</Link>
                 </Button>
               </div>
             </CardContent>

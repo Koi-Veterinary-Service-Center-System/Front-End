@@ -12,6 +12,8 @@ import { FaCircle } from "react-icons/fa";
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const timeSlots = [
+  "7 AM",
+  "8 AM",
   "9 AM",
   "10 AM",
   "11 AM",
@@ -127,17 +129,19 @@ export default function VetCalendar() {
     setCurrentDate(nextWeek);
   };
 
+  // Kiểm tra sự kiện có thuộc khung giờ này không
   const getEventForSlot = (day: Date, time: string) => {
     const [timeHour] = time.split(" ");
     const hour =
       parseInt(timeHour) +
       (time.includes("PM") && parseInt(timeHour) !== 12 ? 12 : 0);
 
-    return events.find(
-      (event) =>
-        event.startTime.getDate() === day.getDate() &&
-        event.startTime.getHours() === hour
-    );
+    return events.find((event) => {
+      const eventDay = event.startTime.getDate() === day.getDate();
+      const inSlotRange =
+        event.startTime.getHours() <= hour && event.endTime.getHours() > hour;
+      return eventDay && inSlotRange;
+    });
   };
 
   const flashingVariants = {

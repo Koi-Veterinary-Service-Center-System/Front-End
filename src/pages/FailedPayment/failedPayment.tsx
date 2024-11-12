@@ -110,7 +110,7 @@ export default function PaymentFailed() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button className="bg-blue-500 hover:bg-blue-600 text-white flex items-center">
                 <RefreshCw className="mr-2 h-4 w-4" />
-                <Link to="/history">Try Again</Link>
+                <Link to="/booking">Try Again</Link>
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

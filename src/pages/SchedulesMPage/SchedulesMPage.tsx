@@ -96,8 +96,6 @@ export default function SchedulePage() {
     const newSlotData = {
       vetID: values.vetId,
       slotID: parseInt(values.slotId),
-      slotStartTime: format(values.startTime.toDate(), "HH:mm"),
-      slotEndTime: format(values.endTime.toDate(), "HH:mm"),
     };
 
     try {

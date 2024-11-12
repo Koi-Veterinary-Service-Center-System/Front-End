@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   PieChart,
@@ -7,33 +8,58 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import api from "@/configs/axios";
+import { toast } from "sonner";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088FE"];
 
-const userDemographicsData = [
-  { name: "18-24", value: 20 },
-  { name: "25-34", value: 30 },
-  { name: "35-44", value: 25 },
-  { name: "45-54", value: 15 },
-  { name: "55+", value: 10 },
-];
+const BookingStatusDemographicsChart = () => {
+  const [bookingData, setBookingData] = useState([]);
+  const [chartData, setChartData] = useState([]);
 
-const UserDemographicsChart = () => {
+  useEffect(() => {
+    const fetchBookingData = async () => {
+      try {
+        const response = await api.get("/booking/all-booking");
+        setBookingData(response.data);
+
+        // Chuẩn bị dữ liệu cho biểu đồ
+        const statusCount = response.data.reduce((acc, booking) => {
+          const status = booking.bookingStatus;
+          acc[status] = (acc[status] || 0) + 1;
+          return acc;
+        }, {});
+
+        const chartData = Object.keys(statusCount).map((key) => ({
+          name: key,
+          value: statusCount[key],
+        }));
+
+        setChartData(chartData);
+      } catch (error) {
+        console.error("Error fetching booking data:", error);
+        toast.error("Failed to load booking data.");
+      }
+    };
+
+    fetchBookingData();
+  }, []);
+
   return (
     <motion.div
-      className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700 lg:col-span-2"
+      className="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl p-6 border border-blue-700"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
     >
-      <h2 className="text-xl font-semibold text-gray-100 mb-4">
-        User Demographics
+      <h2 className="text-xl font-semibold text-blue-800 mb-4">
+        Booking Status Distribution
       </h2>
       <div style={{ width: "100%", height: 300 }}>
         <ResponsiveContainer>
           <PieChart>
             <Pie
-              data={userDemographicsData}
+              data={chartData}
               cx="50%"
               cy="50%"
               outerRadius={100}
@@ -43,7 +69,7 @@ const UserDemographicsChart = () => {
                 `${name} ${(percent * 100).toFixed(0)}%`
               }
             >
-              {userDemographicsData.map((entry, index) => (
+              {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
@@ -64,4 +90,5 @@ const UserDemographicsChart = () => {
     </motion.div>
   );
 };
-export default UserDemographicsChart;
+
+export default BookingStatusDemographicsChart;
