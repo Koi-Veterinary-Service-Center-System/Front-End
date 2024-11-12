@@ -25,6 +25,7 @@ const FeedbackTable = () => {
   const [feedbackToDelete, setFeedbackToDelete] = useState<Feedback | null>(
     null
   );
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   const fetchFeedbackData = async () => {
     setLoading(true);
@@ -93,6 +94,23 @@ const FeedbackTable = () => {
 
   useEffect(() => {
     fetchFeedbackData();
+  }, []);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await api.get("/User/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setProfile(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchProfile();
   }, []);
 
   return (
@@ -206,7 +224,7 @@ const FeedbackTable = () => {
                         <EyeOff size={18} />
                       )}
                     </button>
-                    {userRole === "Manager" && (
+                    {profile?.role === "Manager" && (
                       <button
                         onClick={() => openDeleteModal(feedback)}
                         className="text-red-600 hover:text-red-800"

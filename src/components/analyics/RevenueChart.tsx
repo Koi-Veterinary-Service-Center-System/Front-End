@@ -58,16 +58,6 @@ const FeedbackChart = () => {
         <h2 className="text-xl font-semibold text-blue-800">
           Feedback vs Service
         </h2>
-        <select
-          className="bg-white text-blue-800 rounded-md px-3 py-1 border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={selectedTimeRange}
-          onChange={(e) => setSelectedTimeRange(e.target.value)}
-        >
-          <option>This Week</option>
-          <option>This Month</option>
-          <option>This Quarter</option>
-          <option>This Year</option>
-        </select>
       </div>
 
       {loading ? (

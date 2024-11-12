@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -8,17 +9,53 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { motion } from "framer-motion";
-
-const userGrowthData = [
-  { month: "Jan", users: 1000 },
-  { month: "Feb", users: 1500 },
-  { month: "Mar", users: 2000 },
-  { month: "Apr", users: 3000 },
-  { month: "May", users: 4000 },
-  { month: "Jun", users: 5000 },
-];
+import api from "@/configs/axios";
+import { Booking } from "@/types/info";
 
 const UserGrowthChart = () => {
+  const [userGrowthData, setUserGrowthData] = useState([]);
+
+  useEffect(() => {
+    const fetchBookingData = async () => {
+      try {
+        const response = await api.get("/booking/all-booking");
+        const bookings = response.data;
+
+        // Tạo đối tượng lưu số lượng booking theo từng tháng
+        const monthlyData = Array(12).fill(0); // Khởi tạo mảng với 12 tháng
+
+        // Duyệt qua mỗi booking và đếm số lượng booking cho mỗi tháng
+        bookings.forEach((booking: Booking) => {
+          const bookingDate = new Date(booking.bookingDate);
+          const month = bookingDate.getMonth(); // Lấy ra chỉ số của tháng (0=Jan, 1=Feb, ...)
+          monthlyData[month] += 1; // Tăng số lượng booking cho tháng tương ứng
+        });
+
+        // Định dạng lại dữ liệu để phù hợp với biểu đồ
+        const formattedData = [
+          { month: "Jan", users: monthlyData[0] },
+          { month: "Feb", users: monthlyData[1] },
+          { month: "Mar", users: monthlyData[2] },
+          { month: "Apr", users: monthlyData[3] },
+          { month: "May", users: monthlyData[4] },
+          { month: "Jun", users: monthlyData[5] },
+          { month: "Jul", users: monthlyData[6] },
+          { month: "Aug", users: monthlyData[7] },
+          { month: "Sep", users: monthlyData[8] },
+          { month: "Oct", users: monthlyData[9] },
+          { month: "Nov", users: monthlyData[10] },
+          { month: "Dec", users: monthlyData[11] },
+        ];
+
+        setUserGrowthData(formattedData);
+      } catch (error) {
+        console.error("Error fetching booking data:", error);
+      }
+    };
+
+    fetchBookingData();
+  }, []);
+
   return (
     <motion.div
       className="bg-gradient-to-br from-blue-50 to-white bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-blue-700"
@@ -26,7 +63,7 @@ const UserGrowthChart = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
     >
-      <h2 className="text-xl font-semibold text-blue-800 mb-4">User Growth</h2>
+      <h2 className="text-xl font-semibold text-blue-800 mb-4">User Booking</h2>
       <div className="h-[320px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={userGrowthData}>
@@ -57,4 +94,5 @@ const UserGrowthChart = () => {
     </motion.div>
   );
 };
+
 export default UserGrowthChart;

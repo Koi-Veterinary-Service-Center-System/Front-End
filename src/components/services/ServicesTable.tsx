@@ -59,6 +59,10 @@ const serviceSchema = z.object({
     (val) => (typeof val === "string" ? parseFloat(val) : val),
     z.number().min(1, "Please input a valid estimated duration!")
   ),
+  quantityPrice: z.preprocess(
+    (val) => (typeof val === "string" ? parseFloat(val) : val),
+    z.number().min(0, "Please input a valid quantity price!")
+  ),
   isAtHome: z.boolean().default(false), // Boolean field with default false
   isOnline: z.boolean().default(false), // Boolean field with default false
 });
@@ -86,6 +90,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
       description: "",
       price: 0,
       estimatedDuration: 1,
+      quantityPrice: 0,
       isAtHome: false,
       isOnline: false,
     },
@@ -151,6 +156,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
       description: "",
       price: 0,
       estimatedDuration: 1,
+      quantityPrice: 0,
       isAtHome: false,
       isOnline: false,
     });
@@ -493,6 +499,33 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="quantityPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-blue-700">
+                          Quantity Price
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <PiMoneyWavy className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-500" />
+                            <Input
+                              type="number"
+                              placeholder="Enter quantity price"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(parseFloat(e.target.value))
+                              }
+                              className="pl-10 border-blue-200 focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <FormField
                     control={form.control}
                     name="estimatedDuration"

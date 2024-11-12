@@ -47,6 +47,7 @@ function AnimatedSection({ children }) {
 function Home() {
   const [isChatBoxVisible, setIsChatBoxVisible] = useState(false);
   const location = useLocation();
+  const [visibilityHeight, setVisibilityHeight] = useState(400);
 
   useEffect(() => {
     if (location.state) {
@@ -118,6 +119,11 @@ function Home() {
   const toggleChatBox = () => {
     setIsChatBoxVisible(!isChatBoxVisible);
   };
+  // Calculate half-page height for visibilityHeight
+  useEffect(() => {
+    const halfPageHeight = window.innerHeight / 2;
+    setVisibilityHeight(halfPageHeight);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -329,7 +335,7 @@ function Home() {
           className="rounded-full"
         />
         {/* Back to Top Button */}
-        <FloatButton.BackTop visibilityHeight={0} />
+        <FloatButton.BackTop visibilityHeight={visibilityHeight} />
       </FloatButton.Group>
 
       <Footer />

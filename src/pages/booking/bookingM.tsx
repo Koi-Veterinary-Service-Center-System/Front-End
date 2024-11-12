@@ -8,6 +8,10 @@ import { PiHandCoins } from "react-icons/pi";
 import api from "../../configs/axios";
 import { Booking } from "@/types/info";
 import BookingTable from "@/components/BookingManager/BookingTable";
+import UserActivityHeatmap from "@/components/users/UserActivityHeatmap";
+import BookingStatusDemographicsChart from "@/components/users/UserDemographicsChart";
+import UserRetention from "@/components/analyics/UserRetension";
+import UserGrowthChart from "@/components/users/UserGrowthChart";
 
 const BookMPage = () => {
   const [orderStats, setOrderStats] = useState({
@@ -108,6 +112,10 @@ const BookMPage = () => {
           </motion.div>
 
           <BookingTable />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+            <BookingStatusDemographicsChart />
+            <UserGrowthChart />
+          </div>
         </main>
       </div>
     </div>
