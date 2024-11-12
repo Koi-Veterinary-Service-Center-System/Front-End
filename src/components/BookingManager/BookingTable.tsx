@@ -27,6 +27,7 @@ import {
   Booking,
   Distance,
   Payment,
+  Profile,
   services,
   Slot,
   User,
@@ -69,12 +70,31 @@ const BookingTable = () => {
   const [isLoadingDistance, setLoadingDistance] = useState(false);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [distances, setDistances] = useState<Distance[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoadingPayment, setLoadingPayment] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isLoadingCancel, setIsLoadingCancel] = useState(false);
   const [form] = Form.useForm();
   const [allSlots, setAllSlots] = useState<Slot[]>([]);
+  const [isAtHomeService, setIsAtHomeService] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await api.get("/User/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setProfile(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   // Fetch Slots
   useEffect(() => {
@@ -367,6 +387,7 @@ const BookingTable = () => {
     const selectedDistance = distances.find(
       (distance) => distance.distanceID === form.getFieldValue("district")
     );
+    setIsAtHomeService(selectedService ? selectedService.isAtHome : true);
 
     if (selectedService && selectedDistance) {
       const initAmount = selectedService.price + selectedDistance.price; // Tính tổng giá trị
@@ -444,21 +465,23 @@ const BookingTable = () => {
           <input
             type="text"
             placeholder="Search bookings..."
-            className="bg-white text-gray-800 placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+            className="bg-white text-gray-800 placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-blue-300"
             value={searchTerm}
             onChange={handleSearch}
           />
           <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
         </div>
+        {profile?.role === "Staff" && (
+          <Button
+            type="primary"
+            icon={<MdAddBusiness />}
+            onClick={showModal}
+            className="bg-blue-600 text-white mb-4"
+          >
+            Add Booking
+          </Button>
+        )}
 
-        <Button
-          type="primary"
-          icon={<MdAddBusiness />}
-          onClick={showModal}
-          className="bg-blue-600 text-white mb-4"
-        >
-          Add Booking
-        </Button>
         <Modal
           title="Add New Booking"
           visible={isModalOpen}
@@ -565,7 +588,7 @@ const BookingTable = () => {
                 <Form.Item label="Slot" name="slotID">
                   <Select
                     className="w-full p-0"
-                    style={{ height: "50px" }}
+                    style={{ height: "40px" }}
                     loading={isLoadingSlots}
                     onChange={handleSlotChange}
                     value={selectedSlot}
@@ -637,6 +660,7 @@ const BookingTable = () => {
                   className="w-full p-0"
                   style={{ height: "50px" }}
                   placeholder="Enter your location"
+                  disabled={!isAtHomeService}
                 />
               </Form.Item>
             </motion.div>
@@ -667,6 +691,7 @@ const BookingTable = () => {
                     loading={isLoadingDistance}
                     placeholder="Select a district"
                     onChange={() => calculateTota()}
+                    disabled={!isAtHomeService}
                     optionFilterProp="label" // Use label for filtering if using label
                     filterOption={
                       (input, option) =>

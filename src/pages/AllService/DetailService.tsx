@@ -11,6 +11,7 @@ import {
   FaStar,
   FaArrowLeft,
   FaMoneyBillWave,
+  FaUserMd,
 } from "react-icons/fa";
 import {
   Card,
@@ -21,8 +22,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/configs/axios";
-import { Services } from "@/types/info";
-import { Feedback } from "@/types/feedback"; // Import the Feedback type here
+import { Feedback, Services } from "@/types/info";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -34,7 +34,7 @@ const fadeInUp = {
 function ServiceDetailSkeleton() {
   return (
     <div className="space-y-8">
-      <Skeleton className="w-full h-64 rounded-lg" />
+      <Skeleton className="w-full h-96 rounded-lg" />
       <div className="space-y-4">
         <Skeleton className="h-10 w-3/4" />
         <Skeleton className="h-4 w-full" />
@@ -125,7 +125,7 @@ export default function DetailService() {
           variants={fadeInUp}
           className="bg-white rounded-lg shadow-lg overflow-hidden"
         >
-          <div className="relative w-full h-64 md:h-96 overflow-hidden">
+          <div className="relative w-full h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden">
             <img
               src={service.imageURL}
               alt={service.serviceName}
@@ -183,9 +183,9 @@ export default function DetailService() {
           className="mt-12"
         >
           <h2 className="text-2xl font-bold mb-4 text-blue-800">Feedback</h2>
-          {feedback.filter((item) => item.isVisible).length > 0 ? ( // Filter chỉ hiển thị feedback có isVisible là true
+          {feedback.filter((item) => item.isVisible).length > 0 ? (
             feedback
-              .filter((item) => item.isVisible) // Lọc feedback có isVisible = true
+              .filter((item) => item.isVisible)
               .map((item) => (
                 <Card
                   key={item.feedbackID}
@@ -204,6 +204,12 @@ export default function DetailService() {
                           <CardTitle className="text-lg font-semibold text-blue-800">
                             {item.customerName}
                           </CardTitle>
+                          {item.vetName && (
+                            <CardDescription className="text-sm font-medium text-blue-600">
+                              <FaUserMd className="inline-block mr-1" />
+                              Vet: {item.vetName}
+                            </CardDescription>
+                          )}
                         </div>
                       </div>
                       <div className="flex flex-col items-end">

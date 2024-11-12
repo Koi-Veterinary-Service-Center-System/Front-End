@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { FloatButton } from "antd";
 import { QuestionCircleOutlined, CloseOutlined } from "@ant-design/icons";
@@ -9,7 +9,6 @@ import Banner from "../../components/banner";
 import Footer from "../../components/Footer/footer";
 import Header from "../../components/Header/header";
 
-import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { Button } from "antd";
 
 const fadeInUp = {
@@ -129,14 +128,6 @@ function Home() {
         <div className="space-y-8 m-5">
           <div className="flex justify-between items-center">
             <h3 className="text-2xl font-bold">Veterinary Services Blog</h3>
-            <div className="flex space-x-2">
-              <Button variant="outline" size="icon">
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon">
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {blogPosts.map((post, index) => (
