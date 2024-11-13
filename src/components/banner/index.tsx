@@ -26,7 +26,8 @@ const bannerData = [
     subtitle: "Transform your koi with top-tier grooming",
     description:
       "Keep your koi in pristine condition with our grooming services, designed for rare and exotic varieties.",
-    image: "src/assets/images/image.png",
+    image:
+      "https://firebasestorage.googleapis.com/v0/b/swp391veterinary.appspot.com/o/image.png?alt=media&token=b2bf13a7-245e-4956-8e43-8c4e33470102",
     cta: { text: "View Services", link: "/services" },
     badge: { text: "New Service", color: "bg-red-500" },
   },
@@ -35,7 +36,8 @@ const bannerData = [
     subtitle: "Ensure a safe and healthy environment for your koi",
     description:
       "We provide thorough cleaning, water quality testing, and filtration upgrades to keep your koi pond perfect.",
-    image: "src/assets/images/774607e7ea99e5c29b9aa005f8e5c198.jpg",
+    image:
+      "https://firebasestorage.googleapis.com/v0/b/swp391veterinary.appspot.com/o/a6cded12e9f17e98c22cc86600bbeef1.jpg?alt=media&token=89e631bf-48a0-486b-bf5b-9978ecb3e08c",
     cta: { text: "Contact us", link: "/contact-us" },
     badge: { text: "20% Off", color: "bg-blue-500" },
   },
@@ -43,17 +45,14 @@ const bannerData = [
 
 export default function EnhancedBanner() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoplay, setIsAutoplay] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      if (isAutoplay) {
-        setCurrentSlide((prev) => (prev + 1) % bannerData.length);
-      }
+      setCurrentSlide((prev) => (prev + 1) % bannerData.length);
     }, 5000);
 
     return () => clearInterval(timer);
-  }, [isAutoplay]);
+  }, []);
 
   return (
     <div className="relative h-screen overflow-hidden bg-gradient-to-r from-primary/10 to-secondary/10">
@@ -67,7 +66,7 @@ export default function EnhancedBanner() {
         }}
         pagination={{
           clickable: true,
-          renderBullet: function (index, className) {
+          renderBullet: function (className) {
             return '<span class="' + className + ' w-3 h-3"></span>';
           },
         }}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Edit, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button, Modal, Form, Select, TimePicker } from "antd";
+import { Button, Modal, Form, Select } from "antd";
 import { format, addDays, startOfWeek, subWeeks, addWeeks } from "date-fns";
 import dayjs from "dayjs";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import api from "@/configs/axios";
 import Sidebar from "@/components/Sidebar/sidebar";
 import HeaderAd from "@/components/Header/headerAd";
 import { Slot, Vet } from "@/types/info";
+import axios from "axios";
 
 export default function SchedulePage() {
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -52,8 +53,11 @@ export default function SchedulePage() {
         day: slot.weekDate,
         task: `${slot.vetFirstName} ${slot.vetLastName}`,
         vetId: slot.vetId,
-        startTime: new Date(`1970-01-01T${slot.slotStartTime}`),
-        endTime: new Date(`1970-01-01T${slot.slotEndTime}`),
+        startTime: format(
+          new Date(`1970-01-01T${slot.slotStartTime}`),
+          "HH:mm"
+        ),
+        endTime: format(new Date(`1970-01-01T${slot.slotEndTime}`), "HH:mm"),
         weekDate: slot.weekDate,
       }));
 
@@ -72,11 +76,11 @@ export default function SchedulePage() {
         },
       });
 
-      const availableSlots = response.data.map((slot: any) => ({
+      const availableSlots = response.data.map((slot: Slot) => ({
         id: slot.slotID.toString(),
         weekDate: slot.weekDate,
-        startTime: new Date(`1970-01-01T${slot.startTime}`),
-        endTime: new Date(`1970-01-01T${slot.endTime}`),
+        startTime: format(new Date(`1970-01-01T${slot.startTime}`), "HH:mm"),
+        endTime: format(new Date(`1970-01-01T${slot.endTime}`), "HH:mm"),
       }));
 
       setAvailableSlots(availableSlots);
@@ -95,7 +99,7 @@ export default function SchedulePage() {
   const handleAddSlot = async (values: Slot) => {
     const newSlotData = {
       vetID: values.vetId,
-      slotID: parseInt(values.slotId),
+      slotID: Number(values.slotID),
     };
 
     try {
@@ -105,12 +109,17 @@ export default function SchedulePage() {
       setIsModalOpen(false);
       toast.success("Slot added successfully!");
       fetchSlots();
-    } catch (error: any) {
-      console.error(
-        "Error adding new vet slot:",
-        error.response?.data || error.message
-      );
-      toast.error("Failed to add slot. Please try again.");
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const errorMessage =
+          typeof error.response.data === "string"
+            ? error.response.data
+            : "Failed to add slot. Please try again.";
+
+        toast.error(errorMessage);
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
     }
   };
 
@@ -122,21 +131,24 @@ export default function SchedulePage() {
 
       toast.success("Deleted slot successfully!");
       fetchSlots();
-    } catch (error: any) {
-      console.error(
-        "Error deleting vet slot:",
-        error.response?.data || error.message
-      );
-      toast.error("Failed to delete slot. Please try again.");
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const errorMessage =
+          typeof error.response.data === "string"
+            ? error.response.data
+            : "Failed to delete slot. Please try again.";
+
+        toast.error(errorMessage);
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
     }
   };
 
   const handleUpdateSlot = async (values: any) => {
     const updatedSlot = {
       vetID: values.vetId,
-      slotID: parseInt(values.slotId),
-      slotStartTime: format(values.startTime.toDate(), "HH:mm"),
-      slotEndTime: format(values.endTime.toDate(), "HH:mm"),
+      slotID: Number(values.slotID),
     };
 
     try {
@@ -147,12 +159,17 @@ export default function SchedulePage() {
       toast.success("Updated slot successfully!");
       fetchSlots();
       setIsModalOpen(false);
-    } catch (error: any) {
-      console.error(
-        "Error updating vet slot:",
-        error.response?.data || error.message
-      );
-      toast.error("Failed to update slot. Please try again.");
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const errorMessage =
+          typeof error.response.data === "string"
+            ? error.response.data
+            : "Failed to update slot. Please try again.";
+
+        toast.error(errorMessage);
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
     }
   };
 
@@ -164,7 +181,7 @@ export default function SchedulePage() {
     setCurrentWeekStart(addWeeks(currentWeekStart, 1));
   };
 
-  const handleFormSubmit = (values: any) => {
+  const handleFormSubmit = (values: Slot) => {
     if (currentSlot?.id) {
       handleUpdateSlot(values);
     } else {
@@ -178,8 +195,8 @@ export default function SchedulePage() {
       form.setFieldsValue({
         vetId: slot.vetId,
         slotId: slot.id,
-        startTime: dayjs(slot.startTime),
-        endTime: dayjs(slot.endTime),
+        startTime: dayjs(slot.startTime, "HH:mm"),
+        endTime: dayjs(slot.endTime, "HH:mm"),
       });
     } else {
       form.resetFields();
@@ -246,8 +263,7 @@ export default function SchedulePage() {
                       >
                         <div className="flex justify-between items-center">
                           <span className="font-medium text-blue-800">
-                            {slot.task} - {format(slot.startTime, "HH:mm")} to{" "}
-                            {format(slot.endTime, "HH:mm")}
+                            {slot.task} - {slot.startTime} to {slot.endTime}
                           </span>
                           <div className="flex space-x-2">
                             <Button
@@ -280,8 +296,8 @@ export default function SchedulePage() {
                         day: format(day, "EEEE"),
                         task: "",
                         vetId: "",
-                        startTime: new Date(),
-                        endTime: new Date(),
+                        startTime: format(new Date(), "HH:mm"),
+                        endTime: format(new Date(), "HH:mm"),
                         weekDate: "",
                       })
                     }
@@ -316,14 +332,13 @@ export default function SchedulePage() {
             </Form.Item>
             <Form.Item
               label="Available Slots"
-              name="slotId"
+              name="slotID"
               rules={[{ required: true, message: "Please select a slot" }]}
             >
               <Select placeholder="Select Slot">
                 {availableSlots.map((slot) => (
                   <Select.Option key={slot.id} value={slot.id}>
-                    {slot.weekDate} - {format(slot.startTime, "HH:mm")} to{" "}
-                    {format(slot.endTime, "HH:mm")}
+                    {slot.weekDate} - {slot.startTime} to {slot.endTime}
                   </Select.Option>
                 ))}
               </Select>

@@ -11,15 +11,11 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import api from "@/configs/axios";
-
-interface FeedbackData {
-  serviceName: string;
-  rate: number;
-}
+import { Feedback } from "@/types/info";
+import axios from "axios";
 
 const FeedbackChart = () => {
-  const [selectedTimeRange, setSelectedTimeRange] = useState("This Month");
-  const [feedbackData, setFeedbackData] = useState<FeedbackData[]>([]);
+  const [feedbackData, setFeedbackData] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -30,14 +26,19 @@ const FeedbackChart = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
-      const transformedData = response.data.map((item: any) => ({
+      const transformedData = response.data.map((item: Feedback) => ({
         serviceName: item.serviceName,
         rate: item.rate,
       }));
 
       setFeedbackData(transformedData);
-    } catch (error: any) {
-      setError(error.response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        setError(error.response.data); // Error message from server response
+      } else {
+        console.error("An unknown error occurred:", error);
+        setError("An unknown error occurred");
+      }
     } finally {
       setLoading(false);
     }

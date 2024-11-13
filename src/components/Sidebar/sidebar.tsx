@@ -1,14 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import {
-  Calendar,
-  House,
-  Menu,
-  Settings,
-  ShoppingBag,
-  Users,
-} from "lucide-react";
+import { Calendar, House, Menu, ShoppingBag, Users } from "lucide-react";
 import { TbBrandBooking } from "react-icons/tb";
 import { VscFeedback } from "react-icons/vsc";
 import api from "@/configs/axios";

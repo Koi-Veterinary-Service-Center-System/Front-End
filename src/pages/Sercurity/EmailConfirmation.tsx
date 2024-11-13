@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { FaEnvelope, FaCheck } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import api from "@/configs/axios"; // Ensure this is the correct path to your Axios instance
+import api from "@/configs/axios";
 import { toast } from "sonner";
 import { Spin } from "antd";
 
@@ -11,7 +11,6 @@ export default function EmailConfirmation() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState(""); // State for email
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
 
@@ -59,18 +58,16 @@ export default function EmailConfirmation() {
       console.error("Verification error:", error);
       toast.error("An error occurred while verifying your code.");
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     if (isSubmitted) {
-      // Set a timeout to redirect to the login page after 3 seconds
       const timer = setTimeout(() => {
         navigate("/login");
       }, 3000);
 
-      // Cleanup the timer when component unmounts
       return () => clearTimeout(timer);
     }
   }, [isSubmitted, navigate]);
@@ -124,9 +121,7 @@ export default function EmailConfirmation() {
             <Button
               type="submit"
               className="w-full bg-blue-500 hover:bg-blue-600 text-white"
-              disabled={
-                code.some((digit) => digit === "") || !email || isLoading
-              }
+              disabled={code.some((digit) => digit === "") || isLoading}
             >
               {isLoading ? <Spin /> : "Verify Code"}
             </Button>

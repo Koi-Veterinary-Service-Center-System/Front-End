@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { Bell, Mail, Search } from "lucide-react";
+import { Bell, Mail } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import api from "@/configs/axios";
 

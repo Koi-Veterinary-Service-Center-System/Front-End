@@ -1,11 +1,10 @@
 import { motion } from "framer-motion";
-import { IconType } from "react-icons"; // Import kiểu cho các icon
 
 interface StatCardProps {
   name: string;
-  icon: IconType; // Định nghĩa kiểu cho icon
-  value: string | number; // Kiểu dữ liệu cho value, có thể là string hoặc number
-  color?: string; // Màu sắc là tùy chọn
+  icon: React.ElementType; // Use React.ElementType for flexibility
+  value: string | number;
+  color?: string;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -20,7 +19,7 @@ const StatCard: React.FC<StatCardProps> = ({
       whileHover={{ y: -5, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
     >
       <div className="px-4 py-5 sm:p-6">
-        <span className="flex items-center text-sm  font-semibold text-blue-700">
+        <span className="flex items-center text-sm font-semibold text-blue-700">
           <Icon size={20} className="mr-2" style={{ color }} />
           {name}
         </span>

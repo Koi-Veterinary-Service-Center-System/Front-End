@@ -218,7 +218,7 @@ function Home() {
           <div className="flex flex-col lg:flex-row items-center">
             <div className="lg:w-1/2">
               <img
-                src="/src/assets/images/homeimage.png"
+                src="https://firebasestorage.googleapis.com/v0/b/swp391veterinary.appspot.com/o/homeimage.png?alt=media&token=76f268af-8ff1-4654-adf2-5eb2a5ccddae"
                 alt="Koi Service"
                 className="w-full h-auto"
               />

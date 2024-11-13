@@ -26,9 +26,8 @@ import moment from "moment";
 import {
   Booking,
   Distance,
-  Payment,
   Profile,
-  services,
+  Services,
   Slot,
   User,
   Vet,
@@ -46,6 +45,7 @@ import TextArea from "antd/es/input/TextArea";
 import CancelBookingDialog from "./CancelBookingDialog";
 import { BsFillBookmarkCheckFill } from "react-icons/bs";
 import { TableCell, TableRow } from "../ui/table";
+import { AxiosError } from "axios";
 
 const BookingTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,7 +57,7 @@ const BookingTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); // Điều khiển trạng thái của dialog
   const [users, setUsers] = useState<User[]>([]);
   const [slots, setSlots] = useState<Slot[]>([]);
-  const [services, setServices] = useState<services[]>([]);
+  const [services, setServices] = useState<Services[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [vets, setVets] = useState<Vet[]>([]);
@@ -68,16 +68,16 @@ const BookingTable = () => {
   const [isLoadingServices, setLoadingServices] = useState(false);
   const [isLoadingVets, setLoadingVets] = useState(false);
   const [isLoadingDistance, setLoadingDistance] = useState(false);
-  const [payments, setPayments] = useState<Payment[]>([]);
   const [distances, setDistances] = useState<Distance[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoadingPayment, setLoadingPayment] = useState(false);
+
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isLoadingCancel, setIsLoadingCancel] = useState(false);
   const [form] = Form.useForm();
   const [allSlots, setAllSlots] = useState<Slot[]>([]);
   const [isAtHomeService, setIsAtHomeService] = useState(true);
+  const [isOnlineService, setIsOnlineService] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -124,7 +124,7 @@ const BookingTable = () => {
 
         // Lọc các dịch vụ để chỉ hiển thị những dịch vụ không có thuộc tính isOnline
         const filteredServices = response.data.filter(
-          (service) => !service.isOnline
+          (service: Services) => !service.isOnline
         );
 
         setServices(filteredServices); // Cập nhật với danh sách dịch vụ đã lọc
@@ -175,22 +175,22 @@ const BookingTable = () => {
   }, []);
 
   //Fetch payment data
-  useEffect(() => {
-    const fetchPayments = async () => {
-      try {
-        setLoadingPayment(true);
-        const response = await api.get("/payment/all-payment");
-        setPayments(response.data);
-      } catch (error) {
-        console.error("Error fetching payments: ", error);
-        toast.error("Failed to load payments.");
-      } finally {
-        setLoadingPayment(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchPayments = async () => {
+  //     try {
+  //       setLoadingPayment(true);
+  //       const response = await api.get("/payment/all-payment");
+  //       setPayments(response.data);
+  //     } catch (error) {
+  //       console.error("Error fetching payments: ", error);
+  //       toast.error("Failed to load payments.");
+  //     } finally {
+  //       setLoadingPayment(false);
+  //     }
+  //   };
 
-    fetchPayments();
-  }, []); // Empty dependency array means this effect runs once when component mounts
+  //   fetchPayments();
+  // }, []); // Empty dependency array means this effect runs once when component mounts
 
   // Fetch available Vets for a selected slot
   const fetchVetsBySlot = async (slotId: number) => {
@@ -220,9 +220,9 @@ const BookingTable = () => {
     });
   };
 
-  const handleDateChange = (date: unknown) => {
+  const handleDateChange = (date: moment.Moment | null) => {
     if (!date) {
-      setSlots(allSlots); // Khôi phục tất cả slots nếu không có ngày được chọn
+      setSlots(allSlots);
       return;
     }
 
@@ -254,9 +254,17 @@ const BookingTable = () => {
       });
       setUsers(response.data);
       setError(null);
-    } catch (error: any) {
-      console.error("Failed to fetch user data:", error.message);
-      setError("Failed to fetch user data. Please try again.");
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("Error fetching available vets:", axiosError);
+
+      // Safely access `response.data`, and use JSON.stringify if it's an object
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.error(errorMessage); // Display error message
     }
   };
 
@@ -272,15 +280,22 @@ const BookingTable = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const sortedBookings = response.data.sort(
-        (a: any, b: any) => b.bookingID - a.bookingID
+        (a: string | number, b: string | number) => b.bookingID - a.bookingID
       );
 
       setBookings(sortedBookings);
       setFilteredBookings(sortedBookings); // Gán luôn danh sách booking ban đầu
-    } catch (error: any) {
-      console.error(error.message);
-      toast.info(error.response.data);
-      setError(error.message);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("Error fetching available vets:", axiosError);
+
+      // Safely access `response.data`, and use JSON.stringify if it's an object
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.info(errorMessage); // Display error message
     } finally {
       setLoading(false);
     }
@@ -319,8 +334,16 @@ const BookingTable = () => {
 
       setIsDialogOpen(true); // Open the dialog
     } catch (error) {
-      console.error("Error fetching booking record details:", error);
-      toast.info(error.response.data);
+      const axiosError = error as AxiosError;
+      console.error("Error fetching available vets:", axiosError);
+
+      // Safely access `response.data`, and use JSON.stringify if it's an object
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.info(errorMessage); // Display error message
     }
   };
 
@@ -341,7 +364,7 @@ const BookingTable = () => {
 
       // Retrieve selected district's information
       const selectedDistrict = distances.find(
-        (distance) => distance.distanceID === values.district
+        (distance) => distance.distanceID === Number(values.district)
       );
 
       // Combine user input location with selected district and area
@@ -370,13 +393,17 @@ const BookingTable = () => {
       setIsModalOpen(false); // Đóng modal sau khi đặt chỗ thành công
       form.resetFields();
       fetchBookings();
-    } catch (error: any) {
-      console.error("Booking error:", error);
-      if (error.response && error.response.data) {
-        toast.info(error.response.data); // Hiển thị message từ response body
-      } else {
-        toast.error("Failed to booking"); // Hiển thị message mặc định nếu không có message từ API
-      }
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("Error fetching available vets:", axiosError);
+
+      // Safely access `response.data`, and use JSON.stringify if it's an object
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.info(errorMessage); // Display error message
     }
   };
 
@@ -388,6 +415,7 @@ const BookingTable = () => {
       (distance) => distance.distanceID === form.getFieldValue("district")
     );
     setIsAtHomeService(selectedService ? selectedService.isAtHome : true);
+    setIsOnlineService(selectedService ? selectedService.isOnline : false);
 
     if (selectedService && selectedDistance) {
       const initAmount = selectedService.price + selectedDistance.price; // Tính tổng giá trị
@@ -444,8 +472,16 @@ const BookingTable = () => {
         );
       }
     } catch (error) {
-      console.error("Error cancelling booking:", error);
-      toast.error(error.response.data);
+      const axiosError = error as AxiosError;
+      console.error("Error fetching available vets:", axiosError);
+
+      // Safely access `response.data`, and use JSON.stringify if it's an object
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.error(errorMessage); // Display error message
     } finally {
       setIsLoadingCancel(false); // Tắt trạng thái loading sau khi hoàn thành
       setIsCancelDialogOpen(false);
@@ -648,7 +684,6 @@ const BookingTable = () => {
                 label="Location"
                 name="location"
                 rules={[
-                  { required: true, message: "Please enter your location" },
                   {
                     pattern: /^[^\s].+$/,
                     message:
@@ -730,7 +765,7 @@ const BookingTable = () => {
                   name="quantity"
                   rules={[
                     {
-                      required: true,
+                      required: !isOnlineService,
                       message: "Please enter a quantity", // Bắt lỗi khi trường bị bỏ trống
                     },
                     {
@@ -740,7 +775,11 @@ const BookingTable = () => {
                     },
                   ]}
                 >
-                  <InputNumber min={1} className="w-full p-2 shadow-sm" />
+                  <InputNumber
+                    min={1}
+                    className="w-full p-2 shadow-sm"
+                    disabled={isOnlineService}
+                  />
                 </Form.Item>
               </motion.div>
             </motion.div>
@@ -790,7 +829,6 @@ const BookingTable = () => {
                 <Select
                   className="w-full p-0"
                   style={{ height: "50px" }}
-                  loading={isLoadingPayment}
                   placeholder="Select payment method"
                 >
                   <Select.Option key="1" value="1">
@@ -1003,7 +1041,11 @@ const BookingTable = () => {
               >
                 <FaMapMarkerAlt className="text-red-500" />
                 <p>
-                  <strong>Location:</strong> {selectedBooking.location}
+                  <strong>Location:</strong>{" "}
+                  {selectedBooking.location ===
+                  "undefined, undefined, undefined"
+                    ? "District 1, Ho Chi Minh City"
+                    : selectedBooking.location}
                 </p>
               </motion.div>
 

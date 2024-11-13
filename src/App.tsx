@@ -4,7 +4,6 @@ import Home from "./pages/home/home";
 import Register from "./pages/Sercurity/register";
 import Login from "./pages/Sercurity/login";
 import UpdateProfile from "./pages/updateProfile/updateProfile";
-import AdminDashbroad from "./pages/adminDashbroad/adminDashbroad";
 import Service from "./pages/AllService/service";
 import UsersPage from "./pages/UsersManagePage/Users";
 import SchedulesMPage from "./pages/SchedulesMPage/SchedulesMPage";
@@ -12,7 +11,6 @@ import AllService from "./pages/AllService/allService";
 import ErrorBoundary from "./errorBoudary";
 import { registerLicense } from "@syncfusion/ej2-base";
 import "./index.css";
-import SettingsPage from "./pages/settingpage/setting";
 import FishPrescription from "./pages/prescriptions/prescription";
 import { Toaster } from "sonner";
 import History from "./pages/Booking/history";
@@ -26,7 +24,6 @@ import PaymentSuccessful from "./pages/SuccessPayment/paymentSuccess";
 import PaymentFailed from "./pages/FailedPayment/failedPayment";
 import VetCalendar from "./pages/SchedulerVet";
 import BookMPage from "./pages/Booking/bookingM";
-import BookingRecord from "./pages/Booking/bookingRecord";
 import BookingPage from "./pages/Booking/Booking";
 import DetailBooking from "./pages/Booking/DetailBooking";
 import ChangePassword from "./pages/Sercurity/ChangePassword";
@@ -132,35 +129,12 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/record"
-          element={
-            <PrivateRoute requiredRoles={["Vet"]}>
-              <BookingRecord />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
-              <AdminDashbroad />
-            </PrivateRoute>
-          }
-        />
+
         <Route
           path="/feedbackmanager"
           element={
             <PrivateRoute requiredRoles={["Manager", "Staff"]}>
               <FeedbackManagement />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
-              <SettingsPage />
             </PrivateRoute>
           }
         />

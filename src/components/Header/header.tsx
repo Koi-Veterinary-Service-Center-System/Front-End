@@ -8,16 +8,13 @@ import {
   CalendarCheck2,
   Check,
   Gauge,
-  Heart,
   Pill,
   RefreshCw,
   User2Icon,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { TbLogout } from "react-icons/tb";
-import { TbLogin } from "react-icons/tb";
-import { TbRegistered } from "react-icons/tb";
+import { TbLogout, TbLogin, TbRegistered } from "react-icons/tb";
 import { ImProfile } from "react-icons/im";
 import { ScrollArea } from "../ui/scroll-area";
 import {
@@ -34,44 +31,62 @@ type Notification = {
   message: string;
 };
 
+type UserActionsProps = {
+  profile: Profile | null;
+  notifications: Notification[];
+  clearNotifications: () => void;
+};
+
+type NavLinkProps = {
+  to: string;
+  children: React.ReactNode;
+};
+
+type NotificationItemProps = {
+  notification: Notification;
+};
+
+type AuthButtonsProps = {
+  isLoggedIn: boolean;
+  profile: Profile | null;
+  handleLogout: () => void;
+};
+
 function Header() {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setLoading] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
   useEffect(() => {
-    const token = localStorage.getItem("token"); // Get the token from localStorage
+    const token = localStorage.getItem("token");
     if (token) {
-      setIsLoggedIn(true); // If token exists, user is logged in
+      setIsLoggedIn(true);
     }
   }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("token");
-
-      try {
-        setLoading(true);
-        const response = await api.get("/User/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token to request headers
-          },
-        });
-        setProfile(response.data);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
+      if (token) {
+        try {
+          const response = await api.get<Profile>("/User/profile", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          setProfile(response.data);
+        } catch (error) {
+          console.error("Failed to fetch profile:", error);
+        }
       }
     };
 
     fetchProfile();
   }, []);
 
-  // Handle logout function
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -108,7 +123,7 @@ function Header() {
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
           <img
-            src="/src/assets/images/logo.png"
+            src="https://firebasestorage.googleapis.com/v0/b/swp391veterinary.appspot.com/o/logo.png?alt=media&token=a26711fc-ed75-4e62-8af1-ec577334574a"
             alt="Koine logo"
             className="h-12 w-auto sm:h-16 md:h-20"
           />
@@ -183,7 +198,7 @@ function NavLinks() {
   );
 }
 
-function NavLink({ to, children }) {
+function NavLink({ to, children }: NavLinkProps) {
   return (
     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
       <Link to={to} className="text-gray-600 hover:text-gray-900">
@@ -193,10 +208,14 @@ function NavLink({ to, children }) {
   );
 }
 
-function UserActions({ profile, notifications, clearNotifications }) {
+function UserActions({
+  profile,
+  notifications,
+  clearNotifications,
+}: UserActionsProps) {
   return (
     <>
-      {["Manager", "Staff"].includes(profile?.role) && (
+      {["Manager", "Staff"].includes(profile?.role || "") && (
         <Link to="/service">
           <Button variant="ghost" size="icon">
             <Gauge className="h-5 w-5" />
@@ -215,7 +234,7 @@ function UserActions({ profile, notifications, clearNotifications }) {
         notifications={notifications}
         clearNotifications={clearNotifications}
       />
-      {["Vet"].includes(profile?.role) && (
+      {profile?.role === "Vet" && (
         <Link to="/schedulesV">
           <Button variant="ghost" size="icon">
             <CalendarCheck2 className="h-5 w-5" />
@@ -226,7 +245,13 @@ function UserActions({ profile, notifications, clearNotifications }) {
   );
 }
 
-function NotificationsPopover({ notifications, clearNotifications }) {
+function NotificationsPopover({
+  notifications,
+  clearNotifications,
+}: {
+  notifications: Notification[];
+  clearNotifications: () => void;
+}) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -247,8 +272,8 @@ function NotificationsPopover({ notifications, clearNotifications }) {
         {notifications.length === 0 ? (
           <p className="text-center text-muted-foreground">
             <img
-              src="src\assets\images\No-Mail-1--Streamline-Bruxelles.png"
-              alt=""
+              src="src/assets/images/No-Mail-1--Streamline-Bruxelles.png"
+              alt="No notifications"
               className="w-full h-60"
             />
           </p>
@@ -269,7 +294,7 @@ function NotificationsPopover({ notifications, clearNotifications }) {
   );
 }
 
-function NotificationItem({ notification }) {
+function NotificationItem({ notification }: NotificationItemProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -296,8 +321,8 @@ function NotificationItem({ notification }) {
   );
 }
 
-function AuthButtons({ isLoggedIn, profile, handleLogout }) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+function AuthButtons({ isLoggedIn, profile, handleLogout }: AuthButtonsProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   const handleMouseEnter = () => setIsMenuOpen(true);
   const handleMouseLeave = () => setIsMenuOpen(false);
@@ -314,7 +339,7 @@ function AuthButtons({ isLoggedIn, profile, handleLogout }) {
           {isLoggedIn ? (
             <Avatar className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12">
               <AvatarImage
-                src={profile?.imageURL}
+                src={profile?.imageURL || ""}
                 alt="Profile"
                 className="object-cover"
               />

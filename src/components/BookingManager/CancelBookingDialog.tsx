@@ -30,6 +30,7 @@ interface CancelBookingDialogProps {
   onClose: () => void;
   onConfirm: (refundPercent: string, cancelReason: string) => void;
   isLoading: boolean; // Thêm prop isLoading
+  paymentType?: string;
 }
 
 export default function CancelBookingDialog({

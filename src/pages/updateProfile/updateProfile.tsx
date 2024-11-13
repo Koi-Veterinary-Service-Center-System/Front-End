@@ -19,7 +19,6 @@ import {
   PlusOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { profile as ProfileType } from "../../types/info";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "../../configs/firebase";
 import { toast } from "sonner";
@@ -28,10 +27,11 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
+import { Profile } from "@/types/info";
+import { AxiosError } from "axios";
 
 function UpdateProfile() {
-  const [profile, setProfile] = useState<ProfileType | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -66,8 +66,16 @@ function UpdateProfile() {
       };
 
       setProfile(updatedProfile);
-    } catch (error: any) {
-      setError(error.message || "Failed to fetch profile data");
+    } catch (error) {
+      const axiosError = error as AxiosError;
+
+      // Safely access `response.data`, and use JSON.stringify if it's an object
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.error(errorMessage); // Display error message
     }
   };
 
@@ -84,8 +92,6 @@ function UpdateProfile() {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj as File);
     }
-    setPreviewImage(file.url || (file.preview as string));
-    setPreviewOpen(true);
   };
 
   const handleChange: UploadProps["onChange"] = ({ fileList: newFileList }) =>
@@ -105,7 +111,7 @@ function UpdateProfile() {
 
       uploadTask.on(
         "state_changed",
-        (snapshot) => {
+        () => {
           // Progress tracking if needed
         },
         (error) => {
@@ -120,7 +126,7 @@ function UpdateProfile() {
     });
   };
 
-  const handleUpdateProfile = async (values: any) => {
+  const handleUpdateProfile = async (values: Profile) => {
     setLoading(true);
 
     try {
@@ -162,7 +168,15 @@ function UpdateProfile() {
       fetchProfile();
       navigate("/profile", { state: { updateProfileSuccess: true } });
     } catch (error) {
-      toast.error(error.response.data);
+      const axiosError = error as AxiosError;
+
+      // Safely access `response.data`, and use JSON.stringify if it's an object
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.error(errorMessage); // Display error message
     } finally {
       setLoading(false);
     }
@@ -227,7 +241,7 @@ function UpdateProfile() {
               <CardContent>
                 <Form
                   layout="vertical"
-                  initialValues={profile}
+                  initialValues={profile || undefined}
                   onFinish={handleUpdateProfile}
                   className="space-y-4"
                 >
@@ -323,7 +337,7 @@ function UpdateProfile() {
                     className="flex justify-end space-x-4"
                     variants={formItemVariants}
                   >
-                    <Button variant="outline" asChild>
+                    <Button>
                       <Link to="/profile">Cancel</Link>
                     </Button>
                     <Button htmlType="submit" disabled={loading}>

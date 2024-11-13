@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import api from "../../configs/axios";
 import Header from "@/components/Header/header";
 import { FaUser } from "react-icons/fa";
+import { AxiosError } from "axios";
 
 const Login = () => {
   const [isResetPassword, setIsResetPassword] = useState(false);
@@ -40,7 +41,15 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(response.data));
       navigate("/", { state: { loginSuccess: true } });
     } catch (error) {
-      toast.error(error.response.data);
+      const axiosError = error as AxiosError;
+
+      // Safely access `response.data`, and use JSON.stringify if it's an object
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.error(errorMessage); // Display error message
     }
   };
 
@@ -50,12 +59,16 @@ const Login = () => {
       toast.success("Password reset instructions sent to your email.");
       setIsResetPassword(false);
     } catch (error) {
-      toast.error("Failed to initiate password reset. Please try again.");
-    }
-  };
+      const axiosError = error as AxiosError;
 
-  const handleLoginGoogle = () => {
-    window.open("http://localhost:5155/api/User/google-login", "_self");
+      // Safely access `response.data`, and use JSON.stringify if it's an object
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.error(errorMessage); // Display error message
+    }
   };
 
   const pageVariants = {
