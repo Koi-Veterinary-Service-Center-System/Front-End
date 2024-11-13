@@ -72,12 +72,13 @@ export type VetSlots = {
 };
 
 export type Payment = {
-  paymentID: string;
-  qrcode: string;
+  paymentID: string | number;
   type: string;
+  isDeleted: boolean;
 };
 
 export type Booking = {
+  customerId: string;
   bookingID: string;
   bookingDate: string;
   location: string;
@@ -161,4 +162,5 @@ export type Feedback = {
   comments: string; // Bình luận của khách hàng
   isVisible: boolean; // Trạng thái hiển thị của phản hồi
   vetName: string;
+  serviceName: string;
 };

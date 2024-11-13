@@ -1,5 +1,4 @@
 import Sidebar from "@/components/Sidebar/sidebar";
-import { Link } from "react-router-dom";
 
 function AdminDashbroad({ name }) {
   return (
@@ -11,8 +10,6 @@ function AdminDashbroad({ name }) {
       </div>
 
       <Sidebar />
-      {/* <Link to="/overview">Overview</Link>
-      <Link to="/service">Service</Link> */}
     </div>
   );
 }

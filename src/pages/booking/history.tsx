@@ -109,9 +109,13 @@ const History = () => {
         (a: Booking, b: Booking) => b.bookingID - a.bookingID
       );
       setBookings(fetchedBookings); // Cập nhật state bookings
-    } catch (error: any) {
-      setBookings([]); // Reset bookings on error
-      toast.info(error.response?.data || "Failed to fetch bookings.");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setBookings([]);
+        const message =
+          (error as any)?.respoonse?.data || "Failed to fetch bookings.";
+        toast.info(message);
+      }
     }
   };
 
@@ -625,7 +629,7 @@ const History = () => {
                         className="flex flex-col items-center justify-center h-64"
                       >
                         <img
-                          src="src\assets\images\The Sad Snowman - Falling Apart.png"
+                          src="https://firebasestorage.googleapis.com/v0/b/swp391veterinary.appspot.com/o/The%20Sad%20Snowman%20-%20Falling%20Apart.png?alt=media&token=65d7dec8-75d8-4b9a-b79e-df8882d4b22f"
                           alt="No bookings"
                           className="w-32 h-32 mb-4"
                         />

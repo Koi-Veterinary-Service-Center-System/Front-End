@@ -7,13 +7,11 @@ import Sidebar from "@/components/Sidebar/sidebar";
 import { useEffect, useState } from "react";
 import { User } from "@/types/info";
 import api from "@/configs/axios";
-import dayjs from "dayjs"; // Ensure you have installed dayjs for date comparison
+import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 const UsersPage = () => {
-  const [users, setUsers] = useState<User[]>([]);
   const [totalUsers, setTotalUsers] = useState(0);
-  const [newUsersToday, setNewUsersToday] = useState(0);
-  const [churnRate, setChurnRate] = useState(0);
   const [activeUsers, setActiveUsers] = useState(0);
 
   const fetchUser = async () => {
@@ -23,7 +21,6 @@ const UsersPage = () => {
       });
 
       const allUsers = response.data;
-      const oneMonthAgo = dayjs().subtract(30, "day").format("YYYY-MM-DD");
       const activeUsersCount = allUsers.filter(
         (user: User) => user.isActive
       ).length;
@@ -31,8 +28,16 @@ const UsersPage = () => {
       setTotalUsers(allUsers.length);
 
       setActiveUsers(activeUsersCount);
-    } catch (error: any) {
-      console.error("Failed to fetch user data:", error.message);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+
+      // Safely access `response.data`, and use JSON.stringify if it's an object
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.error(errorMessage); // Display error message
     }
   };
 
@@ -77,11 +82,6 @@ const UsersPage = () => {
             </div>
           </motion.div>
           <UsersTable />
-          {/* USER CHARTS
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-            <UserGrowthChart />
-            <UserActivityHeatmap />
-          </div> */}
         </main>
       </div>
     </div>

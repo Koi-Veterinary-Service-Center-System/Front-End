@@ -11,6 +11,8 @@ import {
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import api from "@/configs/axios";
+import { Feedback } from "@/types/info";
+import axios from "axios";
 
 const UserRetention = () => {
   const [feedBacks, setFeedBack] = useState([]);
@@ -24,8 +26,13 @@ const UserRetention = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setFeedBack(response.data);
-    } catch (error: any) {
-      setError(error.response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        setError(error.response.data); // Set error message based on server response
+      } else {
+        console.error("An unknown error occurred:", error);
+        setError("An unknown error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -36,7 +43,7 @@ const UserRetention = () => {
   }, []);
 
   // Chuyển đổi dữ liệu feedback thành dạng dùng cho biểu đồ
-  const feedbackData = feedBacks.map((feedback: any) => ({
+  const feedbackData = feedBacks.map((feedback: Feedback) => ({
     name: feedback.customerName,
     rate: feedback.rate,
   }));

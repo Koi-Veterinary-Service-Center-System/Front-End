@@ -10,7 +10,12 @@ import {
 } from "react-icons/fa";
 import { SiVisa, SiPaypal, SiMastercard } from "react-icons/si";
 
-const FooterSection = ({ title, links }) => (
+interface FooterSectionProps {
+  title: string;
+  links: { text: string; url: string }[];
+}
+
+const FooterSection: React.FC<FooterSectionProps> = ({ title, links }) => (
   <div className="space-y-4">
     <h5 className="text-lg font-semibold mb-2">{title}</h5>
     <ul className="space-y-2">
@@ -28,7 +33,19 @@ const FooterSection = ({ title, links }) => (
   </div>
 );
 
-const SocialIcon = ({ Icon, url, hoverColor, label }) => (
+interface SocialIconProps {
+  Icon: React.ComponentType<{ className?: string }>;
+  url: string;
+  hoverColor: string;
+  label: string;
+}
+
+const SocialIcon: React.FC<SocialIconProps> = ({
+  Icon,
+  url,
+  hoverColor,
+  label,
+}) => (
   <Link
     to={url}
     className={`text-gray-600 hover:${hoverColor} transition-colors duration-200 flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-sm`}

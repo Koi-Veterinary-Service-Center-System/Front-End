@@ -81,11 +81,7 @@ const ContactUs = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <motion.div variants={staggerChildren}>
                     {["name", "email", "message"].map((field) => (
-                      <motion.div
-                        key={field}
-                        variants={fadeIn}
-                        className="space-y-2"
-                      >
+                      <motion.div key={field} className="space-y-2">
                         <Label
                           htmlFor={field}
                           className="text-blue-700 font-medium"
@@ -157,11 +153,7 @@ const ContactUs = () => {
                     { icon: Mail, text: "info@koivetservice.com" },
                     { icon: Clock, text: "Mon-Fri: 9am-5pm, Sat: 10am-2pm" },
                   ].map(({ icon: Icon, text }, index) => (
-                    <motion.div
-                      key={index}
-                      variants={fadeIn}
-                      className="flex items-center"
-                    >
+                    <motion.div key={index} className="flex items-center">
                       <Icon className="w-6 h-6 mr-4 text-blue-500" />
                       <p className="text-gray-700">{text}</p>
                     </motion.div>

@@ -5,6 +5,12 @@ import { Form, Input, Button, Card } from "antd";
 import { toast } from "sonner";
 import api from "@/configs/axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { AxiosError } from "axios";
+
+interface ResetPasswordFormValues {
+  newPassword: string;
+  confirmPassword: string;
+}
 
 export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +30,7 @@ export default function ResetPassword() {
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
-  const onFinish = async (values) => {
+  const onFinish = async (values: ResetPasswordFormValues) => {
     const { newPassword, confirmPassword } = values;
 
     if (newPassword !== confirmPassword) {
@@ -47,6 +53,12 @@ export default function ResetPassword() {
         toast.error("Failed to change password");
       }
     } catch (error) {
+      const axiosError = error as AxiosError;
+
+      // Log the detailed error for debugging purposes, if needed
+      console.error("Detailed error:", axiosError);
+
+      // Display a generic error message to the user
       toast.error("Error occurred while resetting password");
     } finally {
       setIsLoading(false);

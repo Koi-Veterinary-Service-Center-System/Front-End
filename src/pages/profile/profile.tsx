@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Profile } from "@/types/info";
 import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
+import { AxiosError } from "axios";
 
 function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -51,7 +52,13 @@ function ProfilePage() {
 
       setProfile(genderProfile);
     } catch (error) {
-      setError(error.response?.data?.message || "Failed to fetch profile data");
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      setError(errorMessage);
     }
   };
 
@@ -161,7 +168,7 @@ function ProfilePage() {
                       <Input id="phone" value={profile.phoneNumber} readOnly />
                     </div>
                     <div className="flex justify-end">
-                      <Button asChild>
+                      <Button>
                         <Link to="/updateProfile">Edit Profile</Link>
                       </Button>
                     </div>

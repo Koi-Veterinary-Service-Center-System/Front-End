@@ -5,7 +5,7 @@ import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import api from "../../configs/axios";
 import { toast } from "sonner";
-import { Feedback } from "@/types/info";
+import { Feedback, Profile } from "@/types/info";
 import {
   Dialog,
   DialogContent,
@@ -14,10 +14,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
-// Mock userRole for demonstration, replace with actual role from context or state
-const userRole = "Manager"; // Replace with the actual user role
-
+import { AxiosError } from "axios";
+interface FeedbackM {
+  feedbackID: number;
+}
 const FeedbackTable = () => {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(false);
@@ -32,7 +32,7 @@ const FeedbackTable = () => {
     try {
       const response = await api.get("/Feedback/all-feedback");
       const sortedFeedbacks = response.data.sort(
-        (a: any, b: any) => b.feedbackID - a.feedbackID
+        (a: FeedbackM, b: FeedbackM) => b.feedbackID - a.feedbackID
       );
       setFeedbacks(sortedFeedbacks);
     } catch (error) {
@@ -60,8 +60,15 @@ const FeedbackTable = () => {
         );
         toast.success("Feedback visibility updated successfully!");
       }
-    } catch (error: any) {
-      toast.error(error.response?.data || "Failed to update visibility");
+    } catch (error) {
+      const axiosError = error as AxiosError;
+
+      // Safely access `response?.data` and provide a fallback message
+      toast.error(
+        axiosError.response?.data
+          ? String(axiosError.response.data)
+          : "Failed to update visibility"
+      );
     }
   };
 
@@ -84,8 +91,15 @@ const FeedbackTable = () => {
         );
         toast.success("Feedback deleted successfully!");
       }
-    } catch (error: any) {
-      toast.error(error.response?.data || "Failed to delete feedback");
+    } catch (error) {
+      const axiosError = error as AxiosError;
+
+      // Safely access `response?.data` and provide a fallback message
+      toast.error(
+        axiosError.response?.data
+          ? String(axiosError.response.data)
+          : "Failed to delete feedback"
+      );
     } finally {
       setIsDeleteModalOpen(false);
       setFeedbackToDelete(null);

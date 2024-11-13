@@ -42,6 +42,7 @@ import { PiMoneyWavy } from "react-icons/pi";
 import { Switch } from "../ui/switch";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
+import { Link } from "react-router-dom";
 
 interface ServicesTableProps {
   onDeleteSuccess: () => void;
@@ -303,16 +304,19 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <TableCell>
-                    <img
-                      src={
-                        service.imageURL ||
-                        "https://kehlanpools.com/wp-content/uploads/2022/03/blg1.jpg"
-                      }
-                      alt={`${service.serviceName} image`}
-                      className="w-16 h-16 rounded-md object-cover"
-                    />
-                  </TableCell>
+                  <Link to={`/detail-service/${service.serviceID}`}>
+                    <TableCell>
+                      <img
+                        src={
+                          service.imageURL ||
+                          "https://kehlanpools.com/wp-content/uploads/2022/03/blg1.jpg"
+                        }
+                        alt={`${service.serviceName} image`}
+                        className="w-16 h-16 rounded-md object-cover"
+                      />
+                    </TableCell>
+                  </Link>
+
                   <TableCell className="font-medium">
                     {service.serviceName}
                   </TableCell>

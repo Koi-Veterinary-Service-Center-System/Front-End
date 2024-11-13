@@ -373,7 +373,10 @@ export default function Component() {
                             Location:
                           </span>
                           <p className="text-gray-900">
-                            {appointment.location}
+                            {appointment.location ===
+                            "undefined, undefined, undefined"
+                              ? "No location"
+                              : appointment.location}
                           </p>
                         </div>
                       </motion.div>

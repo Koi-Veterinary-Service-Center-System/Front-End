@@ -9,7 +9,17 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import api from "@/configs/axios";
+import axios from "axios";
 
+interface FeedbackItem {
+  serviceName: string;
+  rate: number;
+}
+
+interface TransformedData {
+  name: string;
+  value: number;
+}
 // Màu sắc cho các phần của biểu đồ
 const COLORS = [
   "#8884d8",
@@ -37,7 +47,7 @@ const VetServiceChannelPerformance = () => {
 
       // Chuyển đổi dữ liệu thành định dạng mà biểu đồ có thể sử dụng
       const transformedData = response.data.reduce(
-        (acc: { name: string; value: number }[], item: any) => {
+        (acc: TransformedData[], item: FeedbackItem) => {
           const label = `${item.serviceName} (Rate ${item.rate})`;
           const existingEntry = acc.find((entry) => entry.name === label);
 
@@ -53,9 +63,13 @@ const VetServiceChannelPerformance = () => {
       );
 
       setFeedbackData(transformedData);
-    } catch (error: any) {
-      setError(error.response.data);
-      console.error("Error fetching feedback data:", error);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        setError(error.response.data); // Set error message based on server response
+      } else {
+        console.error("An unknown error occurred:", error);
+        setError("An unknown error occurred");
+      }
     } finally {
       setLoading(false);
     }

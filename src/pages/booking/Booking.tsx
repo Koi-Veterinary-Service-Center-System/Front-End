@@ -32,6 +32,7 @@ import { motion } from "framer-motion";
 import TextArea from "antd/es/input/TextArea";
 import moment from "moment";
 import TermsModal from "@/components/TermsModal/TermsModal";
+import { AxiosError } from "axios";
 
 const { Option } = Select;
 
@@ -55,13 +56,14 @@ function BookingPage() {
   const [allSlots, setAllSlots] = useState<Slot[]>([]);
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
   const [isAtHomeService, setIsAtHomeService] = useState(true);
+  const [isOnlineService, setIsOnlineService] = useState(false);
 
   // Ant Design form hook
   const [form] = Form.useForm();
 
-  const handleDateChange = (date: unknown) => {
+  const handleDateChange = (date: moment.Moment | null) => {
     if (!date) {
-      setSlots(allSlots); // Khôi phục tất cả slots nếu không có ngày được chọn
+      setSlots(allSlots);
       return;
     }
 
@@ -74,6 +76,7 @@ function BookingPage() {
 
     setSlots(filteredSlots);
   };
+
   // Fetch Slots
   useEffect(() => {
     const fetchSlots = async () => {
@@ -170,8 +173,16 @@ function BookingPage() {
       const response = await api.get(`/vet/available-vet/${slotID}`);
       setVets(response.data); // Update the vets list based on the slot
     } catch (error) {
-      console.error("Error fetching available vets:", error);
-      toast.info(error.response.data);
+      const axiosError = error as AxiosError;
+      console.error("Error fetching available vets:", axiosError);
+
+      // Safely access `response.data`, and use JSON.stringify if it's an object
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.info(errorMessage); // Display error message
     } finally {
       setLoadingVets(false);
     }
@@ -196,7 +207,9 @@ function BookingPage() {
     setSelectedVet(vetId);
 
     // Find the selected vet's name
-    const selectedVetName = vets.find((vet) => vet.id === vetId)?.vetName;
+    const selectedVetName = vets.find(
+      (vet) => vet.id === Number(vetId)
+    )?.vetName;
 
     // Set both vetId and vetName in the form fields
     form.setFieldsValue({ vet: vetId, vetName: selectedVetName });
@@ -215,7 +228,7 @@ function BookingPage() {
 
       // Lấy thông tin quận/huyện từ khoảng cách đã chọn
       const selectedDistrict = distances.find(
-        (distance) => distance.distanceID === values.district
+        (distance) => distance.distanceID === Number(values.district)
       );
 
       // Kết hợp thông tin vị trí
@@ -243,7 +256,7 @@ function BookingPage() {
         toast.success("Booking successful!");
 
         // Kiểm tra nếu paymentId là 2 (tương ứng với VNPAY)
-        if (values.paymentType === 2) {
+        if (values.paymentType === "2") {
           await handlePayOnline(response.data.bookingID); // Gọi API thanh toán
         } else {
           window.location.href = "/history"; // Chuyển về trang lịch sử nếu không phải VNPAY
@@ -280,24 +293,25 @@ function BookingPage() {
     }
   };
 
-  const handleServiceChange = async (serviceID: number) => {
+  const handleServiceChange = async (serviceID: number | string) => {
     const selectedService = services.find(
-      (service) => service.serviceID === serviceID
+      (service) => service.serviceID === Number(serviceID)
     );
 
     setIsAtHomeService(selectedService ? selectedService.isAtHome : true);
+    setIsOnlineService(selectedService ? selectedService.isOnline : false);
 
     if (selectedService?.isOnline) {
-      // Nếu dịch vụ online, chỉ hiển thị VNPay
+      // If the service is online, only show VNPay
       setPayments([{ paymentID: 2, type: "VNPay", isDeleted: false }]);
-      form.setFieldsValue({ paymentType: 2 }); // Đặt mặc định phương thức thanh toán là VNPay
+      form.setFieldsValue({ paymentType: 2 }); // Set VNPay as the default and only option
     } else {
-      // Nếu dịch vụ không phải online, hiển thị lại tất cả các phương thức thanh toán
+      // If the service is not online, show all payment methods
       try {
         setLoadingPayment(true);
         const response = await api.get("/payment/all-payment");
         setPayments(response.data);
-        form.resetFields(["paymentType"]); // Reset giá trị paymentType khi chuyển về dịch vụ không online
+        form.resetFields(["paymentType"]); // Reset paymentType when switching back to non-online service
       } catch (error) {
         console.error("Error fetching payments:", error);
         toast.error("Failed to load payments.");
@@ -578,8 +592,8 @@ function BookingPage() {
                   name="quantity"
                   rules={[
                     {
-                      required: true,
-                      message: "Please enter a quantity", // Bắt lỗi khi trường bị bỏ trống
+                      required: !isOnlineService, // Only required if isOnlineService is false
+                      message: "Please enter a quantity",
                     },
                     {
                       type: "number",
@@ -588,7 +602,11 @@ function BookingPage() {
                     },
                   ]}
                 >
-                  <InputNumber min={0} className="w-full p-2 shadow-sm" />
+                  <InputNumber
+                    min={0}
+                    className="w-full p-2 shadow-sm"
+                    disabled={isOnlineService}
+                  />
                 </Form.Item>
               </motion.div>
             </motion.div>
