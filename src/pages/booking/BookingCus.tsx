@@ -14,6 +14,7 @@ import {
   ClockIcon,
   MapPinIcon,
   CreditCardIcon,
+  CalendarDays,
 } from "lucide-react";
 import { AiOutlineSchedule } from "react-icons/ai";
 import { BiCheckboxChecked } from "react-icons/bi";
@@ -40,6 +41,7 @@ import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
 import { FaRegMoneyBillAlt } from "react-icons/fa";
 import { differenceInDays } from "date-fns";
 import ConfirmStatusChangeModal from "./ConfirmStatusChangeModal";
+import { AxiosError } from "axios";
 
 const statusOptions = [
   "Scheduled",
@@ -63,13 +65,13 @@ const statusIcons: Record<Status, React.ElementType> = {
   Cancelled: AlertCircle,
 };
 
-const History = () => {
+const BookingCus = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [error, setError] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const backgroundStyle = {
-    backgroundImage: "url('src/assets/images/subtle-prism.png')", // Add the path to your image here
+    backgroundImage:
+      "url('https://firebasestorage.googleapis.com/v0/b/swp391veterinary.appspot.com/o/subtle-prism.png?alt=media&token=e88974a9-6dcf-49dd-83ec-cefe66c48f23')", // Add the path to your image here
     backgroundSize: "cover", // Makes the background cover the entire area
     backgroundPosition: "center", // Centers the background
     backgroundRepeat: "no-repeat", // Ensures the image doesn't repeat
@@ -109,13 +111,14 @@ const History = () => {
         (a: Booking, b: Booking) => b.bookingID - a.bookingID
       );
       setBookings(fetchedBookings); // Cập nhật state bookings
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setBookings([]);
-        const message =
-          (error as any)?.respoonse?.data || "Failed to fetch bookings.";
-        toast.info(message);
-      }
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.info(errorMessage);
     }
   };
 
@@ -127,10 +130,13 @@ const History = () => {
         },
       });
       setProfile(response.data);
-    } catch (error: any) {
+    } catch (error) {
+      const axiosError = error as AxiosError;
       const errorMessage =
-        error.response?.data?.message || "Failed to fetch profile data";
-      setError(errorMessage);
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
       toast.error(errorMessage);
     }
   };
@@ -199,9 +205,14 @@ const History = () => {
       } else {
         toast.error("Failed to update booking status.");
       }
-    } catch (error: any) {
-      console.error("Error updating booking status:", error);
-      toast.error(error.response.data);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      console.log(errorMessage);
     }
   };
 
@@ -211,7 +222,7 @@ const History = () => {
   };
 
   // Hàm để cập nhật thông tin Form
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCancelBookingInfo((prevInfo) => ({
       ...prevInfo,
@@ -236,8 +247,14 @@ const History = () => {
       toast.success(`Booking ${selectedBookingId} has been cancelled`);
       setIsCancelDialogOpen(false);
       fetchBookingsByStatus(); // Refresh bookings after cancellation
-    } catch (error: any) {
-      toast.warning(error.response.data);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.warning(errorMessage);
     }
   };
 
@@ -254,8 +271,14 @@ const History = () => {
       toast.success(`Booking ${selectedBookingId} status updated to Success`);
       setIsConfirmModalOpen(false);
       fetchBookingsByStatus(activeStatus);
-    } catch (error: any) {
-      toast.error(error.response.data);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.error(errorMessage);
     }
   };
 
@@ -273,23 +296,29 @@ const History = () => {
 
     return () => clearInterval(waveInterval);
   }, []);
+
+  const rebookAppointment = (bookingID: string) => {
+    // Implement your rebooking logic here
+    // For example, redirect to the booking form with pre-filled data
+    console.log(`Rebooking appointment for booking ID: ${bookingID}`);
+    toast.info(`Rebooking appointment for booking ID: ${bookingID}`);
+  };
+
   return (
     <div className={`min-h-screen bg-gray-100 ${isDarkMode ? "dark" : ""}`}>
       <div className="flex">
         <SlidebarProfile />
 
         <main className="flex-1" style={backgroundStyle}>
-          <header className="bg-white dark:bg-gray-800 shadow  bg-gradient-to-br from-blue-50 to-blue-400">
-            <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Services
-              </h1>
-              <div className="flex items-center space-x-4">
+          <header className="bg-gradient-to-br from-blue-50 to-blue-400 dark:from-gray-800 dark:to-gray-900 shadow">
+            <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-end items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <Sun className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   <Switch
                     checked={isDarkMode}
                     onCheckedChange={handleDarkModeSwitch}
+                    className="data-[state=checked]:bg-blue-600"
                   />
                   <Moon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
@@ -299,7 +328,7 @@ const History = () => {
                     alt="Profile"
                     className="object-cover"
                   />
-                  <AvatarFallback>
+                  <AvatarFallback className="bg-blue-500 text-white">
                     {profile?.firstName?.[0]}
                     {profile?.lastName?.[0]}
                   </AvatarFallback>
@@ -617,6 +646,28 @@ const History = () => {
                                     </DialogContent>
                                   </Dialog>
                                 )}
+                                {/* Rebook Button: Only show for Succeeded and Cancelled bookings */}
+                                {(booking.bookingStatus === "Succeeded" ||
+                                  booking.bookingStatus === "Cancelled") && (
+                                  <Button
+                                    variant="default"
+                                    onClick={() =>
+                                      rebookAppointment("example-booking-id")
+                                    }
+                                    className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-2 px-4 rounded-md 
+                                               shadow-lg hover:shadow-blue-500/50 transition-all duration-300 ease-in-out
+                                               hover:from-blue-600 hover:to-blue-700 hover:-translate-y-0.5 
+                                               active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+                                  >
+                                    <motion.span
+                                      className="flex items-center gap-2"
+                                      initial={{ opacity: 1 }}
+                                      whileHover={{ opacity: 1 }}
+                                    >
+                                      Rebook
+                                    </motion.span>
+                                  </Button>
+                                )}
                               </CardFooter>
                             </Card>
                           </motion.div>
@@ -651,9 +702,8 @@ const History = () => {
         onConfirm={handleConfirmSuccess}
         newStatus="Success"
       />
-      {error && <div className="text-red-500 mt-4">{error}</div>}
     </div>
   );
 };
 
-export default History;
+export default BookingCus;

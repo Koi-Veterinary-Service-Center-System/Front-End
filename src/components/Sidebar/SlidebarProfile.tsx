@@ -1,27 +1,53 @@
-import { motion } from "framer-motion";
-import { ArrowLeft, Store, User } from "lucide-react";
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Store, User, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "../ui/button";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+
 export default function SlidebarProfile() {
   const [activeMenuItem, setActiveMenuItem] = useState("dashboard");
+  const [isMobile, setIsMobile] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkIsMobile();
+    window.addEventListener("resize", checkIsMobile);
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []);
+
   const sidebarVariants = {
-    hidden: { x: -300 },
-    visible: { x: 0, transition: { type: "spring", stiffness: 100 } },
+    hidden: { x: isMobile ? "-100%" : -300 },
+    visible: {
+      x: 0,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        when: "beforeChildren",
+      },
+    },
   };
+
   const handleMenuItemClick = (menuItem: string) => {
     setActiveMenuItem(menuItem);
+    if (isMobile) setIsOpen(false);
   };
-  return (
-    <motion.aside
-      className="w-52 bg-gray-100 dark:bg-gray-800 h-screen sticky top-0"
-      initial="hidden"
-      animate="visible"
-      variants={sidebarVariants}
-    >
+
+  const toggleSidebar = () => setIsOpen(!isOpen);
+
+  const SidebarContent = () => (
+    <>
       <div className="p-4">
         <Link to="/" className="flex items-center space-x-2 text-primary">
-          <img src="src\assets\images\logo.png" alt="" className="h-30 w-30" />
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/swp391veterinary.appspot.com/o/logo.png?alt=media&token=a26711fc-ed75-4e62-8af1-ec577334574a"
+            alt="Logo"
+            className="h-20 w-20 flex justify-center align-middle"
+          />
         </Link>
       </div>
       <nav className="mt-8">
@@ -42,7 +68,7 @@ export default function SlidebarProfile() {
           </li>
           <li>
             <Link
-              to="/history"
+              to="/bookingCus"
               className={`flex items-center space-x-2 p-2 ${
                 activeMenuItem === "history"
                   ? "bg-blue-400 text-primary-foreground"
@@ -56,7 +82,7 @@ export default function SlidebarProfile() {
           </li>
         </ul>
       </nav>
-      <div className="absolute bottom-6 left-6">
+      <div className="absolute bottom-6 left-6 right-6">
         <Button
           variant="default"
           size="lg"
@@ -68,6 +94,46 @@ export default function SlidebarProfile() {
           Back
         </Button>
       </div>
-    </motion.aside>
+    </>
+  );
+
+  return (
+    <>
+      {isMobile && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="fixed top-4 left-4 z-50"
+          onClick={toggleSidebar}
+          aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
+        >
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
+      )}
+      <AnimatePresence>
+        {(!isMobile || isOpen) && (
+          <motion.aside
+            className={`bg-gray-100 dark:bg-gray-800 h-screen ${
+              isMobile
+                ? "fixed top-0 left-0 w-64 z-40 shadow-lg"
+                : "sticky top-0 w-52"
+            }`}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={sidebarVariants}
+          >
+            <SidebarContent />
+          </motion.aside>
+        )}
+      </AnimatePresence>
+      {isMobile && isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={toggleSidebar}
+          aria-hidden="true"
+        />
+      )}
+    </>
   );
 }

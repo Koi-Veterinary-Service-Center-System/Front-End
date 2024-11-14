@@ -69,6 +69,8 @@ export type VetSlots = {
   vetFirstName: string; // Set as string for dynamic first names
   vetLastName: string; // Set as string for dynamic last names
   meetURL: string;
+  startTime?: Date;
+  endTime?: Date;
 };
 
 export type Payment = {
@@ -117,6 +119,7 @@ export type Booking = {
   district: string;
   bookingRecordNote: string;
   hasFeedback: boolean;
+  presRecID: string;
 };
 
 export type User = {
@@ -150,7 +153,7 @@ export type Prescription = {
   note: string;
   refundMoney: number | null;
   refundPercent: number | null;
-  bookingID: string;
+  bookingID: number;
   createAt: string;
 };
 

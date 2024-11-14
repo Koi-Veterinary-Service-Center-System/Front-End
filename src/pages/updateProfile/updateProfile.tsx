@@ -38,7 +38,8 @@ function UpdateProfile() {
 
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const backgroundStyle = {
-    backgroundImage: "url('src/assets/images/subtle-prism.png')", // Add the path to your image here
+    backgroundImage:
+      "url('https://firebasestorage.googleapis.com/v0/b/swp391veterinary.appspot.com/o/subtle-prism.png?alt=media&token=e88974a9-6dcf-49dd-83ec-cefe66c48f23')", // Add the path to your image here
     backgroundSize: "cover", // Makes the background cover the entire area
     backgroundPosition: "center", // Centers the background
     backgroundRepeat: "no-repeat", // Ensures the image doesn't repeat
@@ -204,17 +205,15 @@ function UpdateProfile() {
           variants={contentVariants}
           style={backgroundStyle}
         >
-          <header className="bg-white dark:bg-gray-800 shadow  bg-gradient-to-br from-blue-50 to-blue-400">
-            <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Update Profile
-              </h1>
-              <div className="flex items-center space-x-4">
+          <header className="bg-gradient-to-br from-blue-50 to-blue-400 dark:from-gray-800 dark:to-gray-900 shadow">
+            <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-end items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <Sun className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   <Switch
                     checked={isDarkMode}
                     onCheckedChange={handleDarkModeSwitch}
+                    className="data-[state=checked]:bg-blue-600"
                   />
                   <Moon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
@@ -224,7 +223,7 @@ function UpdateProfile() {
                     alt="Profile"
                     className="object-cover"
                   />
-                  <AvatarFallback>
+                  <AvatarFallback className="bg-blue-500 text-white">
                     {profile?.firstName?.[0]}
                     {profile?.lastName?.[0]}
                   </AvatarFallback>
