@@ -23,8 +23,8 @@ import {
   Stethoscope,
   Clock,
   FileText,
+  Calendar,
 } from "lucide-react";
-import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 
 interface Prescription {
@@ -33,18 +33,19 @@ interface Prescription {
   medication: string;
   frequency: string;
   note?: string;
+  createAt: string; // Add createAt field here
 }
 
 interface ViewPrescriptionDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  prescriptions: Prescription[] | null; // Allow for null value
+  prescriptions: Prescription[] | null;
 }
 
 export function ViewPrescriptionDialog({
   isOpen,
   onClose,
-  prescriptions = [], // Default to an empty array
+  prescriptions = [],
 }: ViewPrescriptionDialogProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const prescriptionsPerPage = 5;
@@ -64,7 +65,7 @@ export function ViewPrescriptionDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[1200px] bg-gradient-to-br from-blue-100 to-white">
+      <DialogContent className="sm:max-w-[1800px] bg-gradient-to-br from-blue-100 to-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-blue-800 mb-4">
             Prescription Details
@@ -77,20 +78,23 @@ export function ViewPrescriptionDialog({
             </TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[25%] font-semibold text-blue-700">
+                <TableHead className="w-[12%] font-semibold text-blue-700">
                   Disease Name
                 </TableHead>
-                <TableHead className="w-[30%] font-semibold text-blue-700">
+                <TableHead className="w-[25%] font-semibold text-blue-700">
                   Symptoms
                 </TableHead>
-                <TableHead className="w-[30%] font-semibold text-blue-700">
+                <TableHead className="w-[23%] font-semibold text-blue-700">
                   Medication
                 </TableHead>
-                <TableHead className="w-[15%] font-semibold text-blue-700">
+                <TableHead className="w-[10%] font-semibold text-blue-700">
                   Frequency
                 </TableHead>
-                <TableHead className="w-[20%] font-semibold text-blue-700">
+                <TableHead className="w-[10%] font-semibold text-blue-700">
                   Note
+                </TableHead>
+                <TableHead className="w-[15%] font-semibold text-blue-700">
+                  Created At
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -120,7 +124,7 @@ export function ViewPrescriptionDialog({
                     <TableCell className="overflow-hidden whitespace-nowrap">
                       <div className="flex items-center space-x-2">
                         <Pill className="w-4 h-4 text-green-500 flex-shrink-0" />
-                        {prescription.medication}
+                        <span>{prescription.medication}</span>
                       </div>
                     </TableCell>
                     <TableCell className="overflow-hidden whitespace-nowrap">
@@ -139,12 +143,29 @@ export function ViewPrescriptionDialog({
                         </span>
                       </div>
                     </TableCell>
+                    <TableCell className="overflow-hidden whitespace-nowrap">
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                        <span className="truncate">
+                          {new Date(prescription.createAt).toLocaleString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
+                        </span>
+                      </div>
+                    </TableCell>
                   </motion.tr>
                 ))}
               </AnimatePresence>
               {prescriptions?.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-gray-500">
+                  <TableCell colSpan={6} className="text-center text-gray-500">
                     No prescriptions available.
                   </TableCell>
                 </TableRow>
