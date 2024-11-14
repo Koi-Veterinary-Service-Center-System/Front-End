@@ -8,10 +8,18 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Calendar, DollarSign, FileText, X } from "lucide-react";
+import {
+  Loader2,
+  DollarSign,
+  FileText,
+  X,
+  Hash,
+  TrendingUp,
+} from "lucide-react";
 import api from "@/configs/axios";
 
 interface BookingRecord {
+  initAmount: number;
   arisedQuantity: number;
   quantityMoney: number;
   receivableAmount: number;
@@ -60,6 +68,13 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
     }
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -90,10 +105,10 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.1 }}
                       >
-                        <Calendar className="h-5 w-5" />
+                        <DollarSign className="h-5 w-5" />
                         <span>
-                          <strong>Arised Quantity:</strong>{" "}
-                          {bookingRecord.arisedQuantity}
+                          <strong>Initial Amount:</strong>{" "}
+                          {formatCurrency(bookingRecord.initAmount)}
                         </span>
                       </motion.div>
                       <motion.div
@@ -102,10 +117,10 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
                       >
-                        <DollarSign className="h-5 w-5" />
+                        <Hash className="h-5 w-5" />
                         <span>
-                          <strong>Quantity Money:</strong>{" "}
-                          {bookingRecord.quantityMoney.toLocaleString()} VND
+                          <strong>Quantity:</strong>{" "}
+                          {bookingRecord.arisedQuantity}
                         </span>
                       </motion.div>
                       <motion.div
@@ -116,8 +131,11 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
                       >
                         <DollarSign className="h-5 w-5" />
                         <span>
-                          <strong>Receivable Amount:</strong>{" "}
-                          {bookingRecord.receivableAmount.toLocaleString()} VND
+                          <strong>Price per Quantity:</strong>{" "}
+                          {formatCurrency(
+                            bookingRecord.quantityMoney /
+                              bookingRecord.arisedQuantity
+                          )}
                         </span>
                       </motion.div>
                       <motion.div
@@ -126,10 +144,10 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.4 }}
                       >
-                        <DollarSign className="h-5 w-5" />
+                        <TrendingUp className="h-5 w-5" />
                         <span>
-                          <strong>Total Amount:</strong>{" "}
-                          {bookingRecord.totalAmount.toLocaleString()} VND
+                          <strong>Total Quantity Price:</strong>{" "}
+                          {formatCurrency(bookingRecord.quantityMoney)}
                         </span>
                       </motion.div>
                       <motion.div
@@ -137,6 +155,45 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 }}
+                      >
+                        <DollarSign className="h-5 w-5" />
+                        <span>
+                          <strong>Total Original Amount:</strong>{" "}
+                          {formatCurrency(
+                            bookingRecord.initAmount +
+                              bookingRecord.quantityMoney
+                          )}
+                        </span>
+                      </motion.div>
+                      <motion.div
+                        className="flex items-center space-x-3 text-blue-700"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.6 }}
+                      >
+                        <DollarSign className="h-5 w-5" />
+                        <span>
+                          <strong>Total Amount Receivable:</strong>{" "}
+                          {formatCurrency(bookingRecord.receivableAmount)}
+                        </span>
+                      </motion.div>
+                      <motion.div
+                        className="flex items-center space-x-3 text-blue-700"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.7 }}
+                      >
+                        <DollarSign className="h-5 w-5" />
+                        <span>
+                          <strong>Final Total Amount:</strong>{" "}
+                          {formatCurrency(bookingRecord.totalAmount)}
+                        </span>
+                      </motion.div>
+                      <motion.div
+                        className="flex items-center space-x-3 text-blue-700"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.8 }}
                       >
                         <FileText className="h-5 w-5" />
                         <span>

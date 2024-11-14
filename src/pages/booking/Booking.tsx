@@ -259,7 +259,7 @@ function BookingPage() {
         if (values.paymentType === "2") {
           await handlePayOnline(response.data.bookingID); // Gọi API thanh toán
         } else {
-          window.location.href = "/history"; // Chuyển về trang lịch sử nếu không phải VNPAY
+          window.location.href = "/bookingCus"; // Chuyển về trang lịch sử nếu không phải VNPAY
         }
       }
     } catch (error: any) {

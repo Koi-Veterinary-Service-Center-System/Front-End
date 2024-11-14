@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import api from "@/configs/axios";
+import { AxiosError } from "axios";
 
 interface KoiVetBookingProps {
   bookingID: string;
@@ -67,9 +68,14 @@ export default function BookingRecord({
       );
       console.log("Booking completed successfully:", response.data);
       onClose();
-    } catch (error: any) {
-      setError(error.response ? error.response.data : "An error occurred");
-      console.error("Failed to complete booking:", error);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      console.log(errorMessage);
     } finally {
       setLoading(false);
     }

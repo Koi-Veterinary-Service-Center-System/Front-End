@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useLocation } from "react-router-dom";
@@ -26,7 +26,7 @@ const staggerChildren = {
   },
 };
 
-function AnimatedSection({ children }) {
+function AnimatedSection({ children }: { children: ReactNode }) {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,

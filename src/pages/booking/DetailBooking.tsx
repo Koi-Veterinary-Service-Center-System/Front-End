@@ -41,6 +41,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useParams } from "react-router-dom";
 import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
+import { ViewPrescriptionDialog } from "../Detail Appointment Page/ViewPrescriptionDialog";
 const statusSteps = [
   {
     label: "Pending",
@@ -128,8 +129,10 @@ const DetailBooking = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [selectedPrescription, setSelectedPrescription] =
     useState<Prescription | null>(null);
+  const [isPrescriptionDialogOpen, setPrescriptionDialogOpen] = useState(false);
   const backgroundStyle = {
-    backgroundImage: "url('/assets/images/subtle-prism.png')", // Add the path to your image here
+    backgroundImage:
+      "url('https://firebasestorage.googleapis.com/v0/b/swp391veterinary.appspot.com/o/subtle-prism.png?alt=media&token=e88974a9-6dcf-49dd-83ec-cefe66c48f23')", // Add the path to your image here
     backgroundSize: "cover", // Makes the background cover the entire area
     backgroundPosition: "center", // Centers the background
     backgroundRepeat: "no-repeat", // Ensures the image doesn't repeat
@@ -187,10 +190,9 @@ const DetailBooking = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      console.log("Prescription response:", response.data); // Debug log
-      setSelectedPrescription(response.data[0]); // Assuming the response is an array, get the first item
+      setSelectedPrescription(response.data); // Store all prescription data
+      setPrescriptionDialogOpen(true); // Open dialog
     } catch (error) {
-      console.error("Error fetching prescription record:", error);
       toast.error("Failed to fetch prescription record.");
     }
   };
@@ -486,93 +488,18 @@ const DetailBooking = () => {
                                 )}
                               </div>
                             </div>
+                            {/* Booking details here */}
                             {booking.hasPres && (
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="ml-auto"
-                                    onClick={() =>
-                                      fetchPrescriptionRecord(booking.bookingID)
-                                    }
-                                  >
-                                    View Details
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-[300px]">
-                                  <DialogHeader>
-                                    <DialogTitle className="text-2xl font-bold text-blue-600">
-                                      Prescription Details
-                                    </DialogTitle>
-                                  </DialogHeader>
-                                  {selectedPrescription ? (
-                                    <div className="mt-4 space-y-4">
-                                      <div className="flex items-center space-x-3">
-                                        <Pill className="h-5 w-5 text-blue-500" />
-                                        <div>
-                                          <p className="text-sm font-medium text-gray-500">
-                                            Disease
-                                          </p>
-                                          <p className="text-lg font-semibold text-gray-800">
-                                            {selectedPrescription.diseaseName}
-                                          </p>
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center space-x-3">
-                                        <Clipboard className="h-5 w-5 text-blue-500" />
-                                        <div>
-                                          <p className="text-sm font-medium text-gray-500">
-                                            Symptoms
-                                          </p>
-                                          <p className="text-lg font-semibold text-gray-800">
-                                            {selectedPrescription.symptoms}
-                                          </p>
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center space-x-3">
-                                        <FileText className="h-5 w-5 text-blue-500" />
-                                        <div>
-                                          <p className="text-sm font-medium text-gray-500">
-                                            Note
-                                          </p>
-                                          <p className="text-lg font-semibold text-gray-800">
-                                            {selectedPrescription.note}
-                                          </p>
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center space-x-3">
-                                        <Calendar className="h-5 w-5 text-blue-500" />
-                                        <div>
-                                          <p className="text-sm font-medium text-gray-500">
-                                            Frequency
-                                          </p>
-                                          <p className="text-lg font-semibold text-gray-800">
-                                            {selectedPrescription.frequency}
-                                          </p>
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center space-x-3">
-                                        <Calendar className="h-5 w-5 text-blue-500" />
-                                        <div>
-                                          <p className="text-sm font-medium text-gray-500">
-                                            Created At
-                                          </p>
-                                          <p className="text-lg font-semibold text-gray-800">
-                                            {new Date(
-                                              selectedPrescription.createAt
-                                            ).toLocaleString()}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <p className="text-center text-gray-500 mt-4">
-                                      No Prescription Found
-                                    </p>
-                                  )}
-                                </DialogContent>
-                              </Dialog>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="ml-auto"
+                                onClick={() =>
+                                  fetchPrescriptionRecord(booking.bookingID)
+                                }
+                              >
+                                View Prescription
+                              </Button>
                             )}
                           </motion.div>
 
@@ -648,6 +575,11 @@ const DetailBooking = () => {
               </motion.div>
             )}
           </div>
+          <ViewPrescriptionDialog
+            isOpen={isPrescriptionDialogOpen}
+            onClose={() => setPrescriptionDialogOpen(false)}
+            prescriptions={selectedPrescription}
+          />
         </main>
       </div>
     </div>

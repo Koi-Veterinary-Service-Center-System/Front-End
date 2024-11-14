@@ -21,12 +21,9 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -34,14 +31,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { motion, AnimatePresence } from "framer-motion";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -56,6 +45,8 @@ import { HiOutlineStatusOnline } from "react-icons/hi";
 import BookingRecord from "../Booking/bookingRecord";
 import BookingRecordModal from "../Booking/BookingRecordModal";
 import ConfirmStatusChangeModal from "../Booking/ConfirmStatusChangeModal";
+import { ViewPrescriptionDialog } from "./ViewPrescriptionDialog";
+import { CreatePrescriptionDialog } from "./CreatePrescriptionDialog";
 
 const prescriptionSchema = z.object({
   diseaseName: z.string().min(1, "Disease name is required"),
@@ -70,14 +61,20 @@ type PrescriptionForm = z.infer<typeof prescriptionSchema>;
 export default function Component() {
   const [appointments, setAppointments] = useState<Booking[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [openPrescriptionDialog, setOpenPrescriptionDialog] = useState(false);
   const [openBookingDialog, setOpenBookingDialog] = useState(false);
   const [selectedBookingID, setSelectedBookingID] = useState<string | null>(
     null
   );
+  const [isCreatePrescriptionOpen, setIsCreatePrescriptionOpen] =
+    useState(false);
+  const [isViewPrescriptionOpen, setIsViewPrescriptionOpen] = useState(false);
+  const [selectedPrescriptions, setSelectedPrescriptions] = useState<
+    PrescriptionForm[]
+  >([]);
+  // Lưu presRecID để update đơn thuốc
   const [selectedPresRecID, setSelectedPresRecID] = useState<number | null>(
     null
-  ); // Lưu presRecID để update đơn thuốc
+  );
   const [loading, setLoading] = useState(true);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -135,20 +132,27 @@ export default function Component() {
       setLoading(false);
     }
   };
-
-  const fetchPrescription = async (bookingID: string, presRecID: number) => {
+  const fetchPrescriptions = async (bookingID: string) => {
     try {
       const response = await api.get(`/pres-rec/${bookingID}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      const prescriptionData = response.data;
-      form.reset(prescriptionData);
-      setSelectedPresRecID(presRecID); // Lưu presRecID khi load đơn thuốc
+
+      // Since response.data is an array of prescriptions
+      const prescriptionsData = response.data;
+
+      // Set prescriptions data as an array in state
+      if (prescriptionsData && prescriptionsData.length > 0) {
+        setSelectedPrescriptions(prescriptionsData);
+        setIsViewPrescriptionOpen(true);
+      } else {
+        toast.info("No prescription data available for this booking.");
+      }
     } catch (error: any) {
-      console.error("Failed to fetch prescription:", error);
-      toast.info(error.response.data);
+      console.error("Failed to fetch prescriptions:", error);
+      toast.info("Error fetching prescriptions data.");
     }
   };
 
@@ -228,7 +232,6 @@ export default function Component() {
         toast.success("Prescription added successfully!");
       }
 
-      setOpenPrescriptionDialog(false);
       form.reset();
       fetchAppointments();
     } catch (error) {
@@ -254,6 +257,15 @@ export default function Component() {
   const closeBookingRecordModal = () => {
     setIsRecordModalOpen(false);
     setSelectedBookingID(null);
+  };
+
+  const openCreatePrescriptionDialog = (bookingID: number) => {
+    setSelectedBookingID(bookingID);
+    setIsCreatePrescriptionOpen(true);
+  };
+
+  const openViewPrescriptionDialog = (bookingID: string) => {
+    fetchPrescriptions(bookingID);
   };
 
   return (
@@ -290,13 +302,13 @@ export default function Component() {
           className="mb-8 flex justify-center"
         >
           <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-400" />
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 " />
             <Input
               type="text"
               placeholder="Search by customer name"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 w-full rounded-full shadow-lg focus:ring-2 focus:ring-blue-300 transition-all duration-300 bg-white/90 backdrop-blur-sm"
+              className="pl-10 pr-4 py-2 w-full rounded-full shadow-lg focus:ring-2 focus:ring-blue-800 transition-all duration-300 bg-white/70 backdrop-blur-sm"
             />
           </div>
         </motion.div>
@@ -507,23 +519,13 @@ export default function Component() {
                     </div>
                     <div className="flex justify-end space-x-4 mt-6">
                       <Dialog
-                        open={
-                          openPrescriptionDialog &&
-                          selectedBookingID === appointment.bookingID
-                        }
+                        open={selectedBookingID === appointment.bookingID}
                         onOpenChange={(isOpen) => {
-                          setOpenPrescriptionDialog(isOpen);
                           setSelectedBookingID(
                             isOpen ? appointment.bookingID : null
                           );
-                          if (isOpen && appointment.hasPres) {
-                            fetchPrescription(
-                              appointment.bookingID,
-                              appointment.presRecID
-                            );
-                          } else {
-                            form.reset();
-                          }
+
+                          form.reset();
                         }}
                       >
                         <Button
@@ -543,150 +545,27 @@ export default function Component() {
                             onClose={closeBookingRecordModal}
                           />
                         )}
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="default"
-                            className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300"
-                          >
-                            <FileText className="mr-2 h-4 w-4" />
-                            {appointment.hasPres
-                              ? "View Prescription"
-                              : "Create Prescription"}
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
-                          <DialogHeader>
-                            <DialogTitle>
-                              {appointment.hasPres
-                                ? "View/Edit Prescription"
-                                : "Create Prescription"}
-                            </DialogTitle>
-                            <DialogDescription>
-                              {appointment.hasPres
-                                ? "View or edit the existing prescription."
-                                : "Enter the details for the new prescription. Click save when you're done."}
-                            </DialogDescription>
-                          </DialogHeader>
-                          <Form {...form}>
-                            <form
-                              onSubmit={form.handleSubmit(
-                                handleUpdatePrescription
-                              )}
-                            >
-                              <div className="grid gap-4 py-4">
-                                <FormField
-                                  control={form.control}
-                                  name="diseaseName"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Disease Name</FormLabel>
-                                      <FormControl>
-                                        <Input
-                                          {...field}
-                                          placeholder="Disease Name"
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={form.control}
-                                  name="symptoms"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Symptoms</FormLabel>
-                                      <FormControl>
-                                        <Input
-                                          {...field}
-                                          placeholder="Symptoms"
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={form.control}
-                                  name="medication"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Medication</FormLabel>
-                                      <FormControl>
-                                        <Input
-                                          {...field}
-                                          placeholder="Medication"
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={form.control}
-                                  name="frequency"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Frequency</FormLabel>
-                                      <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
-                                      >
-                                        <FormControl>
-                                          <SelectTrigger>
-                                            <SelectValue placeholder="Select frequency" />
-                                          </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                          <SelectItem value="once">
-                                            Once daily
-                                          </SelectItem>
-                                          <SelectItem value="twice">
-                                            Twice daily
-                                          </SelectItem>
-                                          <SelectItem value="thrice">
-                                            Three times daily
-                                          </SelectItem>
-                                          <SelectItem value="asNeeded">
-                                            As needed
-                                          </SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={form.control}
-                                  name="note"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>Note</FormLabel>
-                                      <FormControl>
-                                        <Textarea
-                                          {...field}
-                                          placeholder="Special Instructions"
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </div>
-                              <DialogFooter>
-                                <Button
-                                  type="submit"
-                                  className="bg-blue-500 hover:bg-blue-600 text-white"
-                                >
-                                  {selectedPresRecID
-                                    ? "Update Prescription"
-                                    : "Save Prescription"}
-                                </Button>
-                              </DialogFooter>
-                            </form>
-                          </Form>
-                        </DialogContent>
                       </Dialog>
+                      {appointment.hasPres && (
+                        <Button
+                          variant="default"
+                          className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300"
+                          onClick={() =>
+                            openViewPrescriptionDialog(appointment.bookingID)
+                          }
+                        >
+                          View Prescription
+                        </Button>
+                      )}
+                      <Button
+                        variant="default"
+                        className="bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300"
+                        onClick={() =>
+                          openCreatePrescriptionDialog(appointment.bookingID)
+                        }
+                      >
+                        Create Prescription
+                      </Button>
                       <Select
                         value={appointment.bookingStatus}
                         onValueChange={(value) =>
@@ -739,6 +618,18 @@ export default function Component() {
                 />
               </DialogContent>
             </Dialog>
+            {/* Dialogs */}
+            <CreatePrescriptionDialog
+              isOpen={isCreatePrescriptionOpen}
+              onClose={() => setIsCreatePrescriptionOpen(false)}
+              onSubmit={handleUpdatePrescription}
+            />
+
+            <ViewPrescriptionDialog
+              isOpen={isViewPrescriptionOpen}
+              onClose={() => setIsViewPrescriptionOpen(false)}
+              prescriptions={selectedPrescriptions} // Pass as array
+            />
           </AnimatePresence>
         )}
       </div>

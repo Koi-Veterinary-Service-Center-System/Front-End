@@ -34,6 +34,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Badge } from "@/components/ui/badge";
+import { AxiosError } from "axios";
 // Define Zod schema
 const prescriptionSchema = z.object({
   diseaseName: z.string().min(1, { message: "Disease name is required" }),
@@ -80,7 +81,15 @@ export default function FishPrescriptionSystem() {
       } else {
         toast.error("Failed to fetch prescriptions.");
       }
-    } catch (error) {}
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      console.log(errorMessage);
+    }
   };
 
   const fetchBookingDetails = async (bookingID: number) => {
@@ -99,7 +108,13 @@ export default function FishPrescriptionSystem() {
         toast.error("Failed to fetch booking details.");
       }
     } catch (error) {
-      toast.error("Failed to fetch booking details!");
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.error(errorMessage);
     }
   };
 
@@ -125,7 +140,15 @@ export default function FishPrescriptionSystem() {
     setValue("diseaseName", prescription.diseaseName);
     setValue("symptoms", prescription.symptoms);
     setValue("medication", prescription.medication);
-    setValue("frequency", prescription.frequency);
+    setValue(
+      "frequency",
+      prescription.frequency as
+        | "Once daily"
+        | "Twice daily"
+        | "Three times daily"
+        | "As needed"
+    );
+
     setValue("note", prescription.note || "");
     setIsEditDialogOpen(true);
   };
@@ -152,7 +175,14 @@ export default function FishPrescriptionSystem() {
         toast.error("Failed to update prescription.");
       }
     } catch (error) {
-      toast.error("Failed to update prescription!");
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) ||
+            "Faile to update pres!";
+
+      toast.error(errorMessage);
     }
   };
 
@@ -166,7 +196,14 @@ export default function FishPrescriptionSystem() {
       toast.success("Prescription deleted successfully");
       fetchPrescriptions(searchTerm);
     } catch (error) {
-      toast.error("Failed to delete prescription");
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) ||
+            "Fail to delete the pres!";
+
+      toast.error(errorMessage);
     }
     setIsDeleteDialogOpen(false);
     setPrescriptionToDelete(null);

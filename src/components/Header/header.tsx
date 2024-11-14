@@ -4,6 +4,7 @@ import { Profile } from "../../types/info";
 import { AnimatePresence, motion } from "framer-motion";
 import api from "../../configs/axios";
 import {
+  BaggageClaim,
   Bell,
   CalendarCheck2,
   Check,
@@ -226,6 +227,13 @@ function UserActions({
         <Link to="/prescription">
           <Button variant="ghost" size="icon">
             <Pill className="h-5 w-5" />
+          </Button>
+        </Link>
+      )}
+      {profile?.role === "Customer" && (
+        <Link to="/bookingCus">
+          <Button variant="ghost" size="icon">
+            <BaggageClaim className="h-5 w-5" />
           </Button>
         </Link>
       )}

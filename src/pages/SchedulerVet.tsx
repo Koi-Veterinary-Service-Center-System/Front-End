@@ -73,14 +73,9 @@ export default function VetCalendar() {
             endTime.setHours(parseInt(endHour), parseInt(endMinute), 0);
 
             return {
-              id: item.slotID,
-              vetName: `${item.vetFirstName} ${item.vetLastName}`,
-              startTime,
-              endTime,
-              slotStartTime: startTime,
-              slotEndTime: endTime,
-              meetURL: item.meetURL,
-              isBook: item.isBook,
+              ...item,
+              startTime, // Converted to Date object
+              endTime, // Converted to Date object
             };
           })
           .filter(Boolean);
@@ -137,9 +132,14 @@ export default function VetCalendar() {
       (time.includes("PM") && parseInt(timeHour) !== 12 ? 12 : 0);
 
     return events.find((event) => {
+      if (!event.startTime || !event.endTime) {
+        return false; // Return false if startTime or endTime is undefined
+      }
+
       const eventDay = event.startTime.getDate() === day.getDate();
       const inSlotRange =
         event.startTime.getHours() <= hour && event.endTime.getHours() > hour;
+
       return eventDay && inSlotRange;
     });
   };
@@ -244,12 +244,12 @@ export default function VetCalendar() {
                                 {event.vetName}
                               </div>
                               <div className="text-blue-600">
-                                {event.slotStartTime.toLocaleTimeString([], {
+                                {event.startTime?.toLocaleTimeString([], {
                                   hour: "2-digit",
                                   minute: "2-digit",
                                 })}{" "}
                                 -{" "}
-                                {event.slotEndTime.toLocaleTimeString([], {
+                                {event.endTime?.toLocaleTimeString([], {
                                   hour: "2-digit",
                                   minute: "2-digit",
                                 })}
