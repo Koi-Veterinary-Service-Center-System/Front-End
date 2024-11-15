@@ -201,7 +201,7 @@ const BookingCus = () => {
         toast.success(
           `Booking ${bookingID} status updated to ${bookingStatus}`
         );
-        fetchBookingsByStatus(); // Refresh bookings to show updated status
+        fetchBookingsByStatus(activeStatus); // Refresh bookings to show updated status
       } else {
         toast.error("Failed to update booking status.");
       }
@@ -246,7 +246,12 @@ const BookingCus = () => {
       );
       toast.success(`Booking ${selectedBookingId} has been cancelled`);
       setIsCancelDialogOpen(false);
-      fetchBookingsByStatus(); // Refresh bookings after cancellation
+      // Cập nhật trực tiếp trong UI: loại bỏ booking vừa hủy
+      setBookings((prevBookings) =>
+        prevBookings.filter(
+          (booking) => booking.bookingID !== selectedBookingId
+        )
+      ); // Refresh bookings after cancellation
     } catch (error) {
       const axiosError = error as AxiosError;
       const errorMessage =
@@ -270,7 +275,14 @@ const BookingCus = () => {
       });
       toast.success(`Booking ${selectedBookingId} status updated to Success`);
       setIsConfirmModalOpen(false);
-      fetchBookingsByStatus(activeStatus);
+      // Cập nhật trực tiếp trong UI: đổi trạng thái của booking thành Success
+      setBookings((prevBookings) =>
+        prevBookings.map((booking) =>
+          booking.bookingID === selectedBookingId
+            ? { ...booking, bookingStatus: "Succeeded" }
+            : booking
+        )
+      );
     } catch (error) {
       const axiosError = error as AxiosError;
       const errorMessage =

@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
-import { Bell, Mail } from "lucide-react";
+import { Bell, LogOut, Mail } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"; // Import DropdownMenu components
 import api from "@/configs/axios";
 
 interface UserProfile {
@@ -38,6 +44,12 @@ export default function HeaderAd({ title }: { title: string }) {
     fetchProfile();
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/login"; // Redirect to login page
+  };
+
   return (
     <header className="bg-gradient-to-r from-blue-100 to-white border-b border-blue-200">
       <div className="container py-4 ml-4">
@@ -68,25 +80,41 @@ export default function HeaderAd({ title }: { title: string }) {
               <Mail className="h-5 w-5" />
               <span className="sr-only">Messages</span>
             </Button>
-            <div className="flex items-center space-x-3">
-              <Avatar className="w-16 h-16 border-2 border-blue-300">
-                <AvatarImage
-                  src={userProfile.imageURL || "/placeholder.svg"}
-                  alt={userProfile.userName}
-                  className="w-full h-full object-cover rounded-full"
-                />
-                <AvatarFallback className="w-full h-full bg-blue-200 text-blue-800 text-2xl flex items-center justify-center rounded-full">
-                  {userProfile?.firstName?.[0]}
-                  {userProfile?.lastName?.[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm font-medium leading-none text-blue-800">
-                  {userProfile.firstName} {userProfile.lastName}
-                </p>
-                <p className="text-xs text-blue-600">{userProfile.role}</p>
-              </div>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex items-center space-x-3 cursor-pointer">
+                  <Avatar className="w-16 h-16 border-2 border-blue-300">
+                    <AvatarImage
+                      src={userProfile.imageURL || "/placeholder.svg"}
+                      alt={userProfile.userName}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                    <AvatarFallback className="w-full h-full bg-blue-200 text-blue-800 text-2xl flex items-center justify-center rounded-full">
+                      {userProfile?.firstName?.[0]}
+                      {userProfile?.lastName?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium leading-none text-blue-800">
+                      {userProfile.firstName} {userProfile.lastName}
+                    </p>
+                    <p className="text-xs text-blue-600">{userProfile.role}</p>
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-56 p-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg"
+              >
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="flex items-center px-4 py-2 text-sm text-red-700 dark:text-red-200 hover:bg-red-700 dark:hover:bg-red-700 rounded-md transition-colors duration-150 ease-in-out"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>

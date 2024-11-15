@@ -75,7 +75,7 @@ export type VetSlots = {
 
 export type Payment = {
   paymentID: string | number;
-  type: string;
+  paymentType: string;
   isDeleted: boolean;
 };
 
@@ -100,7 +100,7 @@ export type Booking = {
   totalAmount: number;
   meetURL: string;
   paymentID: number;
-  paymentType: string;
+  paymentType: string | number;
   serviceID: number;
   serviceName: string;
   slotID: string;

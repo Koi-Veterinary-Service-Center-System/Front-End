@@ -9,6 +9,7 @@ import {
   Briefcase,
   FileText,
   Clock,
+  MoreHorizontal,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
@@ -43,6 +44,13 @@ import { Switch } from "../ui/switch";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import { Link } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import ServiceDetailDialog from "./ServiceDetailDialog";
 
 interface ServicesTableProps {
   onDeleteSuccess: () => void;
@@ -83,6 +91,8 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string>("");
+  const [selectedService, setSelectedService] = useState<Services | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
   const form = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
@@ -258,6 +268,10 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
       setLoading(false);
     }
   };
+  const handleViewDetails = (service: Services) => {
+    setSelectedService(service);
+    setIsDetailDialogOpen(true);
+  };
 
   return (
     <motion.div className="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl p-6 border border-blue-200 mb-8">
@@ -290,9 +304,8 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
               <TableHead>Price</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Estimated Duration</TableHead>
-              {profile?.role === "Staff" && (
-                <TableHead className="text-right">Actions</TableHead>
-              )}
+
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -339,22 +352,48 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                     )}
                   </TableCell>
                   <TableCell>{service.estimatedDuration} hours</TableCell>
-                  {profile?.role !== "Manager" && (
-                    <TableCell className="text-right">
-                      <button
-                        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-blue-500 text-white hover:bg-blue-600 h-10 w-10 mr-2"
-                        onClick={() => handleEdit(service)}
+
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="h-8 w-8 p-0 flex items-center justify-center"
+                        >
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        side="left"
+                        align="end"
+                        className="bg-white border rounded-md shadow-md text-center"
                       >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button
-                        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-red-500 text-white hover:bg-red-600 h-10 w-10"
-                        onClick={() => confirmDelete(service.serviceID)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </TableCell>
-                  )}
+                        <DropdownMenuItem
+                          onClick={() => handleViewDetails(service)}
+                        >
+                          <FileText className="mr-2 h-4 w-4 text-blue-600" />
+                          View Details
+                        </DropdownMenuItem>
+                        {profile?.role !== "Manager" && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(service)}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => confirmDelete(service.serviceID)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4 text-red-500" />
+                              Delete
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </motion.tr>
               ))
             ) : (
@@ -663,6 +702,11 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
           maxWidth: "200px", // Đặt chiều rộng tối đa cho Tooltip
           whiteSpace: "normal", // Đảm bảo xuống hàng khi vượt quá chiều rộng
         }}
+      />
+      <ServiceDetailDialog
+        service={selectedService}
+        isOpen={isDetailDialogOpen}
+        onClose={() => setIsDetailDialogOpen(false)}
       />
     </motion.div>
   );
