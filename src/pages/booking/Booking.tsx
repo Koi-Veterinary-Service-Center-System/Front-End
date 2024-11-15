@@ -33,6 +33,7 @@ import TextArea from "antd/es/input/TextArea";
 import moment from "moment";
 import TermsModal from "@/components/TermsModal/TermsModal";
 import { AxiosError } from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -57,6 +58,19 @@ function BookingPage() {
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
   const [isAtHomeService, setIsAtHomeService] = useState(true);
   const [isOnlineService, setIsOnlineService] = useState(false);
+  const location = useLocation();
+  const serviceID = location.state?.serviceID || null; // Lấy serviceID từ state
+  const [selectedServiceID, setSelectedServiceID] = useState<number | null>(
+    serviceID || null
+  );
+
+  // Fetch dịch vụ ban đầu nếu có serviceID
+  useEffect(() => {
+    if (selectedServiceID) {
+      form.setFieldsValue({ serviceName: selectedServiceID }); // Đặt giá trị mặc định
+      handleServiceChange(selectedServiceID); // Tải thông tin liên quan đến dịch vụ
+    }
+  }, [selectedServiceID]); // Thực hiện khi serviceID được cập nhật
 
   // Ant Design form hook
   const [form] = Form.useForm();
@@ -302,16 +316,16 @@ function BookingPage() {
     setIsOnlineService(selectedService ? selectedService.isOnline : false);
 
     if (selectedService?.isOnline) {
-      // If the service is online, only show VNPay
+      // Nếu là dịch vụ online, chỉ hiển thị VNPay
       setPayments([{ paymentID: 2, type: "VNPay", isDeleted: false }]);
-      form.setFieldsValue({ paymentType: 2 }); // Set VNPay as the default and only option
+      form.setFieldsValue({ paymentType: 2 }); // Cài mặc định là VNPay
     } else {
-      // If the service is not online, show all payment methods
+      // Nếu không phải dịch vụ online, hiển thị tất cả các phương thức thanh toán
       try {
         setLoadingPayment(true);
         const response = await api.get("/payment/all-payment");
         setPayments(response.data);
-        form.resetFields(["paymentType"]); // Reset paymentType when switching back to non-online service
+        form.resetFields(["paymentType"]); // Reset paymentType khi trở lại dịch vụ không online
       } catch (error) {
         console.error("Error fetching payments:", error);
         toast.error("Failed to load payments.");
@@ -320,7 +334,7 @@ function BookingPage() {
       }
     }
 
-    calculateTotal();
+    calculateTotal(); // Tính tổng số tiền ngay lập tức
   };
 
   const calculateTotal = () => {
@@ -340,6 +354,10 @@ function BookingPage() {
       setTotal(0);
     }
   };
+
+  useEffect(() => {
+    calculateTotal();
+  }, [services, distances, form]);
 
   const handleCheckboxChange = (e: any) => {
     setIsTermsAccepted(e.target.checked);

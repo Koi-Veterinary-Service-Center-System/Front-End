@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/configs/axios";
 import { FaClock, FaMoneyBillWave, FaShoppingCart } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -52,6 +52,12 @@ function AnimatedServiceCard({
       controls.start("visible");
     }
   }, [controls, inView]);
+
+  const handleRequestAppointment = () => {
+    console.log("Navigating with serviceID:", service.serviceID); // Debug: Kiểm tra serviceID trước khi điều hướng
+    navigate("/booking", { state: { serviceID: service.serviceID } });
+  };
+  const navigate = useNavigate();
 
   return (
     <motion.div
@@ -101,11 +107,14 @@ function AnimatedServiceCard({
           </div>
         </div>
         <div className="mt-6">
-          <Link to="/booking">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+          <div className="mt-6">
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={handleRequestAppointment}
+            >
               Request Appointment
             </Button>
-          </Link>
+          </div>
         </div>
       </div>
     </motion.div>
