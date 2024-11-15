@@ -8,6 +8,7 @@ import api from "../../configs/axios";
 import Header from "@/components/Header/header";
 import { FaUser } from "react-icons/fa";
 import { AxiosError } from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
   const [isResetPassword, setIsResetPassword] = useState(false);
@@ -23,8 +24,15 @@ const Login = () => {
     if (token && user) {
       localStorage.setItem("token", token);
       localStorage.setItem("user", user);
-      toast.success(`Welcome ${user}!`);
-      navigate("/", { state: { loginSuccess: true } });
+      const parsedUser = JSON.parse(user); // Parse user string to an object
+
+      // Check the role of the user and navigate to /service if applicable
+      if (parsedUser.role === "Staff" || parsedUser.role === "Manager") {
+        navigate("/service");
+      } else {
+        toast.success(`Welcome ${parsedUser.username || "User"}!`);
+        navigate("/", { state: { loginSuccess: true } });
+      }
     } else if (error) {
       toast.error("Google login failed.");
     }
@@ -37,19 +45,28 @@ const Login = () => {
     try {
       const response = await api.post("User/login", values);
       const { token } = response.data;
+
+      // Decode JWT to extract user role
+      const decodedToken: { role?: string } = jwtDecode(token);
+
+      // Store token and user in localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(response.data));
-      navigate("/", { state: { loginSuccess: true } });
+
+      // Check role and navigate accordingly
+      if (decodedToken.role === "Staff" || decodedToken.role === "Manager") {
+        navigate("/service");
+      } else {
+        navigate("/", { state: { loginSuccess: true } });
+      }
     } catch (error) {
       const axiosError = error as AxiosError;
-
-      // Safely access `response.data`, and use JSON.stringify if it's an object
       const errorMessage =
         typeof axiosError.response?.data === "string"
           ? axiosError.response.data
           : JSON.stringify(axiosError.response?.data) || "An error occurred";
 
-      toast.error(errorMessage); // Display error message
+      toast.error(errorMessage);
     }
   };
 

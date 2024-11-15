@@ -8,7 +8,6 @@ import Service from "./pages/AllService/service";
 import UsersPage from "./pages/UsersManagePage/Users";
 import SchedulesMPage from "./pages/SchedulesMPage/SchedulesMPage";
 import AllService from "./pages/AllService/allService";
-import ErrorBoundary from "./errorBoudary";
 import { registerLicense } from "@syncfusion/ej2-base";
 import "./index.css";
 import FishPrescription from "./pages/prescriptions/prescription";
@@ -51,7 +50,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ChangePassword />} />
         <Route path="/services" element={<AllService />} />
-        <Route path="/service" element={<Service />} />
+
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/detail-service/:serviceId" element={<DetailService />} />
@@ -76,7 +75,7 @@ function App() {
         <Route
           path="/booking"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredRoles={["Customer"]}>
               <BookingPage />
             </PrivateRoute>
           }
@@ -139,6 +138,14 @@ function App() {
           }
         />
         <Route
+          path="/service"
+          element={
+            <PrivateRoute requiredRoles={["Manager", "Staff"]}>
+              <Service />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/schedules"
           element={
             <PrivateRoute requiredRoles={["Manager"]}>
@@ -178,9 +185,6 @@ function App() {
             </PrivateRoute>
           }
         />
-
-        {/* Catch-all Route for Errors */}
-        <Route path="*" element={<ErrorBoundary />} />
       </Routes>
     </Router>
   );

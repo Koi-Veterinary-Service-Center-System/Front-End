@@ -321,29 +321,31 @@ const BookingTable = () => {
   // Hàm mở dialog với chi tiết của booking đã chọn
   const handleViewDetails = async (booking: Booking) => {
     try {
-      // Fetch the booking record including the `note` field from the API
+      // Gọi API để lấy thông tin booking record
       const response = await api.get(`/bookingRecord/${booking.bookingID}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
-      // Update the selected booking with the new details, including `note`
+      // Nếu không có thông tin thêm, chỉ cập nhật booking cơ bản
       setSelectedBooking({
         ...booking,
-        note: response.data.note, // Add the note from the response
+        note: response.data?.note || "No additional notes", // Nếu không có `note`, hiển thị mặc định
       });
 
-      setIsDialogOpen(true); // Open the dialog
+      setIsDialogOpen(true); // Mở dialog
     } catch (error) {
       const axiosError = error as AxiosError;
-      console.error("Error fetching available vets:", axiosError);
+      console.error("Error fetching booking record:", axiosError);
 
-      // Safely access `response.data`, and use JSON.stringify if it's an object
-      const errorMessage =
-        typeof axiosError.response?.data === "string"
-          ? axiosError.response.data
-          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+      // Hiển thị booking cơ bản nếu lỗi xảy ra
+      toast.info("Could not fetch booking record. Showing basic information.");
 
-      toast.info(errorMessage); // Display error message
+      setSelectedBooking({
+        ...booking,
+        note: "No booking record available.", // Thông báo mặc định khi không có record
+      });
+
+      setIsDialogOpen(true); // Mở dialog ngay cả khi không có record
     }
   };
 
@@ -523,7 +525,7 @@ const BookingTable = () => {
           visible={isModalOpen}
           onCancel={handleCancel}
           footer={null} // Loại bỏ các nút mặc định của Modal
-          width={800}
+          width={1000}
         >
           <Form
             form={form}
@@ -689,6 +691,10 @@ const BookingTable = () => {
                     message:
                       "Location cannot start with a space or contain special characters",
                   },
+                  {
+                    required: isAtHomeService,
+                    message: "Please enter your location", // Bắt lỗi khi trường bị bỏ trống
+                  },
                 ]}
               >
                 <Input
@@ -717,6 +723,12 @@ const BookingTable = () => {
                       Select a district
                     </span>
                   }
+                  rules={[
+                    {
+                      required: isAtHomeService,
+                      message: "Please select district", // Bắt lỗi khi trường bị bỏ trống
+                    },
+                  ]}
                   name="district"
                 >
                   <Select
@@ -1121,8 +1133,7 @@ const BookingTable = () => {
               >
                 <MdAssignment className="text-gray-500" />
                 <p>
-                  <strong>Note:</strong>{" "}
-                  {selectedBooking.note || "No additional notes"}
+                  <strong>Note:</strong> {selectedBooking.note}
                 </p>
               </motion.div>
             </div>

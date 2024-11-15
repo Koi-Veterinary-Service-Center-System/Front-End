@@ -17,9 +17,6 @@ import {
   XCircle,
   FileText,
   DollarSign,
-  Pill,
-  Clipboard,
-  Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -31,17 +28,11 @@ import { HiOutlineMail } from "react-icons/hi";
 import { BsCashCoin, BsCreditCard2Back } from "react-icons/bs";
 import { TbMoneybag } from "react-icons/tb";
 import { SiGooglemeet } from "react-icons/si";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useParams } from "react-router-dom";
 import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
 import { ViewPrescriptionDialog } from "../Detail Appointment Page/ViewPrescriptionDialog";
+import axios from "axios";
 const statusSteps = [
   {
     label: "Pending",
@@ -124,7 +115,6 @@ const StatusComponent = ({ currentStatus }: { currentStatus?: string }) => {
 const DetailBooking = () => {
   const { bookingID } = useParams();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [error, setError] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [selectedPrescription, setSelectedPrescription] =
@@ -152,12 +142,18 @@ const DetailBooking = () => {
       const fetchedBookings = response.data;
       console.log("Fetched Bookings:", fetchedBookings);
       setBookings([fetchedBookings]); // Cập nhật bookings
-    } catch (error: any) {
-      console.error("Fetch error:", error);
-      const errorMessage =
-        error.response?.data?.message || "Failed to fetch bookings.";
-      setError(errorMessage);
-      toast.error(errorMessage);
+    } catch (error: unknown) {
+      let errorMessage = "Failed to fetch bookings.";
+
+      if (axios.isAxiosError(error) && error.response) {
+        // Axios-specific error handling
+        errorMessage = error.response.data.message || errorMessage;
+      } else if (error instanceof Error) {
+        // Other error types, such as network errors
+        errorMessage = error.message;
+      }
+
+      console.error(errorMessage);
     }
   };
 
@@ -174,12 +170,18 @@ const DetailBooking = () => {
 
       console.log("Profile fetched:", response.data);
       setProfile(response.data);
-    } catch (error: any) {
-      console.error("Error fetching profile:", error); // Log full error
-      const errorMessage =
-        error.response?.data?.message || "Failed to fetch profile data";
-      console.log("Error message:", errorMessage); // Log specific error message
-      setError(errorMessage);
+    } catch (error: unknown) {
+      let errorMessage = "Failed to fetch bookings.";
+
+      if (axios.isAxiosError(error) && error.response) {
+        // Axios-specific error handling
+        errorMessage = error.response.data.message || errorMessage;
+      } else if (error instanceof Error) {
+        // Other error types, such as network errors
+        errorMessage = error.message;
+      }
+
+      console.error("Fetch error:", error);
       toast.error(errorMessage);
     }
   };
@@ -192,8 +194,19 @@ const DetailBooking = () => {
       });
       setSelectedPrescription(response.data); // Store all prescription data
       setPrescriptionDialogOpen(true); // Open dialog
-    } catch (error) {
-      toast.error("Failed to fetch prescription record.");
+    } catch (error: unknown) {
+      let errorMessage = "Failed to fetch bookings.";
+
+      if (axios.isAxiosError(error) && error.response) {
+        // Axios-specific error handling
+        errorMessage = error.response.data.message || errorMessage;
+      } else if (error instanceof Error) {
+        // Other error types, such as network errors
+        errorMessage = error.message;
+      }
+
+      console.error("Fetch error:", error);
+      toast.error(errorMessage);
     }
   };
   // Call fetchBooking in useEffect

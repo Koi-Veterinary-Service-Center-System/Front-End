@@ -256,7 +256,7 @@ function BookingPage() {
         toast.success("Booking successful!");
 
         // Kiểm tra nếu paymentId là 2 (tương ứng với VNPAY)
-        if (values.paymentType === "2") {
+        if (values.paymentType === 2) {
           await handlePayOnline(response.data.bookingID); // Gọi API thanh toán
         } else {
           window.location.href = "/bookingCus"; // Chuyển về trang lịch sử nếu không phải VNPAY
@@ -512,6 +512,10 @@ function BookingPage() {
                 name="location"
                 rules={[
                   {
+                    required: isAtHomeService,
+                    message: "Please enter a location", // Bắt lỗi khi trường bị bỏ trống
+                  },
+                  {
                     pattern: /^[^\s].+$/,
                     message:
                       "Location cannot start with a space or contain special characters",
@@ -544,7 +548,12 @@ function BookingPage() {
                     </span>
                   }
                   name="district"
-                  rules={[]} // Only required if isAtHomeService is true
+                  rules={[
+                    {
+                      required: isAtHomeService,
+                      message: "Please select district", // Bắt lỗi khi trường bị bỏ trống
+                    },
+                  ]} // Only required if isAtHomeService is true
                 >
                   <Select
                     showSearch // Enable search functionality
