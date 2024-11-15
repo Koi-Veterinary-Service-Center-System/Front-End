@@ -12,6 +12,8 @@ import {
   FaArrowLeft,
   FaMoneyBillWave,
   FaUserMd,
+  FaGlobe,
+  FaHome,
 } from "react-icons/fa";
 import {
   Card,
@@ -171,6 +173,44 @@ export default function DetailService() {
                     {service.estimatedDuration} hours
                   </p>
                 </CardContent>
+              </Card>
+            </div>
+            <div className="flex justify-center space-x-4 mb-6">
+              <Card
+                className={`w-1/2 ${
+                  service.isAtHome ? "bg-green-50" : "bg-gray-50"
+                }`}
+              >
+                <CardHeader className="flex flex-row items-center justify-center space-x-2">
+                  <FaHome
+                    className={
+                      service.isAtHome ? "text-green-500" : "text-gray-400"
+                    }
+                  />
+                  <CardTitle>
+                    {service.isAtHome
+                      ? "Available at Home"
+                      : "Not Available at Home"}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+              <Card
+                className={`w-1/2 ${
+                  service.isOnline ? "bg-blue-50" : "bg-gray-50"
+                }`}
+              >
+                <CardHeader className="flex flex-row items-center justify-center space-x-2">
+                  <FaGlobe
+                    className={
+                      service.isOnline ? "text-blue-500" : "text-gray-400"
+                    }
+                  />
+                  <CardTitle>
+                    {service.isOnline
+                      ? "Available Online"
+                      : "Not Available Online"}
+                  </CardTitle>
+                </CardHeader>
               </Card>
             </div>
           </div>
