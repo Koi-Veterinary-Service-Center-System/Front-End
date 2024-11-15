@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -9,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { X, Clock, DollarSign, Home, Globe, Info } from "lucide-react";
+import { AiOutlineCheckCircle, AiOutlineCloseCircle } from "react-icons/ai";
 
 interface Service {
   serviceID: number;
@@ -115,6 +114,7 @@ const ServiceDetailDialog: React.FC<ServiceDetailDialogProps> = ({
                     {service.quantityPrice.toLocaleString("vi-VN")} vnd
                   </p>
                 </motion.div>
+
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -131,7 +131,11 @@ const ServiceDetailDialog: React.FC<ServiceDetailDialogProps> = ({
                     <span className="font-semibold">
                       Available for At Home:
                     </span>{" "}
-                    {service.isAtHome ? "Yes" : "No"}
+                    {service.isAtHome ? (
+                      <AiOutlineCheckCircle className="text-blue-500" />
+                    ) : (
+                      <AiOutlineCloseCircle className="text-red-500" />
+                    )}
                   </p>
                 </motion.div>
                 <motion.div
@@ -148,7 +152,11 @@ const ServiceDetailDialog: React.FC<ServiceDetailDialogProps> = ({
                   />
                   <p>
                     <span className="font-semibold">Available Online:</span>{" "}
-                    {service.isOnline ? "Yes" : "No"}
+                    {service.isOnline ? (
+                      <AiOutlineCheckCircle className="text-blue-500" />
+                    ) : (
+                      <AiOutlineCloseCircle className="text-red-500" />
+                    )}
                   </p>
                 </motion.div>
               </div>

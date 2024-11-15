@@ -33,6 +33,7 @@ import { useParams } from "react-router-dom";
 import SlidebarProfile from "@/components/Sidebar/SlidebarProfile";
 import { ViewPrescriptionDialog } from "../Detail Appointment Page/ViewPrescriptionDialog";
 import axios from "axios";
+import BookingRecordModal from "./BookingRecordModal";
 const statusSteps = [
   {
     label: "Pending",
@@ -126,6 +127,20 @@ const DetailBooking = () => {
     backgroundSize: "cover", // Makes the background cover the entire area
     backgroundPosition: "center", // Centers the background
     backgroundRepeat: "no-repeat", // Ensures the image doesn't repeat
+  };
+  const [isBookingRecordModalOpen, setBookingRecordModalOpen] = useState(false);
+  const [selectedBookingID, setSelectedBookingID] = useState<number | null>(
+    null
+  );
+
+  const handleOpenBookingRecordModal = (bookingID: number) => {
+    setSelectedBookingID(bookingID);
+    setBookingRecordModalOpen(true);
+  };
+
+  const handleCloseBookingRecordModal = () => {
+    setSelectedBookingID(null);
+    setBookingRecordModalOpen(false);
   };
 
   // Fetch all booking and calculate totals
@@ -262,17 +277,15 @@ const DetailBooking = () => {
         <SlidebarProfile />
 
         <main className="flex-1" style={backgroundStyle}>
-          <header className=" dark:bg-gray-800 shadow bg-gradient-to-br from-blue-50 to-blue-400">
-            <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Services
-              </h1>
-              <div className="flex items-center space-x-4">
+          <header className="bg-gradient-to-br from-blue-50 to-blue-400 dark:from-gray-800 dark:to-gray-900 shadow">
+            <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-end items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <Sun className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   <Switch
                     checked={isDarkMode}
                     onCheckedChange={handleDarkModeSwitch}
+                    className="data-[state=checked]:bg-blue-600"
                   />
                   <Moon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
@@ -282,7 +295,7 @@ const DetailBooking = () => {
                     alt="Profile"
                     className="object-cover"
                   />
-                  <AvatarFallback>
+                  <AvatarFallback className="bg-blue-500 text-white">
                     {profile?.firstName?.[0]}
                     {profile?.lastName?.[0]}
                   </AvatarFallback>
@@ -515,6 +528,34 @@ const DetailBooking = () => {
                               </Button>
                             )}
                           </motion.div>
+                          <motion.div
+                            className="flex items-center text-sm"
+                            variants={iconVariants}
+                            initial="hidden"
+                            animate="visible"
+                            transition={{ delay: 0.7 }}
+                          >
+                            <div className="flex-shrink-0">
+                              <FileText className="h-8 w-8 text-blue-500" />
+                            </div>
+                            <div className="flex-grow">
+                              <h3 className="text-lg font-semibold text-gray-800">
+                                Booking Record
+                              </h3>
+                            </div>
+                            {/* Booking details here */}
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="ml-auto"
+                              onClick={() =>
+                                handleOpenBookingRecordModal(booking.bookingID)
+                              }
+                            >
+                              View Booking Record
+                            </Button>
+                          </motion.div>
 
                           <motion.div
                             className="flex items-center text-sm"
@@ -541,7 +582,7 @@ const DetailBooking = () => {
                           >
                             <CreditCardIcon className="h-5 w-5 mr-3 text-blue-500" />
                             <span className="text-gray-700 font-semibold">
-                              Initamount:{" "}
+                              Initial Amount:{" "}
                               {booking?.initAmount != null
                                 ? booking.initAmount.toLocaleString("vi-VN")
                                 : "0"}{" "}
@@ -592,6 +633,11 @@ const DetailBooking = () => {
             isOpen={isPrescriptionDialogOpen}
             onClose={() => setPrescriptionDialogOpen(false)}
             prescriptions={selectedPrescription}
+          />
+          <BookingRecordModal
+            bookingID={selectedBookingID || 0} // Đảm bảo giá trị mặc định
+            isOpen={isBookingRecordModalOpen}
+            onClose={handleCloseBookingRecordModal}
           />
         </main>
       </div>

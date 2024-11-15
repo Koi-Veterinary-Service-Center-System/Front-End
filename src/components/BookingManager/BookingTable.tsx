@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Eye, XCircle } from "lucide-react";
+import { Search, Eye, XCircle, Stethoscope } from "lucide-react";
 import api from "@/configs/axios";
 import { toast } from "sonner";
 import {
@@ -46,6 +46,9 @@ import CancelBookingDialog from "./CancelBookingDialog";
 import { BsFillBookmarkCheckFill } from "react-icons/bs";
 import { TableCell, TableRow } from "../ui/table";
 import { AxiosError } from "axios";
+import BookingRecordModal from "@/pages/Booking/BookingRecordModal";
+import { LuView } from "react-icons/lu";
+import { Tooltip } from "react-tooltip";
 
 const BookingTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -78,6 +81,20 @@ const BookingTable = () => {
   const [allSlots, setAllSlots] = useState<Slot[]>([]);
   const [isAtHomeService, setIsAtHomeService] = useState(true);
   const [isOnlineService, setIsOnlineService] = useState(false);
+  const [isBookingRecordModalOpen, setBookingRecordModalOpen] = useState(false);
+  const [selectedBookingID, setSelectedBookingID] = useState<number | null>(
+    null
+  );
+
+  const handleOpenBookingRecordModal = (bookingID: number) => {
+    setSelectedBookingID(bookingID);
+    setBookingRecordModalOpen(true);
+  };
+
+  const handleCloseBookingRecordModal = () => {
+    setSelectedBookingID(null);
+    setBookingRecordModalOpen(false);
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -958,23 +975,50 @@ const BookingTable = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {booking.bookingDate}
                     </td>
+
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <button
+                        id="view-details"
                         className="text-indigo-400 hover:text-indigo-300 mr-2"
-                        onClick={() => handleViewDetails(booking)} // Khi bấm vào nút Eye sẽ mở dialog
+                        onClick={() => handleViewDetails(booking)}
                       >
                         <Eye size={18} />
                       </button>
+                      <Tooltip
+                        anchorId="view-details"
+                        content="View booking details"
+                      />
+
+                      <button
+                        id={`view-record-${booking.bookingID}`}
+                        className="text-blue-500 hover:text-blue-600 mr-2"
+                        onClick={() =>
+                          handleOpenBookingRecordModal(booking.bookingID)
+                        }
+                      >
+                        <LuView size={18} />
+                      </button>
+                      <Tooltip
+                        anchorId={`view-record-${booking.bookingID}`}
+                        content="View booking record"
+                      />
+
                       {profile?.role === "Staff" &&
                         booking.bookingStatus !== "Cancelled" &&
                         booking.bookingStatus !== "Succeeded" && (
-                          <button
-                            className="text-red-600 hover:text-red-800"
-                            onClick={() => handleCancelBooking(booking)}
-                            aria-label="Cancel booking"
-                          >
-                            <XCircle size={18} />
-                          </button>
+                          <>
+                            <button
+                              id={`cancel-booking-${booking.bookingID}`}
+                              className="text-red-600 hover:text-red-800"
+                              onClick={() => handleCancelBooking(booking)}
+                            >
+                              <XCircle size={18} />
+                            </button>
+                            <Tooltip
+                              anchorId={`cancel-booking-${booking.bookingID}`}
+                              content="Cancel booking"
+                            />
+                          </>
                         )}
                     </td>
                   </motion.tr>
@@ -1031,11 +1075,22 @@ const BookingTable = () => {
                   <strong>Customer Name:</strong> {selectedBooking.customerName}
                 </p>
               </motion.div>
-
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5 }}
+                className="flex items-center space-x-2"
+              >
+                <Stethoscope className="text-blue-500" />
+                <p>
+                  <strong>Vet Name:</strong> {selectedBooking.vetName}
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
                 className="flex items-center space-x-2"
               >
                 <MdOutlineMedicalServices className="text-purple-500" />
@@ -1048,7 +1103,7 @@ const BookingTable = () => {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.7 }}
                 className="flex items-center space-x-2"
               >
                 <FaMapMarkerAlt className="text-red-500" />
@@ -1064,7 +1119,7 @@ const BookingTable = () => {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.7 }}
+                transition={{ duration: 0.8 }}
                 className="flex items-center space-x-2"
               >
                 <FaPhoneAlt className="text-yellow-500" />
@@ -1076,7 +1131,7 @@ const BookingTable = () => {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
+                transition={{ duration: 0.9 }}
                 className="flex items-center space-x-2"
               >
                 <BsFillBookmarkCheckFill className="text-indigo-500" />
@@ -1088,7 +1143,7 @@ const BookingTable = () => {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.9 }}
+                transition={{ duration: 0.1 }}
                 className="flex items-center space-x-2"
               >
                 <FaCalendarAlt className="text-teal-500" />
@@ -1100,7 +1155,7 @@ const BookingTable = () => {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 1.0 }}
+                transition={{ duration: 1.1 }}
                 className="flex items-center space-x-2"
               >
                 <FaMoneyBillWave className="text-orange-500" />
@@ -1113,7 +1168,7 @@ const BookingTable = () => {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 1.1 }}
+                transition={{ duration: 1.2 }}
                 className="flex items-center space-x-2"
               >
                 <MdAssignment className="text-pink-500" />
@@ -1128,7 +1183,7 @@ const BookingTable = () => {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 1.2 }}
+                transition={{ duration: 1.3 }}
                 className="flex items-center space-x-2"
               >
                 <MdAssignment className="text-gray-500" />
@@ -1161,6 +1216,11 @@ const BookingTable = () => {
         onConfirm={handleConfirmCancel}
         isLoading={isLoadingCancel} // Truyền trạng thái loading
         paymentType={selectedBooking?.paymentTypeAtBooking}
+      />
+      <BookingRecordModal
+        bookingID={selectedBookingID || 0} // Truyền bookingID
+        isOpen={isBookingRecordModalOpen}
+        onClose={handleCloseBookingRecordModal}
       />
     </motion.div>
   );

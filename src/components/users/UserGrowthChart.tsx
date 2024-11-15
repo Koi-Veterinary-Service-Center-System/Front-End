@@ -33,18 +33,18 @@ const UserGrowthChart = () => {
 
         // Định dạng lại dữ liệu để phù hợp với biểu đồ
         const formattedData = [
-          { month: "Jan", users: monthlyData[0] },
-          { month: "Feb", users: monthlyData[1] },
-          { month: "Mar", users: monthlyData[2] },
-          { month: "Apr", users: monthlyData[3] },
-          { month: "May", users: monthlyData[4] },
-          { month: "Jun", users: monthlyData[5] },
-          { month: "Jul", users: monthlyData[6] },
-          { month: "Aug", users: monthlyData[7] },
-          { month: "Sep", users: monthlyData[8] },
-          { month: "Oct", users: monthlyData[9] },
-          { month: "Nov", users: monthlyData[10] },
-          { month: "Dec", users: monthlyData[11] },
+          { month: "Jan", Bookings: monthlyData[0] },
+          { month: "Feb", Bookings: monthlyData[1] },
+          { month: "Mar", Bookings: monthlyData[2] },
+          { month: "Apr", Bookings: monthlyData[3] },
+          { month: "May", Bookings: monthlyData[4] },
+          { month: "Jun", Bookings: monthlyData[5] },
+          { month: "Jul", Bookings: monthlyData[6] },
+          { month: "Aug", Bookings: monthlyData[7] },
+          { month: "Sep", Bookings: monthlyData[8] },
+          { month: "Oct", Bookings: monthlyData[9] },
+          { month: "Nov", Bookings: monthlyData[10] },
+          { month: "Dec", Bookings: monthlyData[11] },
         ];
 
         setUserGrowthData(formattedData);
@@ -63,7 +63,9 @@ const UserGrowthChart = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
     >
-      <h2 className="text-xl font-semibold text-blue-800 mb-4">User Booking</h2>
+      <h2 className="text-xl font-semibold text-blue-800 mb-4">
+        User Booking Per Month
+      </h2>
       <div className="h-[320px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={userGrowthData}>
@@ -82,7 +84,7 @@ const UserGrowthChart = () => {
             />
             <Line
               type="monotone"
-              dataKey="users"
+              dataKey="Bookings"
               stroke="#3B82F6"
               strokeWidth={2}
               dot={{ fill: "#3B82F6", strokeWidth: 2, r: 4 }}
