@@ -41,16 +41,16 @@ export default function SlidebarProfile() {
 
   const SidebarContent = () => (
     <>
-      <div className="p-4">
+      <div className="p-4 flex justify-center items-center">
         <Link to="/" className="flex items-center space-x-2 text-primary">
           <img
             src="https://firebasestorage.googleapis.com/v0/b/swp391veterinary.appspot.com/o/logo.png?alt=media&token=a26711fc-ed75-4e62-8af1-ec577334574a"
             alt="Logo"
-            className="h-20 w-20 flex justify-center align-middle"
+            className="h-20 w-20 "
           />
         </Link>
       </div>
-      <nav className="mt-8">
+      <nav className="mt-8 flex justify-center items-center">
         <ul className="space-y-2">
           <li>
             <Link
