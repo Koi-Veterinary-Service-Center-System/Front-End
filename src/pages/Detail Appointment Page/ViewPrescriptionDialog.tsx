@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -6,16 +8,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableRow,
-  TableCell,
-  TableHead,
-  TableBody,
-  TableHeader,
-  TableCaption,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ChevronLeft,
   ChevronRight,
@@ -25,15 +21,18 @@ import {
   FileText,
   Calendar,
 } from "lucide-react";
-import "react-tooltip/dist/react-tooltip.css";
+
+interface Medication {
+  medication: string;
+  frequency: string;
+}
 
 interface Prescription {
   diseaseName: string;
   symptoms: string;
-  medication: string;
-  frequency: string;
+  medicationDetails: string;
   note?: string;
-  createAt: string; // Add createAt field here
+  createAt: string;
 }
 
 interface ViewPrescriptionDialogProps {
@@ -48,7 +47,7 @@ export function ViewPrescriptionDialog({
   prescriptions = [],
 }: ViewPrescriptionDialogProps) {
   const [currentPage, setCurrentPage] = useState(0);
-  const prescriptionsPerPage = 5;
+  const prescriptionsPerPage = 3;
 
   const totalPages = Math.ceil(
     (prescriptions?.length || 0) / prescriptionsPerPage
@@ -65,120 +64,98 @@ export function ViewPrescriptionDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[1800px] bg-gradient-to-br from-blue-100 to-white">
+      <DialogContent className="sm:max-w-[900px] bg-gradient-to-br from-blue-50 to-white">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-blue-800 mb-4">
+          <DialogTitle className="text-3xl font-bold text-blue-800 mb-4">
             Prescription Details
           </DialogTitle>
         </DialogHeader>
-        <div className="max-h-[70vh] overflow-auto">
-          <Table className="w-full table-fixed">
-            <TableCaption>
-              A list of prescriptions for the appointment.
-            </TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[12%] font-semibold text-blue-700">
-                  Disease Name
-                </TableHead>
-                <TableHead className="w-[25%] font-semibold text-blue-700">
-                  Symptoms
-                </TableHead>
-                <TableHead className="w-[23%] font-semibold text-blue-700">
-                  Medication
-                </TableHead>
-                <TableHead className="w-[10%] font-semibold text-blue-700">
-                  Frequency
-                </TableHead>
-                <TableHead className="w-[10%] font-semibold text-blue-700">
-                  Note
-                </TableHead>
-                <TableHead className="w-[15%] font-semibold text-blue-700">
-                  Created At
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <AnimatePresence mode="wait">
-                {currentPrescriptions.map((prescription, index) => (
-                  <motion.tr
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <TableCell className="overflow-hidden whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                        <Stethoscope className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                        <span className="truncate">
-                          {prescription.diseaseName || "N/A"}
-                        </span>
+        <ScrollArea className="h-[600px] pr-4">
+          <AnimatePresence mode="wait">
+            {currentPrescriptions.map((prescription, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="mb-6 overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                  <CardHeader className="bg-blue-100">
+                    <CardTitle className="text-xl text-blue-800 flex items-center space-x-2">
+                      <Stethoscope className="w-6 h-6 text-blue-600" />
+                      <span>{prescription.diseaseName || "N/A"}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-semibold text-blue-700 mb-2 flex items-center">
+                          <FileText className="w-4 h-4 mr-2" />
+                          Symptoms
+                        </h4>
+                        <p className="text-gray-700">
+                          {prescription.symptoms || "N/A"}
+                        </p>
                       </div>
-                    </TableCell>
-                    <TableCell className="overflow-hidden whitespace-nowrap">
-                      <span className="truncate">
-                        {prescription.symptoms || "N/A"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="overflow-hidden whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                        <Pill className="w-4 h-4 text-green-500 flex-shrink-0" />
-                        <span>{prescription.medication}</span>
+                      <div>
+                        <h4 className="font-semibold text-blue-700 mb-2 flex items-center">
+                          <Pill className="w-4 h-4 mr-2" />
+                          Medications
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {JSON.parse(
+                            prescription.medicationDetails || "[]"
+                          ).map((med: Medication, index: number) => (
+                            <li key={index} className="text-gray-700">
+                              <span className="font-medium">
+                                {med.medication}
+                              </span>
+                              <Badge variant="secondary" className="ml-2">
+                                {med.frequency}
+                              </Badge>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    </TableCell>
-                    <TableCell className="overflow-hidden whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                        <span className="truncate">
-                          {prescription.frequency || "N/A"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="overflow-hidden whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                        <span className="truncate">
-                          {prescription.note || "N/A"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="overflow-hidden whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                        <span className="truncate">
-                          {new Date(prescription.createAt).toLocaleString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )}
-                        </span>
-                      </div>
-                    </TableCell>
-                  </motion.tr>
-                ))}
-              </AnimatePresence>
-              {prescriptions?.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-500">
-                    No prescriptions available.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                    </div>
+                    <div className="mt-4">
+                      <h4 className="font-semibold text-blue-700 mb-2 flex items-center">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Note
+                      </h4>
+                      <p className="text-gray-700">
+                        {prescription.note || "N/A"}
+                      </p>
+                    </div>
+                    <div className="mt-4 text-sm text-gray-500 flex items-center">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      {new Date(prescription.createAt).toLocaleString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          {prescriptions?.length === 0 && (
+            <div className="text-center text-gray-500 py-8">
+              No prescriptions available.
+            </div>
+          )}
+        </ScrollArea>
         {totalPages > 1 && (
           <div className="flex justify-between items-center mt-4">
             <Button
               onClick={prevPage}
               disabled={currentPage === 0}
               className="flex items-center space-x-2"
+              variant="outline"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Previous</span>
@@ -190,6 +167,7 @@ export function ViewPrescriptionDialog({
               onClick={nextPage}
               disabled={currentPage === totalPages - 1}
               className="flex items-center space-x-2"
+              variant="outline"
             >
               <span>Next</span>
               <ChevronRight className="w-4 h-4" />

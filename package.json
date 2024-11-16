@@ -30,6 +30,7 @@
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.1",
+    "@radix-ui/react-tabs": "^1.1.1",
     "@react-three/fiber": "^8.17.10",
     "@syncfusion/ej2-base": "^27.1.50",
     "@syncfusion/ej2-react-calendars": "^27.1.51",

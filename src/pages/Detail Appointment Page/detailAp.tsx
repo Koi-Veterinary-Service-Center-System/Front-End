@@ -140,19 +140,27 @@ export default function Component() {
         },
       });
 
-      // Since response.data is an array of prescriptions
+      console.log("API Response:", response); // Kiểm tra dữ liệu trả về
+
+      if (response.status !== 200 || !response.data) {
+        throw new Error("Invalid response from server.");
+      }
+
       const prescriptionsData = response.data;
 
-      // Set prescriptions data as an array in state
-      if (prescriptionsData && prescriptionsData.length > 0) {
+      if (Array.isArray(prescriptionsData) && prescriptionsData.length > 0) {
         setSelectedPrescriptions(prescriptionsData);
         setIsViewPrescriptionOpen(true);
       } else {
         toast.info("No prescription data available for this booking.");
       }
+      console.log("API Status:", response.status);
+      console.log("API Data:", response.data);
     } catch (error: any) {
-      console.error("Failed to fetch prescriptions:", error);
-      toast.info("Error fetching prescriptions data.");
+      console.error("Failed to fetch prescriptions:", error.response || error);
+      toast.error(
+        error.response?.data?.message || "Error fetching prescriptions."
+      );
     }
   };
 
@@ -215,28 +223,26 @@ export default function Component() {
     }
   };
 
-  const handleUpdatePrescription = async (values: PrescriptionForm) => {
+  const handleUpdatePrescription = async (data: any) => {
+    console.log("Selected Booking ID:", selectedBookingID); // Kiểm tra bookingID trước khi gửi
     try {
-      if (selectedPresRecID) {
-        // Cập nhật đơn thuốc
-        await api.put(`/pres-rec/update-presRec/${selectedPresRecID}`, {
-          ...values,
-        });
-        toast.success("Prescription updated successfully!");
-      } else {
-        // Tạo mới đơn thuốc
-        await api.post("/pres-rec/create-presRec", {
-          ...values,
-          bookingID: selectedBookingID,
-        });
-        toast.success("Prescription added successfully!");
-      }
+      const formattedData = {
+        ...data,
+        bookingID: selectedBookingID, // Thêm bookingID vào payload
+      };
 
-      form.reset();
-      fetchAppointments();
+      console.log("Formatted Data with Booking ID:", formattedData); // Kiểm tra dữ liệu đầy đủ
+
+      await api.post("/pres-rec/create-presRec", formattedData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      toast.success("Prescription added successfully!");
     } catch (error) {
-      console.error("Failed to update or create prescription:", error);
-      toast.error("Failed to update or create prescription.");
+      console.error("Error occurred:", error);
+      toast.error("Failed to save prescription.");
     }
   };
 
@@ -622,7 +628,12 @@ export default function Component() {
             <CreatePrescriptionDialog
               isOpen={isCreatePrescriptionOpen}
               onClose={() => setIsCreatePrescriptionOpen(false)}
-              onSubmit={handleUpdatePrescription}
+              onSubmit={(data) =>
+                handleUpdatePrescription({
+                  ...data,
+                  bookingID: selectedBookingID,
+                })
+              }
             />
 
             <ViewPrescriptionDialog

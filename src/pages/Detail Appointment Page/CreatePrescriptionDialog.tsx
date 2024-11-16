@@ -1,12 +1,13 @@
-// CreatePrescriptionDialog.tsx
+"use client";
 
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,24 +20,38 @@ import {
   FormMessage,
   FormControl,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Pill,
+  Plus,
+  Minus,
+  Stethoscope,
+  FileText,
+  AlertCircle,
+} from "lucide-react";
 
 const prescriptionSchema = z.object({
   diseaseName: z.string().min(1, "Disease name is required"),
   symptoms: z.string().min(1, "Symptoms are required"),
-  medication: z.string().min(1, "Medication is required"),
-  frequency: z.string().min(1, "Frequency is required"),
+  medicationDetails: z.array(
+    z.object({
+      medication: z.string().min(1, "Medication is required"),
+      frequency: z.string().min(1, "Frequency is required"),
+    })
+  ),
   note: z.string().optional(),
 });
 
@@ -53,174 +68,288 @@ export function CreatePrescriptionDialog({
   onClose,
   onSubmit,
 }: CreatePrescriptionDialogProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState("disease");
+
   const form = useForm<PrescriptionForm>({
     resolver: zodResolver(prescriptionSchema),
     defaultValues: {
       diseaseName: "",
       symptoms: "",
-      medication: "",
-      frequency: "",
+      medicationDetails: [{ medication: "", frequency: "" }],
       note: "",
     },
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "medicationDetails",
+  });
+
   const handleSubmit = async (data: PrescriptionForm) => {
+    setIsSubmitting(true);
     try {
-      await onSubmit(data);
+      const formattedData = {
+        DiseaseName: data.diseaseName,
+        Symptoms: data.symptoms,
+        MedicationDetails: JSON.stringify(data.medicationDetails),
+        Note: data.note,
+      };
+
+      await onSubmit(formattedData);
       form.reset();
       onClose();
+      toast.success("Prescription saved successfully!");
     } catch (error) {
       const axiosError = error as AxiosError;
       const errorMessage =
         typeof axiosError.response?.data === "string"
           ? axiosError.response.data
           : JSON.stringify(axiosError.response?.data) ||
-            "Fail to save prescription";
+            "Failed to save prescription";
 
       toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  const medications = [
+    "Amoxicillin",
+    "Metronidazole",
+    "Melafix",
+    "Kanamycin",
+    "Erythromycin",
+    "Furan-2",
+    "Seachem Paraguard",
+    "Tetracycline",
+    "Pimafix",
+    "Copper Sulfate",
+    "Salt Bath Treatment",
+    "Praziquantel",
+    "Levamisole",
+    "API General Cure",
+    "Clindamycin",
+  ];
+
+  const frequencies = [
+    "Once a day",
+    "Twice a day",
+    "Every 6 hours",
+    "Every 8 hours",
+    "Every 12 hours",
+    "Every 24 hours",
+    "Three times a day",
+    "Once every 2 days",
+    "Once a week",
+  ];
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[500px] bg-gradient-to-br from-blue-50 to-white">
         <DialogHeader>
-          <DialogTitle>Create or Edit Prescription</DialogTitle>
-          <DialogDescription>
-            Fill out the form to create or edit the prescription.
-          </DialogDescription>
+          <DialogTitle className="text-2xl font-bold text-blue-800 flex items-center gap-2">
+            <Stethoscope className="w-6 h-6" />
+            Create Prescription
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)}>
-            <div className="grid gap-4 py-4">
-              {/* Disease Name Field */}
-              <FormField
-                control={form.control}
-                name="diseaseName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Disease Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Disease Name" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Symptoms Field */}
-              <FormField
-                control={form.control}
-                name="symptoms"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Symptoms</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Symptoms" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Medication Field */}
-              <FormField
-                control={form.control}
-                name="medication"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Medication</FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="disease">Disease</TabsTrigger>
+                <TabsTrigger value="medication">Medication</TabsTrigger>
+                <TabsTrigger value="notes">Notes</TabsTrigger>
+              </TabsList>
+              <TabsContent value="disease" className="mt-4">
+                <Card>
+                  <CardContent className="space-y-4 pt-4">
+                    <FormField
+                      control={form.control}
+                      name="diseaseName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Disease Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Enter disease name"
+                              className="bg-white"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="symptoms"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Symptoms</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              placeholder="Describe the symptoms"
+                              className="bg-white"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="medication" className="mt-4">
+                <Card>
+                  <CardContent className="pt-4">
+                    <div className="space-y-4">
+                      <FormLabel className="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                        <Pill className="w-5 h-5" />
+                        Medication Details
+                      </FormLabel>
+                      <AnimatePresence>
+                        {fields.map((field, index) => (
+                          <motion.div
+                            key={field.id}
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="grid gap-4"
+                          >
+                            <div className="grid gap-4">
+                              <FormField
+                                control={form.control}
+                                name={`medicationDetails.${index}.medication`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Medication</FormLabel>
+                                    <Select
+                                      onValueChange={field.onChange}
+                                      value={field.value}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="bg-white">
+                                          <SelectValue placeholder="Select medication" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {medications.map((medication) => (
+                                          <SelectItem
+                                            key={medication}
+                                            value={medication}
+                                          >
+                                            {medication}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`medicationDetails.${index}.frequency`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Frequency</FormLabel>
+                                    <Select
+                                      onValueChange={field.onChange}
+                                      value={field.value}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="bg-white">
+                                          <SelectValue placeholder="Select frequency" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {frequencies.map((frequency) => (
+                                          <SelectItem
+                                            key={frequency}
+                                            value={frequency}
+                                          >
+                                            {frequency}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => remove(index)}
+                              className="w-full"
+                            >
+                              <Minus className="w-4 h-4 mr-2" />
+                              Remove Medication
+                            </Button>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          append({ medication: "", frequency: "" })
+                        }
+                        className="w-full"
                       >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Medication" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Melafix - Antibacterial Remedy">
-                            Melafix - Antibacterial Remedy
-                          </SelectItem>
-                          <SelectItem value="Pimafix - Antifungal Remedy">
-                            Pimafix - Antifungal Remedy
-                          </SelectItem>
-                          <SelectItem value="Praziquantel - Parasite Treatment">
-                            Praziquantel - Parasite Treatment
-                          </SelectItem>
-                          <SelectItem value="Formalin - General Antiparasitic">
-                            Formalin - General Antiparasitic
-                          </SelectItem>
-                          <SelectItem value="Malachite Green - Antifungal and Parasitic Treatment">
-                            Malachite Green - Antifungal and Parasitic Treatment
-                          </SelectItem>
-                          <SelectItem value="Salt - General Health Tonic">
-                            Salt - General Health Tonic
-                          </SelectItem>
-                          <SelectItem value="Amoxicillin - Broad Spectrum Antibiotic">
-                            Amoxicillin - Broad Spectrum Antibiotic
-                          </SelectItem>
-                          <SelectItem value="Erythromycin - Bacterial Infection Treatment">
-                            Erythromycin - Bacterial Infection Treatment
-                          </SelectItem>
-                          <SelectItem value="Tetracycline - Bacterial Infection Treatment">
-                            Tetracycline - Bacterial Infection Treatment
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Frequency Select Field */}
-              <FormField
-                control={form.control}
-                name="frequency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Frequency</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select frequency" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="once">Once daily</SelectItem>
-                        <SelectItem value="twice">Twice daily</SelectItem>
-                        <SelectItem value="thrice">
-                          Three times daily
-                        </SelectItem>
-                        <SelectItem value="asNeeded">As needed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Note Field */}
-              <FormField
-                control={form.control}
-                name="note"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Note</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} placeholder="Special Instructions" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Medication
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="notes" className="mt-4">
+                <Card>
+                  <CardContent className="pt-4">
+                    <FormField
+                      control={form.control}
+                      name="note"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <FileText className="w-5 h-5" />
+                            Note
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              placeholder="Add any special instructions"
+                              className="bg-white"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
             <DialogFooter>
               <Button
                 type="submit"
-                className="bg-blue-500 hover:bg-blue-600 text-white"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={isSubmitting}
               >
-                Save Prescription
+                {isSubmitting ? "Saving..." : "Save Prescription"}
               </Button>
             </DialogFooter>
           </form>

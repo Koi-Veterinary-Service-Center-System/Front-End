@@ -107,7 +107,7 @@ const Footer = () => {
           <FooterSection
             title="Useful Links"
             links={[
-              { text: "New Products", url: "/new-products" },
+              { text: "New Products", url: "/" },
               { text: "Fish Service", url: "/services" },
             ]}
           />
