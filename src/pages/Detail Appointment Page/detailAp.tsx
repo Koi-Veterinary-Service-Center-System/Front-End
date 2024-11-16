@@ -149,13 +149,16 @@ export default function Component() {
       const prescriptionsData = response.data;
 
       if (Array.isArray(prescriptionsData) && prescriptionsData.length > 0) {
-        setSelectedPrescriptions(prescriptionsData);
+        // Sắp xếp dữ liệu theo ID giảm dần
+        const sortedPrescriptions = prescriptionsData.sort(
+          (a: PrescriptionForm, b: PrescriptionForm) =>
+            b.prescriptionRecordID - a.prescriptionRecordID
+        );
+        setSelectedPrescriptions(sortedPrescriptions);
         setIsViewPrescriptionOpen(true);
       } else {
         toast.info("No prescription data available for this booking.");
       }
-      console.log("API Status:", response.status);
-      console.log("API Data:", response.data);
     } catch (error: any) {
       console.error("Failed to fetch prescriptions:", error.response || error);
       toast.error(
@@ -240,6 +243,9 @@ export default function Component() {
       });
 
       toast.success("Prescription added successfully!");
+      await fetchAppointments();
+      // Đóng dialog Create Prescription
+      setIsCreatePrescriptionOpen(false);
     } catch (error) {
       console.error("Error occurred:", error);
       toast.error("Failed to save prescription.");

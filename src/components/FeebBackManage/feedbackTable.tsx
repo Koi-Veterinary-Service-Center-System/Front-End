@@ -1,6 +1,18 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Trash, AlertTriangle } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Trash,
+  AlertTriangle,
+  Info,
+  Hash,
+  User,
+  Star,
+  MessageSquare,
+  Stethoscope,
+  Briefcase,
+} from "lucide-react";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import api from "../../configs/axios";
@@ -26,7 +38,10 @@ const FeedbackTable = () => {
     null
   );
   const [profile, setProfile] = useState<Profile | null>(null);
-
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(
+    null
+  ); // Trạng thái lưu feedback chi tiết
   const fetchFeedbackData = async () => {
     setLoading(true);
     try {
@@ -126,6 +141,26 @@ const FeedbackTable = () => {
     };
     fetchProfile();
   }, []);
+
+  const openDetailModal = (feedback: Feedback) => {
+    setSelectedFeedback(feedback);
+    setIsDetailModalOpen(true);
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1 },
+  };
 
   return (
     <motion.div
@@ -238,6 +273,12 @@ const FeedbackTable = () => {
                         <EyeOff size={18} />
                       )}
                     </button>
+                    <button
+                      onClick={() => openDetailModal(feedback)}
+                      className="text-yellow-600 hover:text-yellow-800"
+                    >
+                      <Info size={18} />
+                    </button>
                     {profile?.role === "Manager" && (
                       <button
                         onClick={() => openDeleteModal(feedback)}
@@ -280,6 +321,121 @@ const FeedbackTable = () => {
                 className="bg-red-600 text-white hover:bg-red-700"
               >
                 Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+      {/* Detail Modal */}
+      {selectedFeedback && (
+        <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
+          <DialogContent className="bg-white sm:max-w-[400px]">
+            <DialogHeader>
+              <DialogTitle>Feedback Details</DialogTitle>
+            </DialogHeader>
+
+            <motion.div
+              variants={itemVariants}
+              className="flex items-center space-x-2"
+            >
+              <Hash className="w-5 h-5 text-blue-500" />
+              <span className="font-medium text-gray-700">Feedback ID:</span>
+              <span className="text-gray-600">
+                {selectedFeedback.feedbackID}
+              </span>
+            </motion.div>
+
+            <motion.div
+              variants={itemVariants}
+              className="flex items-center space-x-2"
+            >
+              <User className="w-5 h-5 text-blue-500" />
+              <span className="font-medium text-gray-700">Customer Name:</span>
+              <span className="text-gray-600">
+                {selectedFeedback.customerName}
+              </span>
+            </motion.div>
+
+            <motion.div
+              variants={itemVariants}
+              className="flex items-center space-x-2"
+            >
+              <Star className="w-5 h-5 text-yellow-500" />
+              <span className="font-medium text-gray-700">Rating:</span>
+              <span className="text-gray-600">{selectedFeedback.rate}</span>
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 ${
+                      i < selectedFeedback.rate
+                        ? "text-yellow-500 fill-current"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              variants={itemVariants}
+              className="flex items-start space-x-2"
+            >
+              <MessageSquare className="w-5 h-5 text-blue-500 mt-1" />
+              <div>
+                <span className="font-medium text-gray-700">Comments:</span>
+                <p className="mt-1 text-gray-600 whitespace-pre-wrap">
+                  {selectedFeedback.comments}
+                </p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              variants={itemVariants}
+              className="flex items-center space-x-2"
+            >
+              {selectedFeedback.isVisible ? (
+                <Eye className="w-5 h-5 text-green-500" />
+              ) : (
+                <EyeOff className="w-5 h-5 text-red-500" />
+              )}
+              <span className="font-medium text-gray-700">Visibility:</span>
+              <span
+                className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                  selectedFeedback.isVisible
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {selectedFeedback.isVisible ? "Visible" : "Hidden"}
+              </span>
+            </motion.div>
+
+            <motion.div
+              variants={itemVariants}
+              className="flex items-center space-x-2"
+            >
+              <Stethoscope className="w-5 h-5 text-blue-500" />
+              <span className="font-medium text-gray-700">Vet Name:</span>
+              <span className="text-gray-600">{selectedFeedback.vetName}</span>
+            </motion.div>
+
+            <motion.div
+              variants={itemVariants}
+              className="flex items-center space-x-2"
+            >
+              <Briefcase className="w-5 h-5 text-blue-500" />
+              <span className="font-medium text-gray-700">Service Name:</span>
+              <span className="text-gray-600">
+                {selectedFeedback.serviceName}
+              </span>
+            </motion.div>
+            <DialogFooter className="flex justify-end space-x-4 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsDetailModalOpen(false)}
+              >
+                Close
               </Button>
             </DialogFooter>
           </DialogContent>

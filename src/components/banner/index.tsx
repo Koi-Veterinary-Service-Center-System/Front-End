@@ -111,7 +111,7 @@ export default function EnhancedBanner() {
                   <p className="mb-8">{slide.description}</p>
                   <Button
                     asChild
-                    className="group relative overflow-hidden rounded-full pl-8 h-12"
+                    className="group relative overflow-hidden rounded-full pl-8 h-12 bg-gradient-to-r from-blue-400 to-blue-500 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform duration-300"
                   >
                     <Link to={slide.cta.link}>
                       <span className="relative z-10">{slide.cta.text}</span>

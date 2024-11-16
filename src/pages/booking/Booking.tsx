@@ -89,6 +89,7 @@ function BookingPage() {
     });
 
     setSlots(filteredSlots);
+    form.resetFields(["slotID", "vet"]);
   };
 
   // Fetch Slots
@@ -214,6 +215,7 @@ function BookingPage() {
         form.setFieldsValue({ vet: undefined }); // Reset if the vet is not available for the new slot
       }
     });
+    form.resetFields(["vet"]);
   };
 
   // Handle vet change to fetch slot
@@ -626,6 +628,11 @@ function BookingPage() {
                       type: "number",
                       min: 0,
                       message: "Quantity must be at least 0", // Bắt lỗi nếu người dùng nhập số nhỏ hơn 1
+                    },
+                    {
+                      type: "number",
+                      max: 15,
+                      message: "Quantity must be at least 15", // Bắt lỗi nếu người dùng nhập số nhỏ hơn 1
                     },
                   ]}
                 >
