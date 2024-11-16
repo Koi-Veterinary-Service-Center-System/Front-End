@@ -33,7 +33,7 @@ import TextArea from "antd/es/input/TextArea";
 import moment from "moment";
 import TermsModal from "@/components/TermsModal/TermsModal";
 import { AxiosError } from "axios";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 const { Option } = Select;
 
