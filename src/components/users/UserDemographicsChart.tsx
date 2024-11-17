@@ -13,29 +13,43 @@ import { toast } from "sonner";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088FE"];
 
+// Define types for the chart data and booking data
+interface ChartData {
+  name: string;
+  value: number;
+}
+
+interface Booking {
+  bookingStatus: string;
+}
+
 const BookingStatusDemographicsChart = () => {
-  const [bookingData, setBookingData] = useState([]);
-  const [chartData, setChartData] = useState([]);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
 
   useEffect(() => {
     const fetchBookingData = async () => {
       try {
-        const response = await api.get("/booking/all-booking");
-        setBookingData(response.data);
+        const response = await api.get<Booking[]>("/booking/all-booking");
+        const bookings = response.data;
 
-        // Chuẩn bị dữ liệu cho biểu đồ
-        const statusCount = response.data.reduce((acc, booking) => {
-          const status = booking.bookingStatus;
-          acc[status] = (acc[status] || 0) + 1;
-          return acc;
-        }, {});
+        // Prepare data for the chart
+        const statusCount = bookings.reduce<Record<string, number>>(
+          (acc, booking) => {
+            const status = booking.bookingStatus;
+            acc[status] = (acc[status] || 0) + 1;
+            return acc;
+          },
+          {}
+        );
 
-        const chartData = Object.keys(statusCount).map((key) => ({
-          name: key,
-          value: statusCount[key],
-        }));
+        const formattedChartData: ChartData[] = Object.keys(statusCount).map(
+          (key) => ({
+            name: key,
+            value: statusCount[key],
+          })
+        );
 
-        setChartData(chartData);
+        setChartData(formattedChartData);
       } catch (error) {
         console.error("Error fetching booking data:", error);
         toast.error("Failed to load booking data.");

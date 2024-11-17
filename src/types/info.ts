@@ -4,7 +4,7 @@ export type Object = {
 
 export type Slot = {
   id: string;
-  slotID: number;
+  slotID?: string;
   startTime: string;
   endTime: string;
   weekDate: string;
@@ -39,7 +39,7 @@ export type koiOrPool = {
 };
 
 export type Services = {
-  serviceID: string;
+  serviceID: number;
   serviceName: string;
   description: string;
   price: number;
@@ -77,6 +77,7 @@ export type Payment = {
   paymentID: string | number;
   paymentType: string;
   isDeleted: boolean;
+  type: string;
 };
 
 export type Booking = {
@@ -146,12 +147,16 @@ export type Vet = {
 };
 
 export type Prescription = {
-  prescriptionRecordID: number;
+  prescriptionRecordID?: number;
   diseaseName: string;
   symptoms: string;
-  medication: string;
+  medication: string; // Thêm thuộc tính này
   frequency: string;
-  note: string;
+  medicationDetails: {
+    medication: string;
+    frequency: string;
+  }[];
+  note?: string;
   refundMoney: number | null;
   refundPercent: number | null;
   bookingID: number;

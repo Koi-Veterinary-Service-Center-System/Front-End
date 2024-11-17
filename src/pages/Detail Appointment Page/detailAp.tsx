@@ -37,7 +37,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import api from "@/configs/axios";
-import { Booking } from "@/types/info";
+import { Booking, Prescription } from "@/types/info";
 import { FaUserDoctor } from "react-icons/fa6";
 import { RiServiceLine } from "react-icons/ri";
 import { GiCirclingFish } from "react-icons/gi";
@@ -47,6 +47,7 @@ import BookingRecordModal from "../Booking/BookingRecordModal";
 import ConfirmStatusChangeModal from "../Booking/ConfirmStatusChangeModal";
 import { ViewPrescriptionDialog } from "./ViewPrescriptionDialog";
 import { CreatePrescriptionDialog } from "./CreatePrescriptionDialog";
+import { AxiosError } from "axios";
 
 const prescriptionSchema = z.object({
   diseaseName: z.string().min(1, "Disease name is required"),
@@ -54,6 +55,7 @@ const prescriptionSchema = z.object({
   medication: z.string().min(1, "Medication is required"),
   frequency: z.string().min(1, "Frequency is required"),
   note: z.string().optional(),
+  prescriptionRecordID: z.number().optional(),
 });
 
 type PrescriptionForm = z.infer<typeof prescriptionSchema>;
@@ -71,10 +73,7 @@ export default function Component() {
   const [selectedPrescriptions, setSelectedPrescriptions] = useState<
     PrescriptionForm[]
   >([]);
-  // Lưu presRecID để update đơn thuốc
-  const [selectedPresRecID, setSelectedPresRecID] = useState<number | null>(
-    null
-  );
+
   const [loading, setLoading] = useState(true);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -119,15 +118,18 @@ export default function Component() {
               hasPrescription: !!prescription.data,
               presRecID: prescription.data.id, // Lưu presRecID để sử dụng khi cần update
             };
-          } catch (error: any) {
+          } catch {
             return { ...appointment, hasPrescription: false };
           }
         })
       );
       setAppointments(appointmentsWithPrescriptions);
-    } catch (error: any) {
-      console.error("Failed to fetch appointments:", error);
-      toast.info(error.response.data);
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data || "Failed to fetch appointments.");
+      } else {
+        toast.error("Unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }
@@ -151,19 +153,33 @@ export default function Component() {
       if (Array.isArray(prescriptionsData) && prescriptionsData.length > 0) {
         // Sắp xếp dữ liệu theo ID giảm dần
         const sortedPrescriptions = prescriptionsData.sort(
-          (a: PrescriptionForm, b: PrescriptionForm) =>
-            b.prescriptionRecordID - a.prescriptionRecordID
+          (a, b) =>
+            (b.prescriptionRecordID || 0) - (a.prescriptionRecordID || 0)
         );
-        setSelectedPrescriptions(sortedPrescriptions);
+
+        // Chuẩn hóa dữ liệu trước khi set state
+        const normalizedPrescriptions = sortedPrescriptions.map(
+          (item: Prescription) => ({
+            diseaseName: item.diseaseName || "",
+            symptoms: item.symptoms || "",
+            medicationDetails: item.medicationDetails || [],
+            note: item.note || "",
+            prescriptionRecordID: item.prescriptionRecordID,
+            createAt: item.createAt || new Date().toISOString(), // Giá trị mặc định
+          })
+        );
+
+        setSelectedPrescriptions(normalizedPrescriptions);
         setIsViewPrescriptionOpen(true);
       } else {
         toast.info("No prescription data available for this booking.");
       }
-    } catch (error: any) {
-      console.error("Failed to fetch prescriptions:", error.response || error);
-      toast.error(
-        error.response?.data?.message || "Error fetching prescriptions."
-      );
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data || "Failed to fetch prescription.");
+      } else {
+        toast.error("Unexpected error occurred.");
+      }
     }
   };
 
@@ -217,9 +233,12 @@ export default function Component() {
       });
       fetchAppointments();
       toast.success(`Appointment status updated successfully to ${newStatus}`);
-    } catch (error: any) {
-      console.error("Failed to update status:", error);
-      toast.error(error.response.data);
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data || "Failed to update status.");
+      } else {
+        toast.error("Unexpected error occurred.");
+      }
     } finally {
       setStatusChangeBookingID(null);
       setNewStatus(null);
@@ -261,7 +280,7 @@ export default function Component() {
     fetchAppointments();
   };
 
-  const openBookingRecordModal = (bookingID: number) => {
+  const openBookingRecordModal = (bookingID: string) => {
     setSelectedBookingID(bookingID);
     setIsRecordModalOpen(true);
   };
@@ -271,7 +290,7 @@ export default function Component() {
     setSelectedBookingID(null);
   };
 
-  const openCreatePrescriptionDialog = (bookingID: number) => {
+  const openCreatePrescriptionDialog = (bookingID: string) => {
     setSelectedBookingID(bookingID);
     setIsCreatePrescriptionOpen(true);
   };

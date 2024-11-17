@@ -14,7 +14,7 @@ import api from "@/configs/axios";
 import { AxiosError } from "axios";
 
 interface KoiVetBookingProps {
-  bookingID: string;
+  bookingID: string | null;
   arisedQuantity?: number;
   note?: string;
   onClose: () => void;
@@ -114,7 +114,7 @@ export default function BookingRecord({
           </Label>
           <Input
             id="bookingID"
-            value={currentBookingID}
+            value={currentBookingID || ""}
             readOnly
             className="text-lg bg-white bg-opacity-70"
           />

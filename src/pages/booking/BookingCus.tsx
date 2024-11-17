@@ -14,7 +14,6 @@ import {
   ClockIcon,
   MapPinIcon,
   CreditCardIcon,
-  CalendarDays,
 } from "lucide-react";
 import { AiOutlineSchedule } from "react-icons/ai";
 import { BiCheckboxChecked } from "react-icons/bi";
@@ -108,9 +107,11 @@ const BookingCus = () => {
       });
 
       // Lấy dữ liệu và sắp xếp theo bookingID (mới nhất lên đầu)
-      const fetchedBookings = response.data.sort(
-        (a: Booking, b: Booking) => b.bookingID - a.bookingID
-      );
+      const fetchedBookings = response.data.sort((a: Booking, b: Booking) => {
+        const idA = Number(a.bookingID); // Chuyển đổi sang số
+        const idB = Number(b.bookingID); // Chuyển đổi sang số
+        return idB - idA; // Sắp xếp giảm dần
+      });
       setBookings(fetchedBookings); // Cập nhật state bookings
     } catch (error) {
       const axiosError = error as AxiosError;

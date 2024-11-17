@@ -51,6 +51,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import ServiceDetailDialog from "./ServiceDetailDialog";
+import { AxiosError } from "axios";
 
 interface ServicesTableProps {
   onDeleteSuccess: () => void;
@@ -74,6 +75,7 @@ const serviceSchema = z.object({
   ),
   isAtHome: z.boolean().default(false), // Boolean field with default false
   isOnline: z.boolean().default(false), // Boolean field with default false
+  imageURL: z.string().optional(),
 });
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
@@ -146,13 +148,20 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
 
       // Sort services by `id` in descending order to show latest first
       const sortedServices = filteredResponse.sort(
-        (a: Services, b: Services) => b.serviceID - a.serviceID
+        (a: Services, b: Services) => Number(b.serviceID) - Number(a.serviceID)
       );
 
       setServices(sortedServices);
       setFilteredServices(sortedServices);
-    } catch (error: any) {
-      console.error("Failed to fetch service data");
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        console.error(
+          "Axios Error:",
+          error.response?.data || error.message || "Unknown Axios error"
+        );
+      } else {
+        console.error("Unexpected Error:", error);
+      }
     }
   };
 
@@ -239,8 +248,16 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
       setImageFile(null);
       setImageURL("");
       fetchServices();
-    } catch (error: any) {
-      console.error("Operation failed:", error.response?.data || error.message);
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        console.error(
+          "Axios Error:",
+          error.response?.data || error.message || "Unknown Axios error"
+        );
+        toast.error(error.response?.data || "An error occurred");
+      } else {
+        console.error("Unexpected Error:", error);
+      }
     } finally {
       setLoading(false);
     }
@@ -262,8 +279,16 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
       setIsDeleteDialogOpen(false);
       setDeleteServiceID(null);
       toast.success("Service deleted successfully!");
-    } catch (error: any) {
-      console.error("Delete failed:", error.response?.data || error.message);
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        console.error(
+          "Axios Error:",
+          error.response?.data || error.message || "Unknown Axios error"
+        );
+        toast.error(error.response?.data || "Failed to delete the service.");
+      } else {
+        console.error("Unexpected Error:", error);
+      }
     } finally {
       setLoading(false);
     }
@@ -384,7 +409,9 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => confirmDelete(service.serviceID)}
+                              onClick={() =>
+                                confirmDelete(Number(service.serviceID))
+                              }
                             >
                               <Trash2 className="mr-2 h-4 w-4 text-red-500" />
                               Delete
@@ -528,12 +555,21 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                           <div className="relative">
                             <PiMoneyWavy className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-500" />
                             <Input
-                              type="number"
+                              type="text" // Sử dụng text để hỗ trợ định dạng
                               placeholder="Enter price"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(parseFloat(e.target.value))
-                              }
+                              value={
+                                field.value
+                                  ? field.value.toLocaleString("vi-VN")
+                                  : ""
+                              } // Hiển thị với dấu chấm
+                              onChange={(e) => {
+                                const rawValue = e.target.value.replace(
+                                  /\./g,
+                                  ""
+                                ); // Loại bỏ dấu chấm
+                                const numericValue = parseFloat(rawValue) || 0; // Chuyển thành số
+                                field.onChange(numericValue); // Lưu giá trị thực
+                              }}
                               className="pl-10 border-blue-200 focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                             />
                           </div>
@@ -542,6 +578,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="quantityPrice"
@@ -554,12 +591,21 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
                           <div className="relative">
                             <PiMoneyWavy className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-500" />
                             <Input
-                              type="number"
+                              type="text"
                               placeholder="Enter quantity price"
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(parseFloat(e.target.value))
+                              value={
+                                field.value
+                                  ? field.value.toLocaleString("vi-VN")
+                                  : ""
                               }
+                              onChange={(e) => {
+                                const rawValue = e.target.value.replace(
+                                  /\./g,
+                                  ""
+                                );
+                                const numericValue = parseFloat(rawValue) || 0;
+                                field.onChange(numericValue);
+                              }}
                               className="pl-10 border-blue-200 focus:border-blue-400 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                             />
                           </div>
@@ -704,7 +750,7 @@ const ServicesTable: React.FC<ServicesTableProps> = ({}) => {
         }}
       />
       <ServiceDetailDialog
-        service={selectedService}
+        service={selectedService as Services}
         isOpen={isDetailDialogOpen}
         onClose={() => setIsDetailDialogOpen(false)}
       />

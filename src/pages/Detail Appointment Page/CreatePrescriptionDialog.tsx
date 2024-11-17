@@ -34,14 +34,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Pill,
-  Plus,
-  Minus,
-  Stethoscope,
-  FileText,
-  AlertCircle,
-} from "lucide-react";
+import { Pill, Plus, Minus, Stethoscope, FileText } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const prescriptionSchema = z.object({
@@ -100,7 +93,6 @@ export function CreatePrescriptionDialog({
       await onSubmit(formattedData);
       form.reset();
       onClose();
-      toast.success("Prescription saved successfully!");
     } catch (error) {
       const axiosError = error as AxiosError;
       const errorMessage =

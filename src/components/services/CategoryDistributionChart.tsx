@@ -9,6 +9,7 @@ import {
   Legend,
 } from "recharts";
 import api from "@/configs/axios";
+import { Services } from "@/types/info";
 
 const COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B"];
 
@@ -25,7 +26,7 @@ const CategoryDistributionChart = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-        const formattedData = response.data.map((service: any) => ({
+        const formattedData = response.data.map((service: Services) => ({
           name: service.serviceName,
           value: service.price,
         }));
@@ -50,12 +51,12 @@ const CategoryDistributionChart = () => {
         Category Distribution
       </h2>
       <div className="h-80">
-        <ResponsiveContainer width={"100%"} height={"100%"}>
+        <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={categoryData}
-              cx={"50%"}
-              cy={"50%"}
+              cx="50%"
+              cy="50%"
               innerRadius={40} // Adjusted for donut chart
               outerRadius={80}
               fill="#8884d8"
@@ -65,7 +66,7 @@ const CategoryDistributionChart = () => {
                 `${name}: ${(percent * 100).toFixed(0)}%`
               }
             >
-              {categoryData.map((entry, index) => (
+              {categoryData.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}

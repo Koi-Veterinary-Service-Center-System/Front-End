@@ -20,6 +20,7 @@ interface TransformedData {
   name: string;
   value: number;
 }
+
 // Màu sắc cho các phần của biểu đồ
 const COLORS = [
   "#8884d8",
@@ -31,9 +32,7 @@ const COLORS = [
 ];
 
 const VetServiceChannelPerformance = () => {
-  const [feedbackData, setFeedbackData] = useState<
-    { name: string; value: number }[]
-  >([]);
+  const [feedbackData, setFeedbackData] = useState<TransformedData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -116,7 +115,7 @@ const VetServiceChannelPerformance = () => {
                   `${name} ${(percent * 100).toFixed(0)}%`
                 }
               >
-                {feedbackData.map((entry, index) => (
+                {feedbackData.map((_, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={COLORS[index % COLORS.length]}
