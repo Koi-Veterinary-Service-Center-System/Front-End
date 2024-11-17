@@ -120,6 +120,7 @@ export type Booking = {
   bookingRecordNote: string;
   hasFeedback: boolean;
   presRecID: string;
+  hasBookingRecord: boolean;
 };
 
 export type User = {

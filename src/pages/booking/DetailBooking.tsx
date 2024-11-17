@@ -547,19 +547,38 @@ const DetailBooking = () => {
                               <h3 className="text-lg font-semibold text-gray-800">
                                 Booking Record
                               </h3>
+                              <div className="mt-2">
+                                {booking.hasBookingRecord ? (
+                                  <Badge className="text-sm">
+                                    <CheckCircle className="inline-block h-4 w-4 mr-1" />
+                                    Available
+                                  </Badge>
+                                ) : (
+                                  <Badge
+                                    variant="destructive"
+                                    className="text-sm"
+                                  >
+                                    <XCircle className="inline-block h-4 w-4 mr-1" />
+                                    Not Available
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                             {/* Booking details here */}
-
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="ml-auto"
-                              onClick={() =>
-                                handleOpenBookingRecordModal(booking.bookingID)
-                              }
-                            >
-                              View Booking Record
-                            </Button>
+                            {booking.hasBookingRecord && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="ml-auto"
+                                onClick={() =>
+                                  handleOpenBookingRecordModal(
+                                    booking.bookingID
+                                  )
+                                }
+                              >
+                                View Booking Record
+                              </Button>
+                            )}
                           </motion.div>
 
                           <motion.div
