@@ -207,7 +207,12 @@ const DetailBooking = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setSelectedPrescription(response.data); // Store all prescription data
+      // Sort prescriptions by ID in descending order (newest first)
+      const sortedPrescriptions = response.data.sort(
+        (a: Prescription, b: Prescription) =>
+          b.prescriptionRecordID - a.prescriptionRecordID
+      );
+      setSelectedPrescription(sortedPrescriptions); // Store all prescription data
       setPrescriptionDialogOpen(true); // Open dialog
     } catch (error: unknown) {
       let errorMessage = "Failed to fetch bookings.";

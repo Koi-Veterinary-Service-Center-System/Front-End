@@ -42,6 +42,7 @@ import {
   FileText,
   AlertCircle,
 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const prescriptionSchema = z.object({
   diseaseName: z.string().min(1, "Disease name is required"),
@@ -211,108 +212,121 @@ export function CreatePrescriptionDialog({
               <TabsContent value="medication" className="mt-4">
                 <Card>
                   <CardContent className="pt-4">
-                    <div className="space-y-4">
-                      <FormLabel className="text-lg font-semibold text-blue-800 flex items-center gap-2">
-                        <Pill className="w-5 h-5" />
-                        Medication Details
-                      </FormLabel>
-                      <AnimatePresence>
-                        {fields.map((field, index) => (
-                          <motion.div
-                            key={field.id}
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="grid gap-4"
-                          >
-                            <div className="grid gap-4">
-                              <FormField
-                                control={form.control}
-                                name={`medicationDetails.${index}.medication`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Medication</FormLabel>
-                                    <Select
-                                      onValueChange={field.onChange}
-                                      value={field.value}
-                                    >
-                                      <FormControl>
-                                        <SelectTrigger className="bg-white">
-                                          <SelectValue placeholder="Select medication" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        {medications.map((medication) => (
-                                          <SelectItem
-                                            key={medication}
-                                            value={medication}
-                                          >
-                                            {medication}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={form.control}
-                                name={`medicationDetails.${index}.frequency`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Frequency</FormLabel>
-                                    <Select
-                                      onValueChange={field.onChange}
-                                      value={field.value}
-                                    >
-                                      <FormControl>
-                                        <SelectTrigger className="bg-white">
-                                          <SelectValue placeholder="Select frequency" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        {frequencies.map((frequency) => (
-                                          <SelectItem
-                                            key={frequency}
-                                            value={frequency}
-                                          >
-                                            {frequency}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => remove(index)}
-                              className="w-full"
+                    <ScrollArea className="h-[300px] pr-4 mb-4">
+                      <div className="space-y-4">
+                        <FormLabel className="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                          <Pill className="w-5 h-5" />
+                          Medication Details
+                        </FormLabel>
+                        <AnimatePresence>
+                          {fields.map((field, index) => (
+                            <motion.div
+                              key={field.id}
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.2 }}
+                              className="grid gap-4"
                             >
-                              <Minus className="w-4 h-4 mr-2" />
-                              Remove Medication
-                            </Button>
-                          </motion.div>
-                        ))}
-                      </AnimatePresence>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() =>
-                          append({ medication: "", frequency: "" })
+                              <div className="grid gap-4">
+                                <FormField
+                                  control={form.control}
+                                  name={`medicationDetails.${index}.medication`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Medication</FormLabel>
+                                      <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger className="bg-white">
+                                            <SelectValue placeholder="Select medication" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          {medications.map((medication) => (
+                                            <SelectItem
+                                              key={medication}
+                                              value={medication}
+                                            >
+                                              {medication}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name={`medicationDetails.${index}.frequency`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Frequency</FormLabel>
+                                      <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger className="bg-white">
+                                            <SelectValue placeholder="Select frequency" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          {frequencies.map((frequency) => (
+                                            <SelectItem
+                                              key={frequency}
+                                              value={frequency}
+                                            >
+                                              {frequency}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => remove(index)}
+                                className="w-full"
+                              >
+                                <Minus className="w-4 h-4 mr-2" />
+                                Remove Medication
+                              </Button>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    </ScrollArea>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        // Kiểm tra nếu không có trường nào hoặc trường cuối đã được điền đầy đủ
+                        if (
+                          fields.length === 0 ||
+                          (fields[fields.length - 1].medication.trim() !== "" &&
+                            fields[fields.length - 1].frequency.trim() !== "")
+                        ) {
+                          append({ medication: "", frequency: "" });
+                        } else {
+                          toast.error(
+                            "Please complete the current Medication Details before adding a new one."
+                          );
                         }
-                        className="w-full"
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Medication
-                      </Button>
-                    </div>
+                      }}
+                      className="w-full"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Medication
+                    </Button>
                   </CardContent>
                 </Card>
               </TabsContent>
