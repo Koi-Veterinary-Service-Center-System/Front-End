@@ -294,7 +294,16 @@ export function CreatePrescriptionDialog({
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => remove(index)}
+                                onClick={() => {
+                                  remove(index); // Xóa trường hiện tại
+                                  // Đảm bảo giá trị đồng bộ sau khi xóa
+                                  const medicationDetails =
+                                    form.getValues("medicationDetails");
+                                  console.log(
+                                    "Updated Medication Details after remove:",
+                                    medicationDetails
+                                  );
+                                }}
                                 className="w-full"
                               >
                                 <Minus className="w-4 h-4 mr-2" />
@@ -309,16 +318,21 @@ export function CreatePrescriptionDialog({
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        // Kiểm tra nếu không có trường nào hoặc trường cuối đã được điền đầy đủ
-                        if (
-                          fields.length === 0 ||
-                          (fields[fields.length - 1].medication.trim() !== "" &&
-                            fields[fields.length - 1].frequency.trim() !== "")
-                        ) {
+                        const allFieldsValid = fields.every((field, index) => {
+                          const currentValues = form.getValues(
+                            `medicationDetails.${index}`
+                          );
+                          return (
+                            currentValues?.medication?.trim() !== "" &&
+                            currentValues?.frequency?.trim() !== ""
+                          );
+                        });
+
+                        if (allFieldsValid) {
                           append({ medication: "", frequency: "" });
                         } else {
                           toast.error(
-                            "Please complete the current Medication Details before adding a new one."
+                            "Please complete all Medication Details before adding a new one."
                           );
                         }
                       }}
