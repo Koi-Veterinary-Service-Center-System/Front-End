@@ -12,8 +12,13 @@ import { motion } from "framer-motion";
 import api from "@/configs/axios";
 import { Booking } from "@/types/info";
 
+interface GrowthData {
+  month: string;
+  Bookings: number;
+}
+
 const UserGrowthChart = () => {
-  const [userGrowthData, setUserGrowthData] = useState([]);
+  const [userGrowthData, setUserGrowthData] = useState<GrowthData[]>([]); // Specify type
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -32,7 +37,7 @@ const UserGrowthChart = () => {
         });
 
         // Định dạng lại dữ liệu để phù hợp với biểu đồ
-        const formattedData = [
+        const formattedData: GrowthData[] = [
           { month: "Jan", Bookings: monthlyData[0] },
           { month: "Feb", Bookings: monthlyData[1] },
           { month: "Mar", Bookings: monthlyData[2] },
@@ -47,7 +52,7 @@ const UserGrowthChart = () => {
           { month: "Dec", Bookings: monthlyData[11] },
         ];
 
-        setUserGrowthData(formattedData);
+        setUserGrowthData(formattedData); // Update state with formatted data
       } catch (error) {
         console.error("Error fetching booking data:", error);
       }

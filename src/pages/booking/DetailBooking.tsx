@@ -129,11 +129,11 @@ const DetailBooking = () => {
     backgroundRepeat: "no-repeat", // Ensures the image doesn't repeat
   };
   const [isBookingRecordModalOpen, setBookingRecordModalOpen] = useState(false);
-  const [selectedBookingID, setSelectedBookingID] = useState<number | null>(
+  const [selectedBookingID, setSelectedBookingID] = useState<string | null>(
     null
   );
 
-  const handleOpenBookingRecordModal = (bookingID: number) => {
+  const handleOpenBookingRecordModal = (bookingID: string) => {
     setSelectedBookingID(bookingID);
     setBookingRecordModalOpen(true);
   };
@@ -210,9 +210,10 @@ const DetailBooking = () => {
       // Sort prescriptions by ID in descending order (newest first)
       const sortedPrescriptions = response.data.sort(
         (a: Prescription, b: Prescription) =>
-          b.prescriptionRecordID - a.prescriptionRecordID
+          (b.prescriptionRecordID || 0) - (a.prescriptionRecordID || 0)
       );
-      setSelectedPrescription(sortedPrescriptions); // Store all prescription data
+      setSelectedPrescription(sortedPrescriptions || []);
+      // Store all prescription data
       setPrescriptionDialogOpen(true); // Open dialog
     } catch (error: unknown) {
       let errorMessage = "Failed to fetch bookings.";
@@ -656,10 +657,10 @@ const DetailBooking = () => {
           <ViewPrescriptionDialog
             isOpen={isPrescriptionDialogOpen}
             onClose={() => setPrescriptionDialogOpen(false)}
-            prescriptions={selectedPrescription}
+            prescriptions={selectedPrescription || ""}
           />
           <BookingRecordModal
-            bookingID={selectedBookingID || 0} // Đảm bảo giá trị mặc định
+            bookingID={selectedBookingID || ""} // Đảm bảo giá trị mặc định
             isOpen={isBookingRecordModalOpen}
             onClose={handleCloseBookingRecordModal}
           />

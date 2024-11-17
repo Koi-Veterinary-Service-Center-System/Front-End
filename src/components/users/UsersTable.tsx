@@ -47,6 +47,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { AxiosError } from "axios";
 
 const userSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -84,7 +85,6 @@ const UsersTable = () => {
   // Additional state for managing the ban dialog
   const [isBanModalOpen, setIsBanModalOpen] = useState(false);
   const [userToBan, setUserToBan] = useState<User | null>(null);
-  const [banReason, setBanReason] = useState("");
   const formBan = useForm<BanReasonFormData>({
     resolver: zodResolver(banReasonSchema),
     defaultValues: { reason: "" },
@@ -224,8 +224,16 @@ const UsersTable = () => {
       );
       setIsDeleteModalOpen(false);
       setUserToDelete(null);
-    } catch (error: any) {
-      setError(error.message || "Failed to delete user.");
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) ||
+            "Failed to delete user";
+
+      toast.info(errorMessage);
+      console.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -253,15 +261,22 @@ const UsersTable = () => {
       setIsBanModalOpen(false);
       formBan.reset();
       fetchUser();
-    } catch (error: any) {
-      toast.error("Failed to ban user. Please try again.");
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.info(errorMessage);
+      console.error(errorMessage);
     } finally {
-      setBanLoading(false); // Stop loading after completion
+      setBanLoading(false);
     }
   };
 
   // Handle Unban User
-  const handleUnbanUser = async (userID) => {
+  const handleUnbanUser = async (userID: string | number) => {
     setLoading(true);
     try {
       await api.patch(
@@ -283,8 +298,14 @@ const UsersTable = () => {
         )
       );
     } catch (error) {
-      console.error("Failed to unban user:", error.message);
-      toast.error("Failed to unban user. Please try again.");
+      const axiosError = error as AxiosError;
+      const errorMessage =
+        typeof axiosError.response?.data === "string"
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response?.data) || "An error occurred";
+
+      toast.info(errorMessage);
+      console.error(errorMessage);
     } finally {
       setLoading(false);
     }

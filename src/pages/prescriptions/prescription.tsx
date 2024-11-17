@@ -303,7 +303,8 @@ export default function FishPrescriptionSystem() {
                                       size="icon"
                                       onClick={() => {
                                         setPrescriptionToDelete(
-                                          prescription.prescriptionRecordID
+                                          prescription.prescriptionRecordID ??
+                                            null
                                         );
                                         setIsDeleteDialogOpen(true);
                                       }}
@@ -364,7 +365,7 @@ export default function FishPrescriptionSystem() {
                             <InfoItem
                               icon={FileText}
                               label="Note"
-                              value={prescription.note}
+                              value={prescription.note || "No note available"}
                               fullWidth
                             />
                           </motion.div>

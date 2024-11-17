@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -21,17 +21,32 @@ const COLORS = [
   "#3B82F6",
 ];
 
+// Define the shape of the Booking and Activity Data
+interface Booking {
+  bookingDate: string; // ISO date string
+}
+
+interface ActivityData {
+  name: string;
+  "0-4": number;
+  "4-8": number;
+  "8-12": number;
+  "12-16": number;
+  "16-20": number;
+  "20-24": number;
+}
+
 const UserActivityHeatmap = () => {
-  const [userActivityData, setUserActivityData] = useState([]);
+  const [userActivityData, setUserActivityData] = useState<ActivityData[]>([]);
 
   useEffect(() => {
     const fetchBookingData = async () => {
       try {
-        const response = await api.get("/booking/all-booking");
+        const response = await api.get<Booking[]>("/booking/all-booking");
         const bookings = response.data;
 
-        // Tạo cấu trúc dữ liệu với các khoảng thời gian cho từng ngày trong tuần
-        const data = [
+        // Initialize data structure for the heatmap
+        const data: ActivityData[] = [
           {
             name: "Mon",
             "0-4": 0,
@@ -97,13 +112,13 @@ const UserActivityHeatmap = () => {
           },
         ];
 
-        // Duyệt qua tất cả các booking và phân loại theo khoảng thời gian và ngày
+        // Iterate through bookings to populate the heatmap data
         bookings.forEach((booking) => {
           const bookingDate = new Date(booking.bookingDate);
           const dayOfWeek = bookingDate.getDay(); // 0=Sunday, 1=Monday, ...
           const hour = bookingDate.getHours();
 
-          let timeSlot;
+          let timeSlot: keyof ActivityData | undefined;
           if (hour >= 0 && hour < 4) timeSlot = "0-4";
           else if (hour >= 4 && hour < 8) timeSlot = "4-8";
           else if (hour >= 8 && hour < 12) timeSlot = "8-12";
@@ -111,9 +126,8 @@ const UserActivityHeatmap = () => {
           else if (hour >= 16 && hour < 20) timeSlot = "16-20";
           else if (hour >= 20 && hour <= 24) timeSlot = "20-24";
 
-          // Tăng số lượng booking trong khoảng thời gian và ngày tương ứng
           if (timeSlot) {
-            const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert Sunday to the end of array
+            const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert Sunday to last index
             data[dayIndex][timeSlot] += 1;
           }
         });

@@ -17,7 +17,6 @@ interface BookingData {
 }
 
 const Service = () => {
-  const [isLoadingServices, setLoadingServices] = useState<boolean>(false);
   const [services, setServices] = useState<Services[]>([]);
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
   const [topSelling, setTopSelling] = useState<number>(0);
@@ -34,8 +33,6 @@ const Service = () => {
   useEffect(() => {
     const fetchServicesAndRevenue = async () => {
       try {
-        setLoadingServices(true);
-
         // Fetch services data
         const servicesResponse = await api.get<Services[]>(
           "/service/all-service"
@@ -70,8 +67,6 @@ const Service = () => {
         setTotalRevenue(totalRev);
       } catch (error) {
         console.error("Error fetching data:", error);
-      } finally {
-        setLoadingServices(false);
       }
     };
 

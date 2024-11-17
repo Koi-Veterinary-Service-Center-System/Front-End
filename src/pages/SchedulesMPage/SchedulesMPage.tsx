@@ -49,7 +49,7 @@ export default function SchedulePage() {
       });
 
       const formattedSlots = response.data.map((slot: Slot) => ({
-        id: slot.slotID.toString(),
+        id: slot.slotID?.toString(),
         day: slot.weekDate,
         task: `${slot.vetFirstName} ${slot.vetLastName}`,
         vetId: slot.vetId,
@@ -77,7 +77,7 @@ export default function SchedulePage() {
       });
 
       const availableSlots = response.data.map((slot: Slot) => ({
-        id: slot.slotID.toString(),
+        id: slot.slotID?.toString(),
         weekDate: slot.weekDate,
         startTime: format(new Date(`1970-01-01T${slot.startTime}`), "HH:mm"),
         endTime: format(new Date(`1970-01-01T${slot.endTime}`), "HH:mm"),
@@ -112,9 +112,7 @@ export default function SchedulePage() {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         const errorMessage =
-          typeof error.response.data === "string"
-            ? error.response.data
-            : "Failed to add slot. Please try again.";
+          "That slot is already filled by a doctor at that time.";
 
         toast.error(errorMessage);
       } else {
@@ -293,6 +291,11 @@ export default function SchedulePage() {
                     onClick={() =>
                       openModal({
                         id: "",
+                        slotID: "", // Include slotID as required by Slot
+                        vetFirstName: "", // Provide empty values for these fields
+                        vetLastName: "",
+                        slotStartTime: "",
+                        slotEndTime: "",
                         day: format(day, "EEEE"),
                         task: "",
                         vetId: "",

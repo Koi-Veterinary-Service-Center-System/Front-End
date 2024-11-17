@@ -28,7 +28,7 @@ interface BookingRecord {
 }
 
 interface BookingRecordModalProps {
-  bookingID: number;
+  bookingID?: string | null; // Allow undefined or null
   isOpen: boolean;
   onClose: () => void;
 }
@@ -50,6 +50,7 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
   }, [isOpen, bookingID]);
 
   const fetchBookingRecord = async () => {
+    if (!bookingID) return; // Ensure bookingID is valid
     setLoading(true);
     try {
       const response = await api.get<BookingRecord>(

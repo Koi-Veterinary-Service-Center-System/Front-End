@@ -50,11 +50,11 @@ const BookMPage = () => {
       );
 
       setOrderStats({
-        totalOrders,
-        pendingOrders,
-        completedOrders,
-        ongoingOrders,
-        cancelledOrders,
+        totalOrders: totalOrders.toString(),
+        pendingOrders: pendingOrders.toString(),
+        completedOrders: completedOrders.toString(),
+        ongoingOrders: ongoingOrders.toString(),
+        cancelledOrders: cancelledOrders.toString(),
         totalRevenue: `${totalRevenue.toLocaleString()}vnd`,
       });
     } catch (error) {

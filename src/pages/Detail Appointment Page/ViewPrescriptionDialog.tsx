@@ -17,7 +17,6 @@ import {
   ChevronRight,
   Pill,
   Stethoscope,
-  Clock,
   FileText,
   Calendar,
 } from "lucide-react";

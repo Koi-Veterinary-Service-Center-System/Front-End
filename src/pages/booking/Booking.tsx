@@ -61,9 +61,7 @@ function BookingPage() {
   const [isAtHomeService, setIsAtHomeService] = useState(true);
   const [isOnlineService, setIsOnlineService] = useState(false);
   const serviceID = location.state?.serviceID || null; // Lấy serviceID từ state
-  const [selectedServiceID, setSelectedServiceID] = useState<number | null>(
-    serviceID || null
-  );
+  const [selectedServiceID] = useState<number | null>(serviceID || null);
 
   // Fetch dịch vụ ban đầu nếu có serviceID
   useEffect(() => {
