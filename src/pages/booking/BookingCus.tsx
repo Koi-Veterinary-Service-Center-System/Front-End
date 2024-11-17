@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import api from "../../configs/axios";
@@ -69,6 +69,7 @@ const BookingCus = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const navigate = useNavigate();
   const backgroundStyle = {
     backgroundImage:
       "url('https://firebasestorage.googleapis.com/v0/b/swp391veterinary.appspot.com/o/subtle-prism.png?alt=media&token=e88974a9-6dcf-49dd-83ec-cefe66c48f23')", // Add the path to your image here
@@ -309,11 +310,12 @@ const BookingCus = () => {
     return () => clearInterval(waveInterval);
   }, []);
 
-  const rebookAppointment = (bookingID: string) => {
-    // Implement your rebooking logic here
-    // For example, redirect to the booking form with pre-filled data
-    console.log(`Rebooking appointment for booking ID: ${bookingID}`);
-    toast.info(`Rebooking appointment for booking ID: ${bookingID}`);
+  const rebookAppointment = (booking: Booking) => {
+    navigate("/booking", {
+      state: {
+        rebookData: booking, // Gửi dữ liệu booking cũ
+      },
+    });
   };
 
   return (
@@ -663,9 +665,7 @@ const BookingCus = () => {
                                   booking.bookingStatus === "Cancelled") && (
                                   <Button
                                     variant="default"
-                                    onClick={() =>
-                                      rebookAppointment("example-booking-id")
-                                    }
+                                    onClick={() => rebookAppointment(booking)}
                                     className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-2 px-4 rounded-md 
                                                shadow-lg hover:shadow-blue-500/50 transition-all duration-300 ease-in-out
                                                hover:from-blue-600 hover:to-blue-700 hover:-translate-y-0.5 

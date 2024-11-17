@@ -40,6 +40,8 @@ const { Option } = Select;
 function BookingPage() {
   const [total, setTotal] = useState(0);
   const bookingRef = useRef(null);
+  const location = useLocation();
+  const rebookData = location.state?.rebookData || null;
 
   const [slots, setSlots] = useState<Slot[]>([]);
   const [services, setServices] = useState<Services[]>([]);
@@ -58,7 +60,6 @@ function BookingPage() {
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
   const [isAtHomeService, setIsAtHomeService] = useState(true);
   const [isOnlineService, setIsOnlineService] = useState(false);
-  const location = useLocation();
   const serviceID = location.state?.serviceID || null; // Lấy serviceID từ state
   const [selectedServiceID, setSelectedServiceID] = useState<number | null>(
     serviceID || null
@@ -74,7 +75,21 @@ function BookingPage() {
 
   // Ant Design form hook
   const [form] = Form.useForm();
-
+  useEffect(() => {
+    if (rebookData) {
+      console.log("Rebook Data:", rebookData);
+      // Điền lại thông tin từ booking cũ
+      form.setFieldsValue({
+        serviceName: rebookData.serviceID,
+        vet: rebookData.vetID,
+        location: rebookData.location,
+        district: rebookData.districtID,
+        quantity: rebookData.quantity,
+        note: rebookData.note,
+        paymentType: rebookData.paymentId,
+      });
+    }
+  }, [rebookData, form]);
   const handleDateChange = (date: moment.Moment | null) => {
     if (!date) {
       setSlots(allSlots);
@@ -327,7 +342,7 @@ function BookingPage() {
         setLoadingPayment(true);
         const response = await api.get("/payment/all-payment");
         setPayments(response.data);
-        form.resetFields(["paymentType"]); // Reset paymentType khi trở lại dịch vụ không online
+        form.resetFields(["paymentType", "location", "district", "quantity"]); // Reset paymentType khi trở lại dịch vụ không online
       } catch (error) {
         console.error("Error fetching payments:", error);
         toast.error("Failed to load payments.");

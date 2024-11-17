@@ -251,6 +251,7 @@ const BookingTable = () => {
     });
 
     setSlots(filteredSlots);
+    form.resetFields(["slotID", "vet"]);
   };
 
   // Handle vet change to fetch slot
