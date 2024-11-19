@@ -126,7 +126,7 @@ export default function Component() {
       setAppointments(appointmentsWithPrescriptions);
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
-        toast.error(error.response?.data || "Failed to fetch appointments.");
+        toast.info(error.response?.data || "Failed to fetch appointments.");
       } else {
         toast.error("Unexpected error occurred.");
       }

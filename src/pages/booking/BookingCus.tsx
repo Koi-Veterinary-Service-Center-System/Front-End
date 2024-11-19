@@ -407,9 +407,6 @@ const BookingCus = () => {
                   <CardTitle className="text-blue-600 dark:text-blue-400">
                     Bookings
                   </CardTitle>
-                  <div className="flex items-center space-x-2">
-                    <Search className="h-4 w-4 text-blue-500" />
-                  </div>
                 </CardHeader>
                 <AnimatePresence>
                   <div className="grid grid-cols-1 gap-6">

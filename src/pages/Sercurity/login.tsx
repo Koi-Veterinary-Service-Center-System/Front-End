@@ -159,11 +159,6 @@ const Login = () => {
                         max: 20,
                         message: "Username cannot exceed 20 characters!",
                       },
-                      {
-                        pattern: /^[a-zA-Z0-9_]+$/,
-                        message:
-                          "Username can only contain letters, numbers, and underscores!",
-                      },
                     ]}
                   >
                     <Input
