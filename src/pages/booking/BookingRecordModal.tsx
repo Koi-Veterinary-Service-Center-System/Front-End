@@ -8,27 +8,25 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Loader2,
-  DollarSign,
-  FileText,
-  X,
-  Hash,
-  TrendingUp,
-} from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import api from "@/configs/axios";
+import { MdOutlineArrowRightAlt } from "react-icons/md";
+import { FiPlus } from "react-icons/fi";
 
 interface BookingRecord {
   initAmount: number;
   arisedQuantity: number;
+  initQuantity: number;
   quantityMoney: number;
   receivableAmount: number;
   totalAmount: number;
   note: string;
+  createAt: string;
+  unitPrice: number;
 }
 
 interface BookingRecordModalProps {
-  bookingID?: string | null; // Allow undefined or null
+  bookingID?: string | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -50,7 +48,7 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
   }, [isOpen, bookingID]);
 
   const fetchBookingRecord = async () => {
-    if (!bookingID) return; // Ensure bookingID is valid
+    if (!bookingID) return;
     setLoading(true);
     try {
       const response = await api.get<BookingRecord>(
@@ -74,6 +72,19 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
       style: "currency",
       currency: "VND",
     }).format(amount);
+  };
+
+  const formatDate = (date: string) => {
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    };
+    return new Date(date).toLocaleDateString("vi-VN", options);
   };
 
   return (
@@ -101,104 +112,115 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
                   {bookingRecord ? (
                     <>
                       <motion.div
-                        className="flex items-center space-x-3 text-blue-700"
+                        className="flex justify-between items-center text-blue-700"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.1 }}
                       >
-                        <DollarSign className="h-5 w-5" />
-                        <span>
-                          <strong>Initial Amount:</strong>{" "}
-                          {formatCurrency(bookingRecord.initAmount)}
+                        <span>Initial Quantity:</span>
+                        <span className="text-right">
+                          {bookingRecord.initQuantity}
                         </span>
                       </motion.div>
                       <motion.div
-                        className="flex items-center space-x-3 text-blue-700"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        <Hash className="h-5 w-5" />
-                        <span>
-                          <strong>Quantity:</strong>{" "}
-                          {bookingRecord.arisedQuantity}
-                        </span>
-                      </motion.div>
-                      <motion.div
-                        className="flex items-center space-x-3 text-blue-700"
+                        className="flex justify-between items-center text-blue-700"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 }}
                       >
-                        <DollarSign className="h-5 w-5" />
-                        <span>
-                          <strong>Price per Quantity:</strong>{" "}
-                          {formatCurrency(
-                            bookingRecord.quantityMoney /
-                              bookingRecord.arisedQuantity
-                          )}
+                        <span>Arised Quantity:</span>
+                        <span className="text-right">
+                          {bookingRecord.arisedQuantity}
                         </span>
                       </motion.div>
                       <motion.div
-                        className="flex items-center space-x-3 text-blue-700"
+                        className="flex justify-between items-center text-blue-700"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 }}
+                        transition={{ delay: 0.3 }}
                       >
-                        <TrendingUp className="h-5 w-5" />
-                        <span>
-                          <strong>Total Quantity Price:</strong>{" "}
+                        <span>Price Per Quantity:</span>
+                        <span className="text-right">
+                          {formatCurrency(bookingRecord.unitPrice)}
+                        </span>
+                      </motion.div>
+                      <motion.div
+                        className="flex justify-between items-center text-blue-700"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        {/* Left-aligned content */}
+                        <div className="flex items-center space-x-2">
+                          <MdOutlineArrowRightAlt className="h-5 w-5 text-blue-700" />
+                          <span>Total Quantity Money:</span>
+                        </div>
+
+                        {/* Right-aligned content */}
+                        <span className="text-right">
                           {formatCurrency(bookingRecord.quantityMoney)}
                         </span>
                       </motion.div>
+
                       <motion.div
-                        className="flex items-center space-x-3 text-blue-700"
+                        className="flex justify-between items-center text-blue-700"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.5 }}
+                        transition={{ delay: 0.2 }}
                       >
-                        <DollarSign className="h-5 w-5" />
-                        <span>
-                          <strong>Total Original Amount:</strong>{" "}
-                          {formatCurrency(
-                            bookingRecord.initAmount +
-                              bookingRecord.quantityMoney
-                          )}
+                        <div className="flex items-center space-x-2">
+                          <FiPlus className="h-5 w-5 text-blue-700" />
+                          <span>Initial Amount:</span>
+                        </div>
+                        <span className="text-right">
+                          {formatCurrency(bookingRecord.initAmount)}
                         </span>
                       </motion.div>
                       <motion.div
-                        className="flex items-center space-x-3 text-blue-700"
+                        className="flex justify-between items-center text-blue-700"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.6 }}
                       >
-                        <DollarSign className="h-5 w-5" />
-                        <span>
-                          <strong>Total Amount Receivable:</strong>{" "}
-                          {formatCurrency(bookingRecord.receivableAmount)}
-                        </span>
-                      </motion.div>
-                      <motion.div
-                        className="flex items-center space-x-3 text-blue-700"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.7 }}
-                      >
-                        <DollarSign className="h-5 w-5" />
-                        <span>
-                          <strong>Final Total Amount:</strong>{" "}
+                        <div className="flex items-center space-x-2">
+                          <MdOutlineArrowRightAlt className="h-5 w-5 text-blue-700" />
+                          <span>Total Amount:</span>
+                        </div>
+                        <span className="text-right">
                           {formatCurrency(bookingRecord.totalAmount)}
                         </span>
                       </motion.div>
                       <motion.div
-                        className="flex items-center space-x-3 text-blue-700"
+                        className="flex justify-between items-center text-blue-700 font-bold text-lg bg-blue-100 rounded-lg p-3"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.5 }}
+                      >
+                        <span>Receivable Money:</span>
+                        <span className="text-right text-blue-900">
+                          {formatCurrency(bookingRecord.receivableAmount)}
+                        </span>
+                      </motion.div>
+                      <motion.div
+                        className="flex justify-between items-center text-blue-700"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.7 }}
+                      >
+                        <span>Note:</span>
+                        <span className="text-right">
+                          {bookingRecord.note || "N/A"}
+                        </span>
+                      </motion.div>
+                      <motion.div
+                        className="flex justify-between items-center text-blue-700"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.8 }}
                       >
-                        <FileText className="h-5 w-5" />
-                        <span>
-                          <strong>Note:</strong> {bookingRecord.note || "N/A"}
+                        <span>Created At:</span>
+                        <span className="text-right">
+                          {formatDate(bookingRecord.createAt)}
                         </span>
                       </motion.div>
                     </>
