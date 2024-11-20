@@ -256,7 +256,7 @@ const BookingTable = () => {
   };
 
   // Handle vet change to fetch slot
-  const handleVetChange = (vetId: number) => {
+  const handleVetChange = (vetId: string) => {
     // Find the selected vet's name
     const selectedVetName = vets.find((vet) => vet.id === vetId)?.vetName;
 
