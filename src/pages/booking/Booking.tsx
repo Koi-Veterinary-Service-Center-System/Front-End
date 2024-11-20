@@ -231,13 +231,11 @@ function BookingPage() {
   };
 
   // Handle vet change to fetch slot
-  const handleVetChange = (vetId: number) => {
+  const handleVetChange = (vetId: string) => {
     setSelectedVet(vetId);
 
     // Find the selected vet's name
-    const selectedVetName = vets.find(
-      (vet) => vet.id === Number(vetId)
-    )?.vetName;
+    const selectedVetName = vets.find((vet) => vet.id === vetId)?.vetName;
 
     // Set both vetId and vetName in the form fields
     form.setFieldsValue({ vet: vetId, vetName: selectedVetName });
