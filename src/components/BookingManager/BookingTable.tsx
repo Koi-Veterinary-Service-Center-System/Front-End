@@ -85,6 +85,7 @@ const BookingTable = () => {
   const [selectedBookingID, setSelectedBookingID] = useState<number | null>(
     null
   );
+  const [isQuantityDisabled, setIsQuantityDisabled] = useState(false);
 
   const handleOpenBookingRecordModal = (bookingID: number) => {
     setSelectedBookingID(bookingID);
@@ -431,6 +432,10 @@ const BookingTable = () => {
     const selectedService = services.find(
       (service) => service.serviceID === form.getFieldValue("serviceName")
     );
+    const isConsultationService =
+      selectedService?.serviceName.toLowerCase().includes("consultation") ||
+      false;
+    setIsQuantityDisabled(isConsultationService);
     const selectedDistance = distances.find(
       (distance) => distance.distanceID === form.getFieldValue("district")
     );
@@ -569,7 +574,11 @@ const BookingTable = () => {
                     { required: true, message: "Please select a customer" },
                   ]}
                 >
-                  <Select showSearch placeholder="Select a customer">
+                  <Select
+                    className="w-full p-0"
+                    showSearch
+                    placeholder="Select a customer"
+                  >
                     {users.map((user) => (
                       <Select.Option key={user.userID} value={user.userID}>
                         {user.userName}
@@ -629,7 +638,8 @@ const BookingTable = () => {
                         key={service.serviceID}
                         value={service.serviceID}
                       >
-                        {service.serviceName} - ${service.price} (Duration:{" "}
+                        {service.serviceName} -{" "}
+                        {service.price.toLocaleString("vi-VN")} VND (Duration:{" "}
                         {service.estimatedDuration} hours)
                       </Select.Option>
                     ))}
@@ -641,7 +651,11 @@ const BookingTable = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Form.Item label="Slot" name="slotID">
+                <Form.Item
+                  rules={[{ required: true, message: "Please select a slot" }]}
+                  label="Slot"
+                  name="slotID"
+                >
                   <Select
                     className="w-full p-0"
                     style={{ height: "40px" }}
@@ -663,6 +677,9 @@ const BookingTable = () => {
                 whileTap={{ scale: 0.95 }}
               >
                 <Form.Item
+                  rules={[
+                    { required: true, message: "Please select a veterian" },
+                  ]}
                   label={
                     <span className="flex items-center gap-2">
                       <FaUserDoctor />
@@ -773,8 +790,8 @@ const BookingTable = () => {
                           distance.area
                         } (${distance.price.toLocaleString("vi-VN")} VND)`}
                       >
-                        {distance.district} - {distance.area} ($
-                        {distance.price})
+                        {distance.district} - {distance.area} (
+                        {distance.price.toLocaleString("vi-VN")} VND)
                       </Select.Option>
                     ))}
                   </Select>
@@ -795,7 +812,7 @@ const BookingTable = () => {
                   name="quantity"
                   rules={[
                     {
-                      required: !isOnlineService,
+                      required: !isQuantityDisabled,
                       message: "Please enter a quantity", // Bắt lỗi khi trường bị bỏ trống
                     },
                     {
@@ -808,7 +825,7 @@ const BookingTable = () => {
                   <InputNumber
                     min={1}
                     className="w-full p-2 shadow-sm"
-                    disabled={isOnlineService}
+                    disabled={isQuantityDisabled}
                   />
                 </Form.Item>
               </motion.div>

@@ -59,10 +59,9 @@ function BookingPage() {
   const [allSlots, setAllSlots] = useState<Slot[]>([]);
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
   const [isAtHomeService, setIsAtHomeService] = useState(true);
-  const [isOnlineService, setIsOnlineService] = useState(false);
   const serviceID = location.state?.serviceID || null; // Lấy serviceID từ state
   const [selectedServiceID] = useState<number | null>(serviceID || null);
-
+  const [isQuantityDisabled, setIsQuantityDisabled] = useState(false);
   // Fetch dịch vụ ban đầu nếu có serviceID
   useEffect(() => {
     if (selectedServiceID) {
@@ -327,8 +326,12 @@ function BookingPage() {
       (service) => service.serviceID === Number(serviceID)
     );
 
+    // Kiểm tra nếu tên dịch vụ chứa "consultation"
+    const isConsultationService =
+      selectedService?.serviceName.toLowerCase().includes("consultation") ||
+      false;
+    setIsQuantityDisabled(isConsultationService);
     setIsAtHomeService(selectedService ? selectedService.isAtHome : true);
-    setIsOnlineService(selectedService ? selectedService.isOnline : false);
 
     if (selectedService?.isOnline) {
       // Nếu là dịch vụ online, chỉ hiển thị VNPay
@@ -634,7 +637,7 @@ function BookingPage() {
                   name="quantity"
                   rules={[
                     {
-                      required: !isOnlineService, // Only required if isOnlineService is false
+                      required: !isQuantityDisabled, // Only required if isOnlineService is false
                       message: "Please enter a quantity",
                     },
                     {
@@ -652,7 +655,7 @@ function BookingPage() {
                   <InputNumber
                     min={0}
                     className="w-full p-2 shadow-sm"
-                    disabled={isOnlineService}
+                    disabled={isQuantityDisabled}
                   />
                 </Form.Item>
               </motion.div>
