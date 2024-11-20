@@ -417,7 +417,7 @@ const DetailBooking = () => {
                             <span className="text-gray-700">
                               {booking.location ===
                               "undefined, undefined, undefined"
-                                ? "District 1, Ho Chi Minh City"
+                                ? "No location"
                                 : booking.location}
                             </span>
                           </motion.div>

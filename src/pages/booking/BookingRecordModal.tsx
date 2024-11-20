@@ -23,6 +23,7 @@ interface BookingRecord {
   note: string;
   createAt: string;
   unitPrice: number;
+  totalQuantity: number;
 }
 
 interface BookingRecordModalProps {
@@ -131,6 +132,23 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
                         <span>Arised Quantity:</span>
                         <span className="text-right">
                           {bookingRecord.arisedQuantity}
+                        </span>
+                      </motion.div>
+                      <motion.div
+                        className="flex justify-between items-center text-blue-700"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        {/* Left-aligned content */}
+                        <div className="flex items-center space-x-2">
+                          <MdOutlineArrowRightAlt className="h-5 w-5 text-blue-700" />
+                          <span>Total Quantity:</span>
+                        </div>
+
+                        {/* Right-aligned content */}
+                        <span className="text-right">
+                          {bookingRecord.totalQuantity}
                         </span>
                       </motion.div>
                       <motion.div
