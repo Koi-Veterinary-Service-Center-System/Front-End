@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -128,11 +126,11 @@ export function CreatePrescriptionDialog({
   const frequencies = [
     "Once a day",
     "Twice a day",
+    "Three times a day",
     "Every 6 hours",
     "Every 8 hours",
     "Every 12 hours",
     "Every 24 hours",
-    "Three times a day",
     "Once every 2 days",
     "Once a week",
   ];

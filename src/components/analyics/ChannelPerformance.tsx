@@ -129,7 +129,11 @@ const VetServiceChannelPerformance = () => {
                 }}
                 itemStyle={{ color: "#E5E7EB" }}
               />
-              <Legend />
+              <Legend
+                layout="horizontal"
+                align="center"
+                verticalAlign="bottom"
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
