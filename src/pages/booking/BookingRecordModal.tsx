@@ -88,6 +88,18 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
     return new Date(date).toLocaleDateString("vi-VN", options);
   };
 
+  // Hàm xử lý note
+  const parseNote = (note: string) => {
+    const regex = /(?<=\|)\s*([A-Za-z\s]+)\s*(\d{18,})\s*([A-Za-z\s]+)/;
+    const match = note.match(regex);
+
+    const bankName = match ? match[1].trim() : null;
+    const accountNumber = match ? match[2].trim() : null;
+    const cardHolder = match ? match[3].trim() : null;
+
+    return { bankName, accountNumber, cardHolder };
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -220,15 +232,39 @@ const BookingRecordModal: React.FC<BookingRecordModalProps> = ({
                         </span>
                       </motion.div>
                       <motion.div
-                        className="flex justify-between items-center text-blue-700"
+                        className="flex justify-between items-start text-blue-700"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.7 }}
+                        transition={{ delay: 0.8 }}
                       >
                         <span>Note:</span>
-                        <span className="text-right">
-                          {bookingRecord.note || "N/A"}
-                        </span>
+                        <div className="text-right space-y-2">
+                          <p>{bookingRecord.note || "N/A"}</p>
+
+                          {/* Hiển thị thông tin ngân hàng, số tài khoản và chủ thẻ nếu có */}
+                          {bookingRecord.note && (
+                            <>
+                              {parseNote(bookingRecord.note).bankName && (
+                                <p>
+                                  <strong>Bank:</strong>{" "}
+                                  {parseNote(bookingRecord.note).bankName}
+                                </p>
+                              )}
+                              {parseNote(bookingRecord.note).accountNumber && (
+                                <p>
+                                  <strong>Account Number:</strong>{" "}
+                                  {parseNote(bookingRecord.note).accountNumber}
+                                </p>
+                              )}
+                              {parseNote(bookingRecord.note).cardHolder && (
+                                <p>
+                                  <strong>Card Holder:</strong>{" "}
+                                  {parseNote(bookingRecord.note).cardHolder}
+                                </p>
+                              )}
+                            </>
+                          )}
+                        </div>
                       </motion.div>
                       <motion.div
                         className="flex justify-between items-center text-blue-700"

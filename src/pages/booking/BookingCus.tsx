@@ -6,7 +6,6 @@ import { Booking, Profile } from "../../types/info";
 import {
   Users,
   DollarSign,
-  Search,
   Moon,
   Sun,
   AlertCircle,
@@ -14,6 +13,7 @@ import {
   ClockIcon,
   MapPinIcon,
   CreditCardIcon,
+  BriefcaseMedical,
 } from "lucide-react";
 import { AiOutlineSchedule } from "react-icons/ai";
 import { BiCheckboxChecked } from "react-icons/bi";
@@ -113,6 +113,7 @@ const BookingCus = () => {
         return idB - idA; // Sắp xếp giảm dần
       });
       setBookings(fetchedBookings); // Cập nhật state bookings
+      console.log(fetchedBookings);
     } catch (error) {
       const axiosError = error as AxiosError;
       const errorMessage =
@@ -430,7 +431,7 @@ const BookingCus = () => {
                               <CardHeader className="pb-2">
                                 <div className="flex justify-between items-center">
                                   <CardTitle className="text-lg text-blue-600">
-                                    {booking.serviceName}
+                                    {booking.serviceNameAtBooking}
                                   </CardTitle>
                                 </div>
                               </CardHeader>
@@ -478,7 +479,7 @@ const BookingCus = () => {
                                     <span>
                                       {booking.location ===
                                       "undefined, undefined, undefined"
-                                        ? "District 1, Ho Chi Minh City"
+                                        ? "No Location"
                                         : booking.location}
                                     </span>
                                   </div>

@@ -17,6 +17,7 @@ import {
   XCircle,
   FileText,
   DollarSign,
+  Aperture,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -419,6 +420,18 @@ const DetailBooking = () => {
                               "undefined, undefined, undefined"
                                 ? "No location"
                                 : booking.location}
+                            </span>
+                          </motion.div>
+                          <motion.div
+                            className="flex items-center text-sm"
+                            variants={iconVariants}
+                            initial="hidden"
+                            animate="visible"
+                            transition={{ delay: 0.4 }}
+                          >
+                            <Aperture className="h-5 w-5 mr-3 text-blue-500" />
+                            <span className="text-gray-700">
+                              Quantity: {booking.quantity}
                             </span>
                           </motion.div>
                           <motion.div

@@ -49,6 +49,7 @@ import { AxiosError } from "axios";
 import BookingRecordModal from "@/pages/Booking/BookingRecordModal";
 import { LuView } from "react-icons/lu";
 import { Tooltip } from "react-tooltip";
+import BookingRecord from "@/pages/Booking/bookingRecord";
 
 const BookingTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -513,6 +514,17 @@ const BookingTable = () => {
     }
   };
 
+  const parseNote = (note: string) => {
+    const regex = /(?<=\|)\s*([A-Za-z\s]+)\s*(\d{18,})\s*([A-Za-z\s]+)/;
+    const match = note.match(regex);
+
+    const bankName = match ? match[1].trim() : null;
+    const accountNumber = match ? match[2].trim() : null;
+    const cardHolder = match ? match[3].trim() : null;
+
+    return { bankName, accountNumber, cardHolder };
+  };
+
   return (
     <motion.div
       className="bg-gradient-to-br from-blue-50 to-white shadow-lg rounded-xl p-6 border border-blue-200 mb-8"
@@ -819,6 +831,11 @@ const BookingTable = () => {
                       type: "number",
                       min: 1,
                       message: "Quantity must be at least 1", // Bắt lỗi nếu người dùng nhập số nhỏ hơn 1
+                    },
+                    {
+                      type: "number",
+                      max: 15,
+                      message: "Quantity must be smaller than 15", // Bắt lỗi nếu người dùng nhập số nhỏ hơn 1
                     },
                   ]}
                 >
@@ -1129,7 +1146,7 @@ const BookingTable = () => {
                   <strong>Location:</strong>{" "}
                   {selectedBooking.location ===
                   "undefined, undefined, undefined"
-                    ? "District 1, Ho Chi Minh City"
+                    ? "No location"
                     : selectedBooking.location}
                 </p>
               </motion.div>
@@ -1202,12 +1219,56 @@ const BookingTable = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 1.3 }}
-                className="flex items-center space-x-2"
+                className="flex flex-col space-y-3"
               >
-                <MdAssignment className="text-gray-500" />
-                <p>
-                  <strong>Note:</strong> {selectedBooking.note}
-                </p>
+                <div className="flex items-center space-x-2">
+                  <MdAssignment className="text-blue-500" />
+                  <span className="font-medium text-xl text-blue-600">
+                    Note:
+                  </span>
+                </div>
+
+                {/* Hiển thị nội dung của Note */}
+                <div className="bg-white p-4 rounded-lg shadow-md space-y-2 border border-blue-200">
+                  <div className="text-blue-700">
+                    <p>{selectedBooking.note || "N/A"}</p>
+
+                    {selectedBooking.note && (
+                      <div className="mt-3 space-y-2">
+                        {parseNote(selectedBooking.note).bankName && (
+                          <div className="flex items-start space-x-2">
+                            <span className="font-semibold text-blue-500">
+                              Bank:
+                            </span>
+                            <span className="text-blue-600">
+                              {parseNote(selectedBooking.note).bankName}
+                            </span>
+                          </div>
+                        )}
+                        {parseNote(selectedBooking.note).accountNumber && (
+                          <div className="flex items-start space-x-2">
+                            <span className="font-semibold text-blue-500">
+                              Account Number:
+                            </span>
+                            <span className="text-blue-600">
+                              {parseNote(selectedBooking.note).accountNumber}
+                            </span>
+                          </div>
+                        )}
+                        {parseNote(selectedBooking.note).cardHolder && (
+                          <div className="flex items-start space-x-2">
+                            <span className="font-semibold text-blue-500">
+                              Card Holder:
+                            </span>
+                            <span className="text-blue-600">
+                              {parseNote(selectedBooking.note).cardHolder}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </motion.div>
             </div>
           </DialogContent>
