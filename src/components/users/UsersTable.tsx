@@ -77,8 +77,6 @@ const UsersTable = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [banLoading, setBanLoading] = useState(false);
@@ -204,36 +202,6 @@ const UsersTable = () => {
     } catch (error: any) {
       console.error("Operation failed:", error.response?.data || error.message);
       toast.error(error.response.data);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteUser = async () => {
-    if (!userToDelete) return;
-    setLoading(true);
-    setError(null);
-    try {
-      await api.patch(`/User/soft-delete/${userToDelete.userID}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      toast.success("Deleted user successfully");
-      setUsers(users.filter((user) => user.userID !== userToDelete.userID));
-      setFilteredUsers(
-        filteredUsers.filter((user) => user.userID !== userToDelete.userID)
-      );
-      setIsDeleteModalOpen(false);
-      setUserToDelete(null);
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      const errorMessage =
-        typeof axiosError.response?.data === "string"
-          ? axiosError.response.data
-          : JSON.stringify(axiosError.response?.data) ||
-            "Failed to delete user";
-
-      toast.info(errorMessage);
-      console.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -611,17 +579,7 @@ const UsersTable = () => {
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setUserToDelete(user);
-                            setIsDeleteModalOpen(true);
-                          }}
-                          className="text-red-600 hover:text-red-800 hover:bg-red-100"
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
+
                         {user.isActive ? (
                           <Button
                             variant="ghost"
@@ -715,40 +673,6 @@ const UsersTable = () => {
               </Form>
             </DialogContent>
           </Dialog>
-        </div>
-      )}
-
-      {isDeleteModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-96 border border-gray-200">
-            <div className="flex items-center mb-4">
-              <div className="text-red-600 mr-3">
-                <AlertCircle className="h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Deactivate account
-              </h3>
-            </div>
-            <p className="text-sm text-gray-500 mb-6">
-              Are you sure you want to delete this account? All of this data
-              will be permanently removed. This action cannot be undone.
-            </p>
-            <div className="flex justify-end">
-              <button
-                className="bg-gray-200 text-gray-800 px-4 py-2 rounded mr-2 hover:bg-gray-300"
-                onClick={() => setIsDeleteModalOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                onClick={handleDeleteUser}
-                disabled={loading}
-              >
-                {loading ? "Deactivating..." : "Deactivate"}
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </motion.div>
